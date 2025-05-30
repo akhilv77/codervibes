@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useMoneyTracker } from '@/hooks/useMoneyTracker';
 import { Button } from '@/components/ui/button';
@@ -11,8 +11,10 @@ import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/ca
 import { Pencil, Trash2, Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { useRouter } from 'next/navigation';
+import { useServiceTracking } from '@/hooks/useServiceTracking';
 
 export default function MoneyTrackerPage() {
+    const { trackServiceUsage } = useServiceTracking();
     const {
         state,
         addGroup,
@@ -29,6 +31,10 @@ export default function MoneyTrackerPage() {
     const [searchQuery, setSearchQuery] = useState('');
     const [editingGroup, setEditingGroup] = useState<Group | null>(null);
 
+    useEffect(() => {
+        trackServiceUsage('Money Tracker', 'page_view');
+    }, []);
+
     const handleAddGroup = () => {
         if (!newGroupName.trim()) return;
 
@@ -39,6 +45,7 @@ export default function MoneyTrackerPage() {
             members: [],
         });
 
+        trackServiceUsage('Money Tracker', 'group_created', `Type: ${newGroupType}, Currency: ${newGroupCurrency}`);
         setNewGroupName('');
         setIsAddingGroup(false);
     };
@@ -49,6 +56,7 @@ export default function MoneyTrackerPage() {
         setNewGroupType(group.type);
         setNewGroupCurrency(group.currency);
         setIsAddingGroup(true);
+        trackServiceUsage('Money Tracker', 'group_edit_started', `Group: ${group.name}`);
     };
 
     const handleSaveEdit = () => {
@@ -62,19 +70,26 @@ export default function MoneyTrackerPage() {
             currency: newGroupCurrency,
         };
 
-        // Here you would typically call an update function from your hook
-        // For now, we'll just close the dialog
+        trackServiceUsage('Money Tracker', 'group_edited', `Group: ${updatedGroup.name}, Type: ${updatedGroup.type}`);
         setEditingGroup(null);
         setNewGroupName('');
         setIsAddingGroup(false);
     };
 
     const handleDeleteGroup = (id: string) => {
+        const group = state.groups.find(g => g.id === id);
+        if (group) {
+            trackServiceUsage('Money Tracker', 'group_delete_initiated', `Group: ${group.name}`);
+        }
         setDeleteConfirmation({ show: true, id });
     };
 
     const confirmDelete = () => {
         if (deleteConfirmation.id) {
+            const group = state.groups.find(g => g.id === deleteConfirmation.id);
+            if (group) {
+                trackServiceUsage('Money Tracker', 'group_deleted', `Group: ${group.name}`);
+            }
             deleteGroup(deleteConfirmation.id);
             setDeleteConfirmation({ show: false, id: null });
         }

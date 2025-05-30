@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Plus, Trash2, Pencil } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { PageShell } from "@/components/layout/page-shell";
@@ -24,8 +24,10 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { useServiceTracking } from '@/hooks/useServiceTracking';
 
 export default function GamesPage() {
+  const { trackServiceUsage } = useServiceTracking();
   const [open, setOpen] = useState(false);
   const [gameName, setGameName] = useState("");
   const [maxScore, setMaxScore] = useState<string>("");
@@ -46,6 +48,10 @@ export default function GamesPage() {
     players
   } = useStore();
 
+  useEffect(() => {
+    trackServiceUsage('Scorecard', 'page_view');
+  }, []);
+
   const handleMaxScoreChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     if (/^\d*$/.test(value)) {
@@ -56,6 +62,7 @@ export default function GamesPage() {
   const handleSaveMaxScore = () => {
     if (maxScore && !isNaN(parseInt(maxScore))) {
       updateMaxScore(parseInt(maxScore));
+      trackServiceUsage('Scorecard', 'max_score_updated', `New max score: ${maxScore}`);
     }
   };
 
@@ -63,6 +70,7 @@ export default function GamesPage() {
     if (selectedPlayers.length === 0) return;
     const maxScoreValue = newGameMaxScore ? parseInt(newGameMaxScore) : undefined;
     addGame(gameName, selectedPlayers, maxScoreValue);
+    trackServiceUsage('Scorecard', 'game_created', `Name: ${gameName}, Players: ${selectedPlayers.length}, Max Score: ${maxScoreValue || 'default'}`);
     setGameName("");
     setNewGameMaxScore("");
     setSelectedPlayers([]);
@@ -79,6 +87,7 @@ export default function GamesPage() {
 
   const handleDeleteGame = () => {
     if (selectedGame) {
+      trackServiceUsage('Scorecard', 'game_deleted', `Game: ${selectedGame.name}`);
       deleteGame(selectedGame.id);
       setSelectedGame(null);
       setDeleteDialogOpen(false);
@@ -89,6 +98,7 @@ export default function GamesPage() {
     if (selectedGame && selectedPlayers.length > 0) {
       const maxScoreValue = gameMaxScore ? parseInt(gameMaxScore) : undefined;
       updateGame(selectedGame.id, gameName, selectedPlayers, maxScoreValue);
+      trackServiceUsage('Scorecard', 'game_edited', `Game: ${gameName}, Players: ${selectedPlayers.length}, Max Score: ${maxScoreValue || 'default'}`);
       setGameName("");
       setGameMaxScore("");
       setSelectedPlayers([]);

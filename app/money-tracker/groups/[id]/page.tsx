@@ -144,10 +144,11 @@ export default function GroupDetailsPage({
     };
 
     const handleEditExpense = (expense: Expense) => {
-        setEditingExpense({
+        const editingExpense: EditingExpense = {
             ...expense,
             amount: expense.amount.toString(),
-        });
+        };
+        setEditingExpense(editingExpense);
         setIsEditingExpense(true);
     };
 
@@ -184,11 +185,13 @@ export default function GroupDetailsPage({
             });
         }
 
-        updateExpense(editingExpense.id, {
+        const updatedExpense: Expense = {
             ...editingExpense,
             amount,
             splitDetails,
-        });
+        };
+
+        updateExpense(editingExpense.id, updatedExpense);
 
         setEditingExpense(null);
         setIsEditingExpense(false);

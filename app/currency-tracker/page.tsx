@@ -9,6 +9,7 @@ import { PreferredCurrency } from "@/components/currency-tracker/PreferredCurren
 import { ManagePopularCurrencies } from "@/components/currency-tracker/ManagePopularCurrencies";
 import { CurrencyPageShell } from "@/components/layout/currency-page-shell";
 import { PageHeader } from "@/components/layout/page-header";
+import { useServiceTracking } from '@/hooks/useServiceTracking';
 
 interface ExchangeRates {
     rates: { [key: string]: number };
@@ -23,6 +24,7 @@ const STORAGE_KEYS = {
 };
 
 export default function CurrencyTracker() {
+    const { trackServiceUsage } = useServiceTracking();
     const [rates, setRates] = useState<ExchangeRates | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -44,6 +46,7 @@ export default function CurrencyTracker() {
     });
 
     useEffect(() => {
+        trackServiceUsage('Currency Tracker', 'page_view');
         const fetchRates = async () => {
             try {
                 const response = await fetch('https://open.er-api.com/v6/latest/USD');
@@ -71,18 +74,22 @@ export default function CurrencyTracker() {
 
     const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setAmount(Number(e.target.value));
+        trackServiceUsage('Currency Tracker', 'amount_change', `Amount: ${e.target.value}`);
     };
 
     const handleFromCurrencyChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         setFromCurrency(e.target.value);
+        trackServiceUsage('Currency Tracker', 'currency_change', `From: ${e.target.value}`);
     };
 
     const handleToCurrencyChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         setToCurrency(e.target.value);
+        trackServiceUsage('Currency Tracker', 'currency_change', `To: ${e.target.value}`);
     };
 
     const handlePreferredCurrencyChange = (currency: string) => {
         setPreferredCurrency(currency);
+        trackServiceUsage('Currency Tracker', 'preferred_currency_change', `Currency: ${currency}`);
         // If the preferred currency is selected in the converter, update the other field
         if (fromCurrency === currency) {
             setFromCurrency(toCurrency);
