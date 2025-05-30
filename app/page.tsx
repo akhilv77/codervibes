@@ -25,34 +25,20 @@ export default function HomePage() {
   return (
     <RootPageShell>
       <div className="min-h-screen bg-background">
-        {/* Header */}
-        <header className="border-b">
-          <div className="container flex items-center justify-between">
-            {/* <h1 className="text-3xl font-bold">App Suite</h1> */}
-            <Image src="/assets/logo.png" alt="CoderVibes Logo" width={120} height={120} />
-            <Button variant="ghost" size="icon" asChild>
-              <Link href="/settings">
-                <Settings className="h-5 w-5" />
-                <span className="sr-only">Settings</span>
-              </Link>
-            </Button>
-          </div>
-        </header>
-
         {/* Main Content */}
         <main className="container py-8">
           <div className="grid gap-6">
             <div>
-              <h2 className="text-lg font-semibold mb-4">Coder Vibes App Suite</h2>
-              <p className="text-muted-foreground mb-6">
-                Welcome to your coder vibes app suite. Use the search bar below to quickly find the app you need.
+              <h2 className="text-2xl font-semibold mb-4">Welcome to CoderVibes Tool Suite</h2>
+              <p className="text-muted-foreground mb-6 text-lg">
+                Your one-stop destination for powerful utility tools. Whether you&apos;re a developer, designer, content creator, or just looking to boost your productivity, we&apos;ve got you covered. Use the search bar below to find the perfect tool for your needs.
               </p>
               <div className="mb-6">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
                   <Input
                     type="text"
-                    placeholder="Search apps by name, description, or features..."
+                    placeholder="Search tools by name, description, or features..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="pl-10 w-full"
@@ -62,12 +48,12 @@ export default function HomePage() {
               {filteredApps.length === 0 ? (
                 <div className="text-center py-12">
                   <h2 className="text-xl font-semibold mb-2">
-                    {searchQuery ? 'No Matching Apps Found' : 'No Apps Available'}
+                    {searchQuery ? 'No Matching Tools Found' : 'No Tools Available'}
                   </h2>
                   <p className="text-gray-600 dark:text-gray-400">
                     {searchQuery
                       ? 'Try adjusting your search query'
-                      : 'Please check back later for new apps'
+                      : 'Please check back later for new tools'
                     }
                   </p>
                 </div>
@@ -106,7 +92,7 @@ export default function HomePage() {
                       <div className="px-6 pb-4">
                         <Link href={app.href} className="block">
                           <Button className="w-full group-hover:bg-primary/90 transition-colors">
-                            Open App
+                            Open Tool
                           </Button>
                         </Link>
                       </div>
@@ -114,6 +100,17 @@ export default function HomePage() {
                   ))}
                 </div>
               )}
+              <div className="mt-12 text-center">
+                <h3 className="text-xl font-semibold mb-4">Need a Specific Tool?</h3>
+                <p className="text-muted-foreground mb-6">
+                  Can&apos;t find what you&apos;re looking for? We&apos;re constantly expanding our tool suite. Let us know what you need, and we&apos;ll build it for you!
+                </p>
+                <Button asChild>
+                  <Link href="/contact">
+                    Request a Tool
+                  </Link>
+                </Button>
+              </div>
             </div>
           </div>
         </main>
