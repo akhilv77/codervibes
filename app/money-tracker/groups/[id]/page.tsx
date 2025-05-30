@@ -13,6 +13,8 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Loading } from '@/components/ui/loading';
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 type EditingExpense = Omit<Expense, 'amount'> & { amount: string };
 
@@ -44,6 +46,8 @@ export default function GroupDetailsPage({
         updateSettlement,
         deleteSettlement,
         updateGroup,
+        isLoading,
+        error,
     } = useMoneyTracker();
 
     const group = groups.find((g) => g.id === params.id);
@@ -250,12 +254,38 @@ export default function GroupDetailsPage({
         };
     }, []);
 
+    if (isLoading) {
+        return (
+            <Loading
+                variant="default"
+                size="lg"
+                text="Loading group details..."
+                fullScreen
+            />
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="flex justify-center items-center min-h-screen">
+                <div className="text-center space-y-4">
+                    <p className="text-red-500">{error}</p>
+                    <Button onClick={() => window.location.reload()}>
+                        Try Again
+                    </Button>
+                </div>
+            </div>
+        );
+    }
+
     if (!group) {
         return (
-            <div className="container mx-auto py-8">
-                <div className="text-center">
-                    <h1 className="text-2xl font-bold mb-4">Group Not Found</h1>
-                    <Button onClick={() => window.history.back()}>Go Back</Button>
+            <div className="flex justify-center items-center min-h-screen">
+                <div className="text-center space-y-4">
+                    <p className="text-red-500">Group not found</p>
+                    <Button onClick={() => window.history.back()}>
+                        Go Back
+                    </Button>
                 </div>
             </div>
         );
@@ -397,57 +427,60 @@ export default function GroupDetailsPage({
             )}
 
             {isManagingMembers && (
-                <Dialog open={isManagingMembers} onOpenChange={(open) => {
-                    if (!open) {
-                        setIsManagingMembers(false);
-                        setSelectedMembers(group.members);
-                    }
-                }}>
+                <Dialog open={isManagingMembers} onOpenChange={setIsManagingMembers}>
                     <DialogContent className="sm:max-w-[600px]">
                         <DialogHeader>
                             <DialogTitle>Manage Group Members</DialogTitle>
                             <DialogDescription>
-                                Select the members to include in this group.
+                                Select members to add to this group.
                             </DialogDescription>
                         </DialogHeader>
                         <div className="border-t border-gray-200 dark:border-gray-700 mb-4" />
-                        <div className="space-y-4">
-                            <div className="max-h-[50vh] overflow-y-auto">
-                                <div className="space-y-2">
+                        <div className="grid gap-4 py-4">
+                            <ScrollArea className="h-[300px] rounded-md border p-4">
+                                <div className="grid gap-4">
                                     {members.map((member) => (
-                                        <label
-                                            key={member.id}
-                                            className="flex items-center space-x-3 p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md cursor-pointer"
-                                        >
-                                            <input
-                                                type="checkbox"
+                                        <div key={member.id} className="flex items-center space-x-2">
+                                            <Checkbox
+                                                id={member.id}
                                                 checked={selectedMembers.includes(member.id)}
-                                                onChange={(e) => {
-                                                    if (e.target.checked) {
+                                                onCheckedChange={(checked) => {
+                                                    if (checked) {
                                                         setSelectedMembers([...selectedMembers, member.id]);
                                                     } else {
                                                         setSelectedMembers(selectedMembers.filter(id => id !== member.id));
                                                     }
                                                 }}
-                                                className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
                                             />
-                                            <span className="text-sm font-medium">{member.name}</span>
-                                        </label>
+                                            <label
+                                                htmlFor={member.id}
+                                                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer hover:text-primary transition-colors"
+                                            >
+                                                {member.name}
+                                            </label>
+                                        </div>
                                     ))}
+                                    {members.length === 0 && (
+                                        <p className="text-sm text-muted-foreground">
+                                            No members available. Add members first.
+                                        </p>
+                                    )}
                                 </div>
-                            </div>
+                            </ScrollArea>
                         </div>
                         <DialogFooter>
                             <Button
                                 variant="outline"
                                 onClick={() => {
                                     setIsManagingMembers(false);
-                                    setSelectedMembers(group.members);
+                                    setSelectedMembers([]);
                                 }}
                             >
                                 Cancel
                             </Button>
-                            <Button onClick={handleUpdateMembers}>Save Members</Button>
+                            <Button onClick={handleUpdateMembers}>
+                                Save Changes
+                            </Button>
                         </DialogFooter>
                     </DialogContent>
                 </Dialog>
@@ -582,7 +615,7 @@ export default function GroupDetailsPage({
                                                 />
                                                 <Label
                                                     htmlFor={`split-${memberId}`}
-                                                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                                                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer hover:text-primary transition-colors"
                                                 >
                                                     {member.name}
                                                 </Label>
@@ -786,7 +819,7 @@ export default function GroupDetailsPage({
                                                 variant="ghost"
                                                 size="icon"
                                                 onClick={() => handleEditExpense(expense)}
-                                                className="h-8 w-8"
+                                                className="h-8 w-8 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700"
                                             >
                                                 <Pencil className="h-4 w-4" />
                                             </Button>
@@ -794,7 +827,7 @@ export default function GroupDetailsPage({
                                                 variant="ghost"
                                                 size="icon"
                                                 onClick={() => handleDeleteExpense(expense.id)}
-                                                className="h-8 w-8 text-destructive hover:text-destructive/90"
+                                                className="h-8 w-8 text-destructive bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30"
                                             >
                                                 <Trash2 className="h-4 w-4" />
                                             </Button>

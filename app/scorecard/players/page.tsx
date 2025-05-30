@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { PageShell } from "@/components/layout/page-shell";
@@ -13,6 +13,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { AlertCircle } from "lucide-react";
+import { Loading } from "@/components/ui/loading";
 
 export default function PlayersPage() {
   const [addDialogOpen, setAddDialogOpen] = useState(false);
@@ -20,6 +21,7 @@ export default function PlayersPage() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [playerName, setPlayerName] = useState("");
   const [selectedPlayer, setSelectedPlayer] = useState<{ id: string; name: string } | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   const {
     players,
@@ -27,6 +29,14 @@ export default function PlayersPage() {
     deletePlayer,
     updatePlayerName
   } = useStore();
+
+  useEffect(() => {
+    // Simulate loading state while IndexedDB operations complete
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleAddPlayer = () => {
     if (playerName.trim()) {
@@ -104,51 +114,59 @@ export default function PlayersPage() {
         }
       />
 
-      <div className="space-y-6">
-        {players.length === 0 ? (
-          <Alert>
-            <AlertCircle className="h-4 w-4" />
-            <AlertTitle>No players yet</AlertTitle>
-            <AlertDescription>
-              Add players to get started with your games.
-            </AlertDescription>
-          </Alert>
-        ) : (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {players.map((player) => (
-              <Card key={player.id}>
-                <CardContent className="pt-6">
-                  <div className="flex items-center gap-4">
-                    <Avatar className="h-14 w-14 border">
-                      <AvatarImage src={player.avatarUrl} alt={player.name} />
-                      <AvatarFallback>{player.name.substring(0, 2).toUpperCase()}</AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1">
-                      <h3 className="font-semibold">{player.name}</h3>
+      {isLoading ? (
+        <div className="flex items-center justify-center min-h-[400px]">
+          <Loading variant="default" size="lg" text="Loading players..." />
+        </div>
+      ) : (
+        <div className="space-y-6">
+          {players.length === 0 ? (
+            <Alert>
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle>No players yet</AlertTitle>
+              <AlertDescription>
+                Add players to get started with your games.
+              </AlertDescription>
+            </Alert>
+          ) : (
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {players.map((player) => (
+                <Card key={player.id}>
+                  <CardContent className="pt-6">
+                    <div className="flex items-center gap-4">
+                      <Avatar className="h-14 w-14 border">
+                        <AvatarImage src={player.avatarUrl} alt={player.name} />
+                        <AvatarFallback>{player.name.substring(0, 2).toUpperCase()}</AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1">
+                        <h3 className="font-semibold">{player.name}</h3>
+                      </div>
+                      <div className="flex gap-1">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => openEditDialog(player)}
+                          className="h-8 w-8 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700"
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => openDeleteDialog(player)}
+                          className="h-8 w-8 text-destructive bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
-                    <div className="flex gap-2">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => openEditDialog(player)}
-                      >
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => openDeleteDialog(player)}
-                      >
-                        <Trash2 className="h-4 w-4 text-destructive" />
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        )}
-      </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Edit Dialog */}
       <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>

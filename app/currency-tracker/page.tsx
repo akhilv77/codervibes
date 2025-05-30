@@ -16,6 +16,7 @@ import { db } from '@/lib/db/indexed-db';
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { useCurrencyRatesStore } from '@/lib/stores/currency-rates-store';
+import { Loading } from '@/components/ui/loading';
 
 export default function CurrencyTracker() {
     const { trackServiceUsage } = useServiceTracking();
@@ -93,12 +94,12 @@ export default function CurrencyTracker() {
     };
 
     if (loading) return (
-        <div className="flex justify-center items-center min-h-screen">
-            <div className="text-center space-y-4">
-                <RefreshCw className="h-8 w-8 animate-spin mx-auto text-primary" />
-                <p className="text-muted-foreground">Loading exchange rates...</p>
-            </div>
-        </div>
+        <Loading
+            variant="default"
+            size="lg"
+            text="Loading exchange rates..."
+            fullScreen
+        />
     );
 
     if (error) return (
@@ -106,8 +107,11 @@ export default function CurrencyTracker() {
             <div className="text-center space-y-4">
                 <p className="text-red-500">{error}</p>
                 <Button onClick={fetchRates} disabled={refreshing}>
-                    {refreshing ? <RefreshCw className="h-4 w-4 animate-spin mr-2" /> : null}
-                    Try Again
+                    {refreshing ? (
+                        <Loading variant="spinner" size="sm" />
+                    ) : (
+                        "Try Again"
+                    )}
                 </Button>
             </div>
         </div>
@@ -121,8 +125,11 @@ export default function CurrencyTracker() {
                     <p className="text-muted-foreground mt-1 text-sm sm:text-base">Track and convert currencies in real-time</p>
                 </div>
                 <Button variant="outline" onClick={fetchRates} disabled={refreshing} className="w-full sm:w-auto">
-                    {refreshing ? <RefreshCw className="h-4 w-4 animate-spin mr-2" /> : null}
-                    Refresh Rates
+                    {refreshing ? (
+                        <Loading variant="spinner" size="sm" />
+                    ) : (
+                        "Refresh Rates"
+                    )}
                 </Button>
             </div>
 

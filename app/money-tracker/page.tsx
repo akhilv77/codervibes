@@ -12,6 +12,17 @@ import { Pencil, Trash2, Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { useRouter } from 'next/navigation';
 import { useServiceTracking } from '@/hooks/useServiceTracking';
+import { Loading } from '@/components/ui/loading';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export default function MoneyTrackerPage() {
     const { trackServiceUsage } = useServiceTracking();
@@ -33,6 +44,8 @@ export default function MoneyTrackerPage() {
         updateSettlement,
         deleteSettlement,
         getGroupBalance,
+        isLoading,
+        error,
     } = useMoneyTracker();
 
     const naviagte = useRouter();
@@ -103,22 +116,14 @@ export default function MoneyTrackerPage() {
         }
     };
 
-    const handleDeleteGroup = async (id: string) => {
-        try {
-            await deleteGroup(id);
-            setDeleteConfirmation({ show: false, id: null });
-        } catch (error) {
-            console.error('Error deleting group:', error);
-        }
+    const handleDeleteGroup = (groupId: string) => {
+        setDeleteConfirmation({ show: true, id: groupId });
     };
 
-    const confirmDelete = () => {
+    const confirmDeleteGroup = () => {
         if (deleteConfirmation.id) {
-            const group = groups.find(g => g.id === deleteConfirmation.id);
-            if (group) {
-                trackServiceUsage('Money Tracker', 'group_deleted', `Group: ${group.name}`);
-            }
-            handleDeleteGroup(deleteConfirmation.id);
+            deleteGroup(deleteConfirmation.id);
+            setDeleteConfirmation({ show: false, id: null });
         }
     };
 
@@ -126,6 +131,30 @@ export default function MoneyTrackerPage() {
         group.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         (group.type?.toLowerCase() || '').includes(searchQuery.toLowerCase())
     );
+
+    if (isLoading) {
+        return (
+            <Loading
+                variant="default"
+                size="lg"
+                text="Loading money tracker..."
+                fullScreen
+            />
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="flex justify-center items-center min-h-screen">
+                <div className="text-center space-y-4">
+                    <p className="text-red-500">{error}</p>
+                    <Button onClick={() => window.location.reload()}>
+                        Try Again
+                    </Button>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="container mx-auto px-4 py-4 sm:py-8">
@@ -219,32 +248,25 @@ export default function MoneyTrackerPage() {
                 </DialogContent>
             </Dialog>
 
-            {deleteConfirmation.show && (
-                <Dialog open={deleteConfirmation.show} onOpenChange={handleDeleteDialogOpenChange}>
-                    <DialogContent className="sm:max-w-[425px]">
-                        <DialogHeader>
-                            <DialogTitle>Confirm Delete</DialogTitle>
-                            <DialogDescription>
-                                Are you sure you want to delete this group? This will also delete all associated expenses and cannot be undone.
-                            </DialogDescription>
-                        </DialogHeader>
-                        <DialogFooter>
-                            <Button
-                                variant="outline"
-                                onClick={() => setDeleteConfirmation({ show: false, id: null })}
-                            >
-                                Cancel
-                            </Button>
-                            <Button
-                                variant="destructive"
-                                onClick={confirmDelete}
-                            >
-                                Delete
-                            </Button>
-                        </DialogFooter>
-                    </DialogContent>
-                </Dialog>
-            )}
+            <AlertDialog open={deleteConfirmation.show} onOpenChange={(open) => setDeleteConfirmation({ show: open, id: null })}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            This will permanently delete the group and all its associated expenses. This action cannot be undone.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={confirmDeleteGroup}
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        >
+                            Delete
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
 
             {filteredGroups.length === 0 ? (
                 <div className="text-center py-12">
@@ -285,7 +307,7 @@ export default function MoneyTrackerPage() {
                                                 variant="ghost"
                                                 size="icon"
                                                 onClick={() => handleEditGroup(group)}
-                                                className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
+                                                className="h-8 w-8 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700"
                                             >
                                                 <Pencil className="h-4 w-4" />
                                             </Button>
@@ -293,7 +315,7 @@ export default function MoneyTrackerPage() {
                                                 variant="ghost"
                                                 size="icon"
                                                 onClick={() => handleDeleteGroup(group.id)}
-                                                className="h-8 w-8 text-destructive opacity-0 group-hover:opacity-100 transition-opacity"
+                                                className="h-8 w-8 text-destructive bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30"
                                             >
                                                 <Trash2 className="h-4 w-4" />
                                             </Button>

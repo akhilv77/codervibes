@@ -1,4 +1,4 @@
-import { Trophy, Wallet, type LucideIcon, DollarSign } from "lucide-react";
+import { Trophy, Wallet, type LucideIcon, DollarSign, BadgeDollarSignIcon } from "lucide-react";
 
 export interface AppConfig {
   id: string;
@@ -39,7 +39,7 @@ export const apps: AppConfig[] = [
     name: "Currency Tracker",
     description: "Track and convert currencies with daily updates",
     href: "/currency-tracker",
-    icon: DollarSign,
+    icon: BadgeDollarSignIcon,
     features: [
       "Real-time currency conversion",
       "Daily rate updates",

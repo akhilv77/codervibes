@@ -10,18 +10,48 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Pencil, Trash2, Search } from 'lucide-react';
+import { Loading } from '@/components/ui/loading';
 
 export default function MembersPage() {
     const {
-        members = [],
+        members,
+        isLoading,
+        error,
         addMember,
         updateMember,
         deleteMember
     } = useMoneyTracker();
 
     const [isAddingMember, setIsAddingMember] = useState(false);
+    const [isEditingMember, setIsEditingMember] = useState(false);
     const [newMemberName, setNewMemberName] = useState('');
     const [newMemberEmail, setNewMemberEmail] = useState('');
+    const [editingMember, setEditingMember] = useState<Member | null>(null);
+    const [deleteConfirmation, setDeleteConfirmation] = useState<{ show: boolean; id: string | null }>({ show: false, id: null });
+
+    if (isLoading) {
+        return (
+            <Loading
+                variant="default"
+                size="lg"
+                text="Loading members..."
+                fullScreen
+            />
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="flex justify-center items-center min-h-screen">
+                <div className="text-center space-y-4">
+                    <p className="text-red-500">{error}</p>
+                    <Button onClick={() => window.location.reload()}>
+                        Try Again
+                    </Button>
+                </div>
+            </div>
+        );
+    }
 
     const handleAddMember = async () => {
         if (!newMemberName.trim() || !newMemberEmail.trim()) return;
@@ -40,6 +70,40 @@ export default function MembersPage() {
         }
     };
 
+    const handleEditMember = (member: Member) => {
+        setEditingMember(member);
+        setNewMemberName(member.name);
+        setNewMemberEmail(member.email);
+        setIsEditingMember(true);
+    };
+
+    const handleUpdateMember = async () => {
+        if (!editingMember || !newMemberName.trim() || !newMemberEmail.trim()) return;
+
+        try {
+            await updateMember(editingMember.id, {
+                name: newMemberName.trim(),
+                email: newMemberEmail.trim().toLowerCase(),
+            });
+
+            setEditingMember(null);
+            setNewMemberName('');
+            setNewMemberEmail('');
+            setIsEditingMember(false);
+        } catch (error) {
+            console.error('Error updating member:', error);
+        }
+    };
+
+    const handleDeleteMember = async (id: string) => {
+        try {
+            await deleteMember(id);
+            setDeleteConfirmation({ show: false, id: null });
+        } catch (error) {
+            console.error('Error deleting member:', error);
+        }
+    };
+
     return (
         <div className="container mx-auto py-8">
             <div className="flex justify-between items-center mb-8">
@@ -47,12 +111,20 @@ export default function MembersPage() {
                 <Button onClick={() => setIsAddingMember(true)}>Add Member</Button>
             </div>
 
-            <Dialog open={isAddingMember} onOpenChange={setIsAddingMember}>
+            <Dialog open={isAddingMember || isEditingMember} onOpenChange={(open) => {
+                if (!open) {
+                    setIsAddingMember(false);
+                    setIsEditingMember(false);
+                    setEditingMember(null);
+                    setNewMemberName('');
+                    setNewMemberEmail('');
+                }
+            }}>
                 <DialogContent className="sm:max-w-[425px]">
                     <DialogHeader>
-                        <DialogTitle>Add New Member</DialogTitle>
+                        <DialogTitle>{isEditingMember ? 'Edit Member' : 'Add New Member'}</DialogTitle>
                         <DialogDescription>
-                            Add a new member to your expense tracking group.
+                            {isEditingMember ? 'Update the member details below.' : 'Add a new member to your expense tracking group.'}
                         </DialogDescription>
                     </DialogHeader>
                     <div className="grid gap-4 py-4">
@@ -83,13 +155,48 @@ export default function MembersPage() {
                         </div>
                     </div>
                     <DialogFooter>
-                        <Button variant="outline" onClick={() => setIsAddingMember(false)}>
+                        <Button variant="outline" onClick={() => {
+                            setIsAddingMember(false);
+                            setIsEditingMember(false);
+                            setEditingMember(null);
+                            setNewMemberName('');
+                            setNewMemberEmail('');
+                        }}>
                             Cancel
                         </Button>
-                        <Button onClick={handleAddMember}>Add Member</Button>
+                        <Button onClick={isEditingMember ? handleUpdateMember : handleAddMember}>
+                            {isEditingMember ? 'Update Member' : 'Add Member'}
+                        </Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
+
+            {deleteConfirmation.show && (
+                <Dialog open={deleteConfirmation.show} onOpenChange={(open) => !open && setDeleteConfirmation({ show: false, id: null })}>
+                    <DialogContent className="sm:max-w-[425px]">
+                        <DialogHeader>
+                            <DialogTitle>Confirm Delete</DialogTitle>
+                            <DialogDescription>
+                                Are you sure you want to delete this member? This action cannot be undone.
+                            </DialogDescription>
+                        </DialogHeader>
+                        <DialogFooter>
+                            <Button
+                                variant="outline"
+                                onClick={() => setDeleteConfirmation({ show: false, id: null })}
+                            >
+                                Cancel
+                            </Button>
+                            <Button
+                                variant="destructive"
+                                onClick={() => deleteConfirmation.id && handleDeleteMember(deleteConfirmation.id)}
+                            >
+                                Delete
+                            </Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
+            )}
 
             {members.length === 0 ? (
                 <div className="text-center py-12">
@@ -127,13 +234,24 @@ export default function MembersPage() {
                                         {member.email}
                                     </p>
                                 </div>
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => deleteMember(member.id)}
-                                >
-                                    Delete
-                                </Button>
+                                <div className="flex gap-1">
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        onClick={() => handleEditMember(member)}
+                                        className="h-8 w-8 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700"
+                                    >
+                                        <Pencil className="h-4 w-4" />
+                                    </Button>
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        onClick={() => setDeleteConfirmation({ show: true, id: member.id })}
+                                        className="h-8 w-8 text-destructive bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30"
+                                    >
+                                        <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                </div>
                             </div>
                         </div>
                     ))}

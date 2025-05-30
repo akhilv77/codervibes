@@ -25,6 +25,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { useServiceTracking } from '@/hooks/useServiceTracking';
+import { Loading } from "@/components/ui/loading";
 
 export default function GamesPage() {
   const { trackServiceUsage } = useServiceTracking();
@@ -37,6 +38,7 @@ export default function GamesPage() {
   const [gameMaxScore, setGameMaxScore] = useState<string>("");
   const [newGameMaxScore, setNewGameMaxScore] = useState<string>("");
   const [selectedGame, setSelectedGame] = useState<{ id: string; name: string; players: string[]; maxScore?: number } | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   const {
     maxScore: currentMaxScore,
@@ -50,6 +52,11 @@ export default function GamesPage() {
 
   useEffect(() => {
     trackServiceUsage('Scorecard', 'page_view');
+    // Simulate loading state while IndexedDB operations complete
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 500);
+    return () => clearTimeout(timer);
   }, []);
 
   const handleMaxScoreChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -209,92 +216,100 @@ export default function GamesPage() {
         }
       />
 
-      <div className="space-y-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Maximum Score</CardTitle>
-            <CardDescription>
-              Set the maximum score threshold for all games. When a player&apos;s total exceeds this, they&apos;re out!
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-end gap-4">
-              <div className="grid gap-2 flex-1">
-                <Label htmlFor="maxScore">Maximum Score</Label>
-                <Input
-                  id="maxScore"
-                  placeholder="Enter maximum score"
-                  value={maxScore || currentMaxScore.toString()}
-                  onChange={handleMaxScoreChange}
-                />
-              </div>
-              <Button onClick={handleSaveMaxScore}>Save</Button>
-            </div>
-          </CardContent>
-          <CardFooter className="text-sm text-muted-foreground">
-            Current maximum score: {currentMaxScore}
-          </CardFooter>
-        </Card>
-
-        <div className="space-y-4">
-          <h2 className="text-xl font-semibold tracking-tight">Game History</h2>
-
-          {games.length === 0 ? (
-            <div className="rounded-lg border border-dashed p-8 text-center">
-              <h3 className="font-medium">No games yet</h3>
-              <p className="text-sm text-muted-foreground mt-1">
-                Create your first game to get started
-              </p>
-            </div>
-          ) : (
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {games.map((game) => (
-                <Card key={game.id} className="overflow-hidden">
-                  <CardHeader className="pb-3">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <CardTitle className="text-base">{game.name}</CardTitle>
-                        <CardDescription className="text-xs mt-2">
-                          Created {new Date(game.createdAt).toLocaleString()}
-                        </CardDescription>
-                      </div>
-                      <div className="flex gap-2">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => openEditDialog(game)}
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => openDeleteDialog(game)}
-                        >
-                          <Trash2 className="h-4 w-4 text-destructive" />
-                        </Button>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="pb-3">
-                    <p className="text-sm text-muted-foreground">
-                      {game.players.length} players selected
-                    </p>
-                  </CardContent>
-                  <CardFooter className="pt-3 border-t flex justify-between">
-                    <span className="text-xs text-muted-foreground">
-                      ID: {game.id.slice(0, 8)}
-                    </span>
-                    <Button variant="outline" size="sm" asChild>
-                      <a href={`/scorecard/play?gameId=${game.id}`}>Play</a>
-                    </Button>
-                  </CardFooter>
-                </Card>
-              ))}
-            </div>
-          )}
+      {isLoading ? (
+        <div className="flex items-center justify-center min-h-[400px]">
+          <Loading variant="default" size="lg" text="Loading games..." />
         </div>
-      </div>
+      ) : (
+        <div className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Maximum Score</CardTitle>
+              <CardDescription>
+                Set the maximum score threshold for all games. When a player&apos;s total exceeds this, they&apos;re out!
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-end gap-4">
+                <div className="grid gap-2 flex-1">
+                  <Label htmlFor="maxScore">Maximum Score</Label>
+                  <Input
+                    id="maxScore"
+                    placeholder="Enter maximum score"
+                    value={maxScore || currentMaxScore.toString()}
+                    onChange={handleMaxScoreChange}
+                  />
+                </div>
+                <Button onClick={handleSaveMaxScore}>Save</Button>
+              </div>
+            </CardContent>
+            <CardFooter className="text-sm text-muted-foreground">
+              Current maximum score: {currentMaxScore}
+            </CardFooter>
+          </Card>
+
+          <div className="space-y-4">
+            <h2 className="text-xl font-semibold tracking-tight">Game History</h2>
+
+            {games.length === 0 ? (
+              <div className="rounded-lg border border-dashed p-8 text-center">
+                <h3 className="font-medium">No games yet</h3>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Create your first game to get started
+                </p>
+              </div>
+            ) : (
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {games.map((game) => (
+                  <Card key={game.id} className="overflow-hidden">
+                    <CardHeader className="pb-3">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <CardTitle className="text-base">{game.name}</CardTitle>
+                          <CardDescription className="text-xs mt-2">
+                            Created {new Date(game.createdAt).toLocaleString()}
+                          </CardDescription>
+                        </div>
+                        <div className="flex gap-1">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => openEditDialog(game)}
+                            className="h-8 w-8 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700"
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => openDeleteDialog(game)}
+                            className="h-8 w-8 text-destructive bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="pb-3">
+                      <p className="text-sm text-muted-foreground">
+                        {game.players.length} players selected
+                      </p>
+                    </CardContent>
+                    <CardFooter className="pt-3 border-t flex justify-between">
+                      <span className="text-xs text-muted-foreground">
+                        ID: {game.id.slice(0, 8)}
+                      </span>
+                      <Button variant="outline" size="sm" asChild>
+                        <a href={`/scorecard/play?gameId=${game.id}`}>Play</a>
+                      </Button>
+                    </CardFooter>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Edit Dialog */}
       <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
