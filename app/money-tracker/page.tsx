@@ -108,7 +108,11 @@ export default function MoneyTrackerPage() {
         if (!editingGroup) return;
 
         try {
-            await updateGroup(editingGroup.id, editingGroup);
+            await updateGroup(editingGroup.id, {
+                name: newGroupName,
+                type: newGroupType,
+                currency: newGroupCurrency,
+            });
             setEditingGroup(null);
             setIsAddingGroup(false);
         } catch (error) {
@@ -241,7 +245,7 @@ export default function MoneyTrackerPage() {
                         >
                             Cancel
                         </Button>
-                        <Button onClick={handleAddGroup}>
+                        <Button onClick={editingGroup ? handleSaveEdit : handleAddGroup}>
                             {editingGroup ? 'Save Changes' : 'Create Group'}
                         </Button>
                     </DialogFooter>

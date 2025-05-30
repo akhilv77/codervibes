@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { InfoIcon, ArrowRight, RefreshCw } from "lucide-react";
+import { InfoIcon, ArrowRight, RefreshCw, ArrowUpDown } from "lucide-react";
 import { PopularRates } from "@/components/currency-tracker/PopularRates";
 import { PreferredCurrency } from "@/components/currency-tracker/PreferredCurrency";
 import { ManagePopularCurrencies } from "@/components/currency-tracker/ManagePopularCurrencies";
@@ -25,7 +25,7 @@ export default function CurrencyTracker() {
     const [error, setError] = useState<string | null>(null);
     const [amount, setAmount] = useState<number>(1);
     const [fromCurrency, setFromCurrency] = useState('USD');
-    const [toCurrency, setToCurrency] = useState('EUR');
+    const [toCurrency, setToCurrency] = useState('INR');
     const [refreshing, setRefreshing] = useState(false);
 
     const {
@@ -193,7 +193,7 @@ export default function CurrencyTracker() {
                             </div>
 
                             <div className="flex justify-center">
-                                <ArrowRight className="h-5 w-5 sm:h-6 sm:w-6 text-muted-foreground" />
+                                <ArrowUpDown className="h-5 w-5 sm:h-6 sm:w-6 text-muted-foreground" />
                             </div>
 
                             <div className="grid gap-4 sm:grid-cols-2">

@@ -9,7 +9,7 @@ interface Settings {
 
 interface SettingsStore {
   settings: Settings;
-  setSettings: (settings: Partial<Settings>) => void;
+  setSettings: (settings: Partial<Settings>) => Promise<void>;
   initialize: () => Promise<void>;
 }
 

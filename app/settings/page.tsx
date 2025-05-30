@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Moon, Sun, Monitor, AlertTriangle, Info } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useStore } from "@/lib/store";
+import { useSettingsStore } from "@/lib/stores/settings-store";
 import { RootPageShell } from "@/components/layout/root-page-shell";
 import { PageHeader } from "@/components/layout/page-header";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -28,14 +29,27 @@ export default function SettingsPage() {
   const [resetDialogOpen, setResetDialogOpen] = useState(false);
   const { resetAll } = useStore();
   const { toast } = useToast();
+  const { settings, setSettings, initialize } = useSettingsStore();
 
   useEffect(() => {
     setMounted(true);
+    initialize();
   }, []);
+
+  useEffect(() => {
+    if (mounted && settings.theme) {
+      setTheme(settings.theme);
+    }
+  }, [mounted, settings.theme, setTheme]);
 
   if (!mounted) {
     return null;
   }
+
+  const handleThemeChange = async (newTheme: 'light' | 'dark' | 'system') => {
+    setTheme(newTheme);
+    await setSettings({ theme: newTheme });
+  };
 
   const handleReset = () => {
     resetAll();
@@ -55,7 +69,7 @@ export default function SettingsPage() {
           description="Manage your app preferences and data"
         />
       </div>
-      <div className="container max-w-4xl py-6">
+      <div className="container max-w-screen-xl">
         <div className="grid gap-8">
           {/* Appearance Section */}
           <Card>
@@ -72,7 +86,7 @@ export default function SettingsPage() {
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <Button
                   variant={theme === 'light' ? 'default' : 'outline'}
-                  onClick={() => setTheme('light')}
+                  onClick={() => handleThemeChange('light')}
                   className="flex items-center justify-center gap-2 h-auto py-4"
                 >
                   <Sun className="h-5 w-5" />
@@ -83,7 +97,7 @@ export default function SettingsPage() {
                 </Button>
                 <Button
                   variant={theme === 'dark' ? 'default' : 'outline'}
-                  onClick={() => setTheme('dark')}
+                  onClick={() => handleThemeChange('dark')}
                   className="flex items-center justify-center gap-2 h-auto py-4"
                 >
                   <Moon className="h-5 w-5" />
@@ -94,7 +108,7 @@ export default function SettingsPage() {
                 </Button>
                 <Button
                   variant={theme === 'system' ? 'default' : 'outline'}
-                  onClick={() => setTheme('system')}
+                  onClick={() => handleThemeChange('system')}
                   className="flex items-center justify-center gap-2 h-auto py-4"
                 >
                   <Monitor className="h-5 w-5" />
