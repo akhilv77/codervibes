@@ -1,4 +1,4 @@
-import { Trophy, Wallet, type LucideIcon } from "lucide-react";
+import { Trophy, Wallet, type LucideIcon, DollarSign } from "lucide-react";
 
 export interface AppConfig {
   id: string;
@@ -13,7 +13,7 @@ export const apps: AppConfig[] = [
   {
     id: "scorecard",
     name: "Scorecard",
-    description: "Track scores and manage games for your players",
+    description: "Track scores and manage games for your players ",
     href: "/scorecard",
     icon: Trophy,
     features: [
@@ -32,6 +32,18 @@ export const apps: AppConfig[] = [
       "Group expense tracking",
       "Member management",
       "Balance calculation",
+    ]
+  },
+  {
+    id: "currency-tracker",
+    name: "Currency Tracker",
+    description: "Track and convert currencies with daily updates",
+    href: "/currency-tracker",
+    icon: DollarSign,
+    features: [
+      "Real-time currency conversion",
+      "Daily rate updates",
+      "Support for 170+ currencies"
     ]
   }
 ]; 
