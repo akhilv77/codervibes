@@ -5,6 +5,9 @@ import { useMoneyTracker } from '@/hooks/useMoneyTracker';
 import { Button } from '@/components/ui/button';
 import { getGravatarUrl, getInitials } from '@/lib/utils';
 import type { Member } from '@/types/money-tracker';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
 
 export default function MembersPage() {
     const { state, addMember, updateMember, deleteMember } = useMoneyTracker();
@@ -33,44 +36,49 @@ export default function MembersPage() {
                 <Button onClick={() => setIsAddingMember(true)}>Add Member</Button>
             </div>
 
-            {isAddingMember && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center">
-                    <div className="bg-white dark:bg-gray-800 p-6 rounded-lg w-full max-w-md">
-                        <h2 className="text-xl font-semibold mb-4">Add New Member</h2>
-                        <div className="space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium mb-1">Name</label>
-                                <input
-                                    type="text"
-                                    value={newMemberName}
-                                    onChange={(e) => setNewMemberName(e.target.value)}
-                                    className="w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600"
-                                    placeholder="Enter member name"
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium mb-1">Email</label>
-                                <input
-                                    type="email"
-                                    value={newMemberEmail}
-                                    onChange={(e) => setNewMemberEmail(e.target.value)}
-                                    className="w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600"
-                                    placeholder="Enter member email"
-                                />
-                            </div>
-                            <div className="flex justify-end space-x-2">
-                                <Button
-                                    variant="outline"
-                                    onClick={() => setIsAddingMember(false)}
-                                >
-                                    Cancel
-                                </Button>
-                                <Button onClick={handleAddMember}>Add Member</Button>
-                            </div>
+            <Dialog open={isAddingMember} onOpenChange={setIsAddingMember}>
+                <DialogContent className="sm:max-w-[425px]">
+                    <DialogHeader>
+                        <DialogTitle>Add New Member</DialogTitle>
+                        <DialogDescription>
+                            Add a new member to your expense tracking group.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="grid gap-4 py-4">
+                        <div className="grid grid-cols-4 items-center gap-4">
+                            <Label htmlFor="name" className="text-right">
+                                Name
+                            </Label>
+                            <Input
+                                id="name"
+                                value={newMemberName}
+                                onChange={(e) => setNewMemberName(e.target.value)}
+                                className="col-span-3"
+                                placeholder="Enter member name"
+                            />
+                        </div>
+                        <div className="grid grid-cols-4 items-center gap-4">
+                            <Label htmlFor="email" className="text-right">
+                                Email
+                            </Label>
+                            <Input
+                                id="email"
+                                type="email"
+                                value={newMemberEmail}
+                                onChange={(e) => setNewMemberEmail(e.target.value)}
+                                className="col-span-3"
+                                placeholder="Enter member email"
+                            />
                         </div>
                     </div>
-                </div>
-            )}
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setIsAddingMember(false)}>
+                            Cancel
+                        </Button>
+                        <Button onClick={handleAddMember}>Add Member</Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
 
             {state.members.length === 0 ? (
                 <div className="text-center py-12">

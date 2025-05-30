@@ -64,12 +64,11 @@ export default function MoneyTrackerLayout({
     children: React.ReactNode;
 }) {
     return (
-        <div className="flex min-h-screen flex-col">
-            <header className="sticky top-0 z-10 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="flex min-h-screen flex-col bg-background">
+            <header className="sticky top-0 z-10 w-full border-b bg-background">
                 <div className="mx-auto max-w-screen-xl px-4">
                     <div className="flex h-14 items-center justify-between mt-10">
                         <div className="flex items-center gap-2 mb-5">
-                            <BackButton path="/" />
                             <div className="flex items-center gap-2 font-semibold">
                                 <span className="text-primary text-2xl font-bold">Money Tracker</span>
                             </div>
@@ -79,10 +78,10 @@ export default function MoneyTrackerLayout({
                 </div>
                 <NavTabs />
             </header>
-            <main className="flex-1 flex justify-center">
+            <main className="flex-1 flex justify-center bg-background">
                 <div className="container max-w-screen-xl px-4 py-4">{children}</div>
             </main>
-            <footer className="border-t py-4">
+            <footer className="border-t py-4 bg-background">
                 <div className="container max-w-screen-xl px-4 flex justify-center text-sm text-muted-foreground">
                     <p>© {new Date().getFullYear()} Money Tracker</p>
                 </div>

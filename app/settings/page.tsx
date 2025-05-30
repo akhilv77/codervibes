@@ -47,7 +47,7 @@ export default function SettingsPage() {
   };
 
   return (
-    <RootPageShell>
+    <>
       <div className="flex items-center gap-2 mb-6">
         <BackButton path="/" />
         <PageHeader
@@ -170,6 +170,6 @@ export default function SettingsPage() {
           </Card>
         </div>
       </div>
-    </RootPageShell>
+    </>
   );
 }

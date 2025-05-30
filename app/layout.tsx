@@ -5,19 +5,39 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/toaster";
 import Script from "next/script";
 import { useAnalytics } from "@/hooks/useAnalytics";
+import { RootPageShell } from "@/components/layout/root-page-shell";
+import { checkAndMigrate } from "@/lib/db/migrate";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Coder Vibes",
-  description: "Building daily useful tools to make life easier",
+  title: "CoderVibes - Tools for Developers",
+  description: "A collection of useful tools for developers",
 };
+
+// Initialize IndexedDB and handle migration
+if (typeof window !== 'undefined') {
+  // Use requestIdleCallback if available, otherwise setTimeout
+  const initDB = () => {
+    try {
+      checkAndMigrate().catch(console.error);
+    } catch (error) {
+      console.error('Error during IndexedDB initialization:', error);
+    }
+  };
+
+  if ('requestIdleCallback' in window) {
+    window.requestIdleCallback(initDB);
+  } else {
+    setTimeout(initDB, 0);
+  }
+}
 
 export default function RootLayout({
   children,
-}: {
+}: Readonly<{
   children: React.ReactNode;
-}) {
+}>) {
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
@@ -47,7 +67,9 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          {children}
+          <RootPageShell>
+            {children}
+          </RootPageShell>
           <Toaster />
         </ThemeProvider>
       </body>

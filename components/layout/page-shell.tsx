@@ -16,7 +16,6 @@ export function PageShell({ children }: PageShellProps) {
         <div className="mx-auto max-w-screen-xl px-4">
           <div className="flex h-14 items-center justify-between mt-10">
             <div className="flex items-center gap-2 mb-5">
-              <BackButton path="/" />
               <div className="flex items-center gap-2 font-semibold">
                 <span className="text-primary text-3xl font-bold">Score Card</span>
               </div>

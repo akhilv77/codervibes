@@ -1,78 +1,40 @@
-import { useState, useEffect } from 'react';
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Settings } from "lucide-react";
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from "@/components/ui/dialog";
+'use client';
+
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import type { ExchangeRates } from "@/types/currency-tracker";
 
 interface PreferredCurrencyProps {
-    rates: { [key: string]: number } | null;
-    onPreferredCurrencyChange: (currency: string) => void;
+    rates: ExchangeRates['rates'] | null;
     preferredCurrency: string;
+    onPreferredCurrencyChange: (currency: string) => void;
 }
 
-export function PreferredCurrency({ rates, onPreferredCurrencyChange, preferredCurrency }: PreferredCurrencyProps) {
-    const [open, setOpen] = useState(false);
-    const [selectedCurrency, setSelectedCurrency] = useState(preferredCurrency);
-
-    useEffect(() => {
-        setSelectedCurrency(preferredCurrency);
-    }, [preferredCurrency]);
-
-    const handleSave = () => {
-        onPreferredCurrencyChange(selectedCurrency);
-        setOpen(false);
-    };
-
+export function PreferredCurrency({ rates, preferredCurrency, onPreferredCurrencyChange }: PreferredCurrencyProps) {
     if (!rates) return null;
 
     return (
-        <Card className="p-4 mb-6">
-            <div className="flex items-center justify-between">
-                <div>
-                    <h3 className="text-lg font-semibold">Preferred Currency</h3>
-                    <p className="text-sm text-muted-foreground">Currently set to: {preferredCurrency}</p>
-                </div>
-                <Dialog open={open} onOpenChange={setOpen}>
-                    <DialogTrigger asChild>
-                        <Button variant="outline" size="sm">
-                            <Settings className="h-4 w-4 mr-2" />
-                            Change
-                        </Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                        <DialogHeader>
-                            <DialogTitle>Set Preferred Currency</DialogTitle>
-                            <DialogDescription>
-                                Choose your preferred currency for viewing exchange rates
-                            </DialogDescription>
-                        </DialogHeader>
-                        <div className="py-4">
-                            <select
-                                value={selectedCurrency}
-                                onChange={(e) => setSelectedCurrency(e.target.value)}
-                                className="w-full p-2 border rounded"
-                            >
-                                {Object.keys(rates).map((currency) => (
-                                    <option key={currency} value={currency}>
-                                        {currency}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-                        <DialogFooter>
-                            <Button onClick={handleSave}>Save Changes</Button>
-                        </DialogFooter>
-                    </DialogContent>
-                </Dialog>
-            </div>
+        <Card>
+            <CardHeader>
+                <CardTitle>Preferred Currency</CardTitle>
+            </CardHeader>
+            <CardContent>
+                <Select
+                    value={preferredCurrency}
+                    onValueChange={onPreferredCurrencyChange}
+                >
+                    <SelectTrigger className="w-full h-12 text-lg">
+                        <SelectValue placeholder="Select currency" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        {Object.keys(rates).map((currency) => (
+                            <SelectItem key={currency} value={currency}>
+                                {currency}
+                            </SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+            </CardContent>
         </Card>
     );
 } 

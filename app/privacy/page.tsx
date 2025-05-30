@@ -1,154 +1,169 @@
 'use client';
 
 import { RootPageShell } from "@/components/layout/root-page-shell";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Shield, Lock, Eye, Server } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Shield, Lock, Eye, Server, Mail, Clock, FileText, Users } from "lucide-react";
 
 export default function PrivacyPage() {
     return (
-        <RootPageShell>
-            <div className="container flex justify-center">
-                <div className="w-full max-w-4xl py-8">
-                    <div className="space-y-8">
-                        {/* Header */}
-                        <div className="text-center space-y-4">
-                            <h1 className="text-4xl font-bold tracking-tight">Privacy Policy</h1>
-                            <p className="text-xl text-muted-foreground">
-                                Your privacy is our top priority
-                            </p>
-                        </div>
+        <div className="container max-w-screen-xl px-4 py-8">
+            <div className="max-w-screen-xl mx-auto">
+                <div className="text-center mb-12">
+                    <h1 className="text-4xl font-bold mb-4">Privacy Policy</h1>
+                    <p className="text-muted-foreground text-lg">
+                        Your privacy is important to us. Learn how we collect, use, and protect your information.
+                    </p>
+                </div>
 
-                        {/* Key Privacy Points */}
-                        <div className="grid gap-6 md:grid-cols-2">
-                            <Card>
-                                <CardHeader>
-                                    <div className="mb-2">
-                                        <Shield className="h-8 w-8 text-primary" />
+                <div className="grid gap-8">
+                    <Card className="border-2">
+                        <CardContent className="p-6">
+                            <div className="flex items-start gap-4">
+                                <div className="p-2 bg-primary/10 rounded-lg">
+                                    <Users className="w-6 h-6 text-primary" />
+                                </div>
+                                <div>
+                                    <h2 className="text-2xl font-semibold mb-4">Information We Collect</h2>
+                                    <div className="space-y-4 text-muted-foreground">
+                                        <p>We collect information that you provide directly to us, including when you:</p>
+                                        <ul className="list-disc pl-6 space-y-2">
+                                            <li>Create an account</li>
+                                            <li>Use our tools and services</li>
+                                            <li>Contact us for support</li>
+                                            <li>Request new tools or features</li>
+                                        </ul>
                                     </div>
-                                    <CardTitle>Local-First Approach</CardTitle>
-                                    <CardDescription>
-                                        Your data never leaves your device
-                                    </CardDescription>
-                                </CardHeader>
-                                <CardContent>
-                                    <p className="text-sm text-muted-foreground">
-                                        All our tools operate entirely within your browser. Your data is processed locally
-                                        and never transmitted to our servers. This ensures maximum privacy and security
-                                        for your information.
-                                    </p>
-                                </CardContent>
-                            </Card>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
 
-                            <Card>
-                                <CardHeader>
-                                    <div className="mb-2">
-                                        <Lock className="h-8 w-8 text-primary" />
+                    <Card className="border-2">
+                        <CardContent className="p-6">
+                            <div className="flex items-start gap-4">
+                                <div className="p-2 bg-primary/10 rounded-lg">
+                                    <Eye className="w-6 h-6 text-primary" />
+                                </div>
+                                <div>
+                                    <h2 className="text-2xl font-semibold mb-4">Analytics and Tracking</h2>
+                                    <div className="space-y-4 text-muted-foreground">
+                                        <p>We use Google Analytics to understand how visitors interact with our website. This helps us improve our services and user experience. Google Analytics may collect:</p>
+                                        <ul className="list-disc pl-6 space-y-2">
+                                            <li>Pages visited and time spent on each page</li>
+                                            <li>Device and browser information</li>
+                                            <li>Geographic location (country/region level)</li>
+                                            <li>Traffic sources and user behavior</li>
+                                        </ul>
+                                        <p>You can opt out of Google Analytics by installing the <a href="https://tools.google.com/dlpage/gaoptout" className="text-primary hover:underline" target="_blank" rel="noopener noreferrer">Google Analytics Opt-out Browser Add-on</a>.</p>
                                     </div>
-                                    <CardTitle>No Data Storage</CardTitle>
-                                    <CardDescription>
-                                        We don&apos;t store your information
-                                    </CardDescription>
-                                </CardHeader>
-                                <CardContent>
-                                    <p className="text-sm text-muted-foreground">
-                                        Unlike many other services, we don&apos;t maintain any databases or servers to store
-                                        user data. This means there&apos;s no risk of data breaches or unauthorized access
-                                        to your information.
-                                    </p>
-                                </CardContent>
-                            </Card>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
 
-                            <Card>
-                                <CardHeader>
-                                    <div className="mb-2">
-                                        <Eye className="h-8 w-8 text-primary" />
+                    <Card className="border-2">
+                        <CardContent className="p-6">
+                            <div className="flex items-start gap-4">
+                                <div className="p-2 bg-primary/10 rounded-lg">
+                                    <FileText className="w-6 h-6 text-primary" />
+                                </div>
+                                <div>
+                                    <h2 className="text-2xl font-semibold mb-4">How We Use Your Information</h2>
+                                    <div className="space-y-4 text-muted-foreground">
+                                        <p>We use the information we collect to:</p>
+                                        <ul className="list-disc pl-6 space-y-2">
+                                            <li>Provide and maintain our services</li>
+                                            <li>Improve and personalize your experience</li>
+                                            <li>Analyze usage patterns and optimize our website</li>
+                                            <li>Communicate with you about updates and new features</li>
+                                            <li>Respond to your requests and support needs</li>
+                                        </ul>
                                     </div>
-                                    <CardTitle>Transparent Operations</CardTitle>
-                                    <CardDescription>
-                                        Open source and verifiable
-                                    </CardDescription>
-                                </CardHeader>
-                                <CardContent>
-                                    <p className="text-sm text-muted-foreground">
-                                        Our code is open source, allowing you to verify exactly how your data is handled.
-                                        We believe in complete transparency about our operations and data handling practices.
-                                    </p>
-                                </CardContent>
-                            </Card>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
 
-                            <Card>
-                                <CardHeader>
-                                    <div className="mb-2">
-                                        <Server className="h-8 w-8 text-primary" />
+                    <Card className="border-2">
+                        <CardContent className="p-6">
+                            <div className="flex items-start gap-4">
+                                <div className="p-2 bg-primary/10 rounded-lg">
+                                    <Lock className="w-6 h-6 text-primary" />
+                                </div>
+                                <div>
+                                    <h2 className="text-2xl font-semibold mb-4">Data Security</h2>
+                                    <div className="space-y-4 text-muted-foreground">
+                                        <p>We implement appropriate security measures to protect your personal information. However, no method of transmission over the Internet is 100% secure, and we cannot guarantee absolute security.</p>
                                     </div>
-                                    <CardTitle>No Server Requirements</CardTitle>
-                                    <CardDescription>
-                                        Works entirely in your browser
-                                    </CardDescription>
-                                </CardHeader>
-                                <CardContent>
-                                    <p className="text-sm text-muted-foreground">
-                                        Our tools are designed to work without any server-side processing. Everything
-                                        happens in your browser, ensuring your data never needs to be sent anywhere.
-                                    </p>
-                                </CardContent>
-                            </Card>
-                        </div>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
 
-                        {/* Detailed Privacy Policy */}
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Detailed Privacy Policy</CardTitle>
-                                <CardDescription>
-                                    Last updated: {new Date().toLocaleDateString()}
-                                </CardDescription>
-                            </CardHeader>
-                            <CardContent className="space-y-6">
-                                <section>
-                                    <h3 className="text-lg font-semibold mb-2">1. Data Collection</h3>
-                                    <p className="text-muted-foreground">
-                                        We do not collect any personal data. Our tools operate entirely within your browser
-                                        and do not require any server-side processing or data storage.
-                                    </p>
-                                </section>
+                    <Card className="border-2">
+                        <CardContent className="p-6">
+                            <div className="flex items-start gap-4">
+                                <div className="p-2 bg-primary/10 rounded-lg">
+                                    <Shield className="w-6 h-6 text-primary" />
+                                </div>
+                                <div>
+                                    <h2 className="text-2xl font-semibold mb-4">Your Rights</h2>
+                                    <div className="space-y-4 text-muted-foreground">
+                                        <p>You have the right to:</p>
+                                        <ul className="list-disc pl-6 space-y-2">
+                                            <li>Access your personal information</li>
+                                            <li>Correct inaccurate data</li>
+                                            <li>Request deletion of your data</li>
+                                            <li>Opt out of analytics tracking</li>
+                                            <li>Withdraw consent for data processing</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
 
-                                <section>
-                                    <h3 className="text-lg font-semibold mb-2">2. Data Processing</h3>
-                                    <p className="text-muted-foreground">
-                                        All data processing occurs locally on your device. Your information never leaves
-                                        your browser, ensuring complete privacy and security.
-                                    </p>
-                                </section>
+                    <Card className="border-2">
+                        <CardContent className="p-6">
+                            <div className="flex items-start gap-4">
+                                <div className="p-2 bg-primary/10 rounded-lg">
+                                    <Mail className="w-6 h-6 text-primary" />
+                                </div>
+                                <div>
+                                    <h2 className="text-2xl font-semibold mb-4">Contact Us</h2>
+                                    <div className="space-y-4 text-muted-foreground">
+                                        <p>If you have any questions about this Privacy Policy or our data practices, please contact us at:</p>
+                                        <p>
+                                            <a href="mailto:support@codervibes.in" className="text-primary hover:underline">
+                                                support@codervibes.in
+                                            </a>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
 
-                                <section>
-                                    <h3 className="text-lg font-semibold mb-2">3. Third-Party Services</h3>
-                                    <p className="text-muted-foreground">
-                                        We do not use any third-party services that collect or process user data. Our
-                                        tools are completely self-contained within your browser.
-                                    </p>
-                                </section>
-
-                                <section>
-                                    <h3 className="text-lg font-semibold mb-2">4. Cookies and Tracking</h3>
-                                    <p className="text-muted-foreground">
-                                        We do not use cookies or any form of tracking. Your browsing activity remains
-                                        completely private while using our tools.
-                                    </p>
-                                </section>
-
-                                <section>
-                                    <h3 className="text-lg font-semibold mb-2">5. Contact Information</h3>
-                                    <p className="text-muted-foreground">
-                                        If you have any questions about our privacy policy, please contact us through
-                                        our contact page. We&apos;re committed to being transparent about our practices
-                                        and addressing any concerns you may have.
-                                    </p>
-                                </section>
-                            </CardContent>
-                        </Card>
-                    </div>
+                    <Card className="border-2">
+                        <CardContent className="p-6">
+                            <div className="flex items-start gap-4">
+                                <div className="p-2 bg-primary/10 rounded-lg">
+                                    <Clock className="w-6 h-6 text-primary" />
+                                </div>
+                                <div>
+                                    <h2 className="text-2xl font-semibold mb-4">Updates to This Policy</h2>
+                                    <div className="space-y-4 text-muted-foreground">
+                                        <p>We may update this Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page and updating the &quot;Last Updated&quot; date.</p>
+                                        <p className="text-sm">
+                                            Last Updated: {new Date().toLocaleDateString()}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
                 </div>
             </div>
-        </RootPageShell>
+        </div>
     );
 } 

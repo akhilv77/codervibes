@@ -35,6 +35,20 @@ export default function MoneyTrackerPage() {
         trackServiceUsage('Money Tracker', 'page_view');
     }, []);
 
+    const handleDialogOpenChange = (open: boolean) => {
+        if (!open) {
+            setEditingGroup(null);
+            setNewGroupName('');
+        }
+        setIsAddingGroup(open);
+    };
+
+    const handleDeleteDialogOpenChange = (open: boolean) => {
+        if (!open) {
+            setDeleteConfirmation({ show: false, id: null });
+        }
+    };
+
     const handleAddGroup = () => {
         if (!newGroupName.trim()) return;
 
@@ -125,82 +139,82 @@ export default function MoneyTrackerPage() {
                 </div>
             </div>
 
-            {isAddingGroup && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4">
-                    <div className="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-lg w-full max-w-md">
-                        <h2 className="text-xl font-semibold mb-4">
-                            {editingGroup ? 'Edit Group' : 'Add New Group'}
-                        </h2>
-                        <div className="space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium mb-1">Group Name</label>
-                                <input
-                                    type="text"
-                                    value={newGroupName}
-                                    onChange={(e) => setNewGroupName(e.target.value)}
-                                    className="w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600"
-                                    placeholder="Enter group name"
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium mb-1">Group Type</label>
-                                <select
-                                    value={newGroupType}
-                                    onChange={(e) => setNewGroupType(e.target.value as Group['type'])}
-                                    className="w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600"
-                                >
-                                    <option value="Trip">Trip</option>
-                                    <option value="Family">Family</option>
-                                    <option value="Business">Business</option>
-                                    <option value="Others">Others</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium mb-1">Currency</label>
-                                <select
-                                    value={newGroupCurrency}
-                                    onChange={(e) => setNewGroupCurrency(e.target.value as Group['currency'])}
-                                    className="w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600"
-                                >
-                                    <option value="USD">USD</option>
-                                    <option value="EUR">EUR</option>
-                                    <option value="GBP">GBP</option>
-                                    <option value="INR">INR</option>
-                                    <option value="JPY">JPY</option>
-                                    <option value="CAD">CAD</option>
-                                    <option value="AUD">AUD</option>
-                                </select>
-                            </div>
-                            <div className="flex justify-end space-x-2">
-                                <Button
-                                    variant="outline"
-                                    onClick={() => {
-                                        setIsAddingGroup(false);
-                                        setEditingGroup(null);
-                                        setNewGroupName('');
-                                    }}
-                                >
-                                    Cancel
-                                </Button>
-                                <Button onClick={editingGroup ? handleSaveEdit : handleAddGroup}>
-                                    {editingGroup ? 'Save Changes' : 'Create Group'}
-                                </Button>
-                            </div>
+            <Dialog open={isAddingGroup} onOpenChange={handleDialogOpenChange}>
+                <DialogContent className="sm:max-w-[600px]">
+                    <DialogHeader>
+                        <DialogTitle>{editingGroup ? 'Edit Group' : 'Add New Group'}</DialogTitle>
+                        <DialogDescription>
+                            {editingGroup ? 'Update the group details below.' : 'Create a new group to start tracking expenses.'}
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="border-t border-gray-200 dark:border-gray-700 mb-4" />
+                    <div className="grid gap-4 py-4">
+                        <div className="grid gap-2">
+                            <label className="text-sm font-medium">Group Name</label>
+                            <Input
+                                type="text"
+                                value={newGroupName}
+                                onChange={(e) => setNewGroupName(e.target.value)}
+                                placeholder="Enter group name"
+                            />
+                        </div>
+                        <div className="grid gap-2">
+                            <label className="text-sm font-medium">Group Type</label>
+                            <select
+                                value={newGroupType}
+                                onChange={(e) => setNewGroupType(e.target.value as Group['type'])}
+                                className="w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600"
+                            >
+                                <option value="Trip">Trip</option>
+                                <option value="Family">Family</option>
+                                <option value="Business">Business</option>
+                                <option value="Others">Others</option>
+                            </select>
+                        </div>
+                        <div className="grid gap-2">
+                            <label className="text-sm font-medium">Currency</label>
+                            <select
+                                value={newGroupCurrency}
+                                onChange={(e) => setNewGroupCurrency(e.target.value as Group['currency'])}
+                                className="w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600"
+                            >
+                                <option value="USD">USD</option>
+                                <option value="EUR">EUR</option>
+                                <option value="GBP">GBP</option>
+                                <option value="INR">INR</option>
+                                <option value="JPY">JPY</option>
+                                <option value="CAD">CAD</option>
+                                <option value="AUD">AUD</option>
+                            </select>
                         </div>
                     </div>
-                </div>
-            )}
+                    <DialogFooter>
+                        <Button
+                            variant="outline"
+                            onClick={() => {
+                                setIsAddingGroup(false);
+                                setEditingGroup(null);
+                                setNewGroupName('');
+                            }}
+                        >
+                            Cancel
+                        </Button>
+                        <Button onClick={editingGroup ? handleSaveEdit : handleAddGroup}>
+                            {editingGroup ? 'Save Changes' : 'Create Group'}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
 
             {deleteConfirmation.show && (
-                <Dialog open={deleteConfirmation.show} onOpenChange={(open) => !open && setDeleteConfirmation({ show: false, id: null })}>
-                    <DialogContent className="sm:max-w-[600px]">
+                <Dialog open={deleteConfirmation.show} onOpenChange={handleDeleteDialogOpenChange}>
+                    <DialogContent className="sm:max-w-[425px]">
                         <DialogHeader>
                             <DialogTitle>Confirm Delete</DialogTitle>
                             <DialogDescription>
                                 Are you sure you want to delete this group? This will also delete all associated expenses and cannot be undone.
                             </DialogDescription>
                         </DialogHeader>
-                        <div className="border-t border-gray-200 dark:border-gray-700 mb-4" />
                         <DialogFooter>
                             <Button
                                 variant="outline"

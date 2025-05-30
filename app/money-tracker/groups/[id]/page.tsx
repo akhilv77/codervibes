@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useMoneyTracker } from '@/hooks/useMoneyTracker';
 import { Button } from '@/components/ui/button';
 import { formatCurrency } from '@/lib/utils';
@@ -12,8 +12,20 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
 
 type EditingExpense = Omit<Expense, 'amount'> & { amount: string };
+
+const initialExpenseState = {
+    description: '',
+    amount: '',
+    paidBy: [] as string[],
+    splitBetween: [] as string[],
+    splitMode: 'equal' as SplitMode,
+    splitDetails: {} as { [key: string]: number },
+    date: new Date().toISOString().split('T')[0],
+    notes: '',
+};
 
 export default function GroupDetailsPage({
     params,
@@ -37,42 +49,23 @@ export default function GroupDetailsPage({
     const [isManagingMembers, setIsManagingMembers] = useState(false);
     const [editedGroup, setEditedGroup] = useState<Partial<Group>>({});
     const [selectedMembers, setSelectedMembers] = useState<string[]>([]);
-
-    const [newExpense, setNewExpense] = useState({
-        description: '',
-        amount: '',
-        paidBy: [] as string[],
-        splitBetween: [] as string[],
-        splitMode: 'equal' as SplitMode,
-        splitDetails: {} as { [key: string]: number },
-        date: new Date().toISOString().split('T')[0],
-        notes: '',
-    });
-
+    const [newExpense, setNewExpense] = useState(initialExpenseState);
     const [isEditingExpense, setIsEditingExpense] = useState(false);
     const [editingExpense, setEditingExpense] = useState<EditingExpense | null>(null);
     const [deleteConfirmation, setDeleteConfirmation] = useState<{ show: boolean; id: string | null }>({ show: false, id: null });
 
-    if (!group) {
-        return (
-            <div className="container mx-auto py-8">
-                <div className="text-center">
-                    <h1 className="text-2xl font-bold mb-4">Group Not Found</h1>
-                    <Button onClick={() => window.history.back()}>Go Back</Button>
-                </div>
-            </div>
-        );
-    }
+    // Initialize newExpense with group members when group is available
+    useEffect(() => {
+        if (group && newExpense.splitBetween.length === 0) {
+            setNewExpense(prev => ({
+                ...prev,
+                splitBetween: group.members
+            }));
+        }
+    }, [group]);
 
-    // Initialize newExpense with all group members after group check
-    if (newExpense.splitBetween.length === 0) {
-        setNewExpense(prev => ({
-            ...prev,
-            splitBetween: group.members
-        }));
-    }
-
-    const handleAddExpense = () => {
+    const handleAddExpense = useCallback(() => {
+        if (!group) return;
         if (!newExpense.description || !newExpense.amount || !newExpense.paidBy.length || !newExpense.splitBetween.length) return;
 
         const amount = parseFloat(newExpense.amount);
@@ -117,42 +110,46 @@ export default function GroupDetailsPage({
             notes: newExpense.notes,
         });
 
-        setNewExpense({
-            description: '',
-            amount: '',
-            paidBy: [],
-            splitBetween: [],
-            splitMode: 'equal',
-            splitDetails: {},
-            date: new Date().toISOString().split('T')[0],
-            notes: '',
-        });
+        setNewExpense(initialExpenseState);
         setIsAddingExpense(false);
-    };
+    }, [newExpense, group, addExpense]);
 
-    const handleUpdateGroup = () => {
+    const handleUpdateGroup = useCallback(() => {
+        if (!group) return;
         if (editedGroup.name?.trim()) {
             updateGroup(group.id, editedGroup);
             setIsEditingGroup(false);
             setEditedGroup({});
         }
-    };
+    }, [editedGroup, group, updateGroup]);
 
-    const handleUpdateMembers = () => {
+    const handleUpdateMembers = useCallback(() => {
+        if (!group) return;
         updateGroup(group.id, { members: selectedMembers });
         setIsManagingMembers(false);
-    };
+    }, [selectedMembers, group, updateGroup]);
 
-    const handleEditExpense = (expense: Expense) => {
+    const handleEditExpense = useCallback((expense: Expense) => {
+        // Convert split details to percentages if split mode is percentage
+        let splitDetails = { ...expense.splitDetails };
+        if (expense.splitMode === 'percentage') {
+            const totalAmount = expense.amount;
+            Object.keys(splitDetails).forEach(memberId => {
+                const amount = splitDetails[memberId];
+                splitDetails[memberId] = (amount / totalAmount) * 100;
+            });
+        }
+
         const editingExpense: EditingExpense = {
             ...expense,
             amount: expense.amount.toString(),
+            splitDetails
         };
         setEditingExpense(editingExpense);
         setIsEditingExpense(true);
-    };
+    }, []);
 
-    const handleUpdateExpense = () => {
+    const handleUpdateExpense = useCallback(() => {
         if (!editingExpense) return;
 
         const amount = parseFloat(editingExpense.amount);
@@ -195,21 +192,21 @@ export default function GroupDetailsPage({
 
         setEditingExpense(null);
         setIsEditingExpense(false);
-    };
+    }, [editingExpense, updateExpense]);
 
-    const handleDeleteExpense = (id: string) => {
+    const handleDeleteExpense = useCallback((id: string) => {
         setDeleteConfirmation({ show: true, id });
-    };
+    }, []);
 
-    const confirmDelete = () => {
+    const confirmDelete = useCallback(() => {
         if (deleteConfirmation.id) {
             deleteExpense(deleteConfirmation.id);
             setDeleteConfirmation({ show: false, id: null });
         }
-    };
+    }, [deleteConfirmation.id, deleteExpense]);
 
     // Helper to ensure all required fields are present for EditingExpense
-    function ensureEditingExpense(exp: EditingExpense | null): EditingExpense {
+    const ensureEditingExpense = useCallback((exp: EditingExpense | null): EditingExpense => {
         if (!exp) throw new Error('editingExpense is null');
         return {
             id: exp.id!,
@@ -225,6 +222,17 @@ export default function GroupDetailsPage({
             createdAt: exp.createdAt!,
             updatedAt: exp.updatedAt!
         };
+    }, []);
+
+    if (!group) {
+        return (
+            <div className="container mx-auto py-8">
+                <div className="text-center">
+                    <h1 className="text-2xl font-bold mb-4">Group Not Found</h1>
+                    <Button onClick={() => window.history.back()}>Go Back</Button>
+                </div>
+            </div>
+        );
     }
 
     return (
@@ -291,23 +299,33 @@ export default function GroupDetailsPage({
             </div>
 
             {isEditingGroup && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4">
-                    <div className="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-lg w-full max-w-md max-h-[90vh] overflow-y-auto">
-                        <h2 className="text-xl font-semibold mb-4">Edit Group</h2>
+                <Dialog open={isEditingGroup} onOpenChange={(open) => {
+                    if (!open) {
+                        setIsEditingGroup(false);
+                        setEditedGroup({});
+                    }
+                }}>
+                    <DialogContent className="sm:max-w-[600px]">
+                        <DialogHeader>
+                            <DialogTitle>Edit Group</DialogTitle>
+                            <DialogDescription>
+                                Update the group details below.
+                            </DialogDescription>
+                        </DialogHeader>
                         <div className="border-t border-gray-200 dark:border-gray-700 mb-4" />
-                        <div className="space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium mb-1">Group Name</label>
-                                <input
-                                    type="text"
+                        <div className="grid gap-4 py-4">
+                            <div className="grid gap-2">
+                                <Label htmlFor="name">Group Name</Label>
+                                <Input
+                                    id="name"
                                     value={editedGroup.name || group.name}
                                     onChange={(e) => setEditedGroup({ ...editedGroup, name: e.target.value })}
-                                    className="w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600"
                                 />
                             </div>
-                            <div>
-                                <label className="block text-sm font-medium mb-1">Group Type</label>
+                            <div className="grid gap-2">
+                                <Label htmlFor="type">Group Type</Label>
                                 <select
+                                    id="type"
                                     value={editedGroup.type || group.type}
                                     onChange={(e) => setEditedGroup({ ...editedGroup, type: e.target.value })}
                                     className="w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600"
@@ -318,9 +336,10 @@ export default function GroupDetailsPage({
                                     <option value="Others">Others</option>
                                 </select>
                             </div>
-                            <div>
-                                <label className="block text-sm font-medium mb-1">Currency</label>
+                            <div className="grid gap-2">
+                                <Label htmlFor="currency">Currency</Label>
                                 <select
+                                    id="currency"
                                     value={editedGroup.currency || group.currency}
                                     onChange={(e) => setEditedGroup({ ...editedGroup, currency: e.target.value as Group['currency'] })}
                                     className="w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600"
@@ -334,27 +353,37 @@ export default function GroupDetailsPage({
                                     <option value="AUD">AUD</option>
                                 </select>
                             </div>
-                            <div className="flex justify-end space-x-2">
-                                <Button
-                                    variant="outline"
-                                    onClick={() => {
-                                        setIsEditingGroup(false);
-                                        setEditedGroup({});
-                                    }}
-                                >
-                                    Cancel
-                                </Button>
-                                <Button onClick={handleUpdateGroup}>Save Changes</Button>
-                            </div>
                         </div>
-                    </div>
-                </div>
+                        <DialogFooter>
+                            <Button
+                                variant="outline"
+                                onClick={() => {
+                                    setIsEditingGroup(false);
+                                    setEditedGroup({});
+                                }}
+                            >
+                                Cancel
+                            </Button>
+                            <Button onClick={handleUpdateGroup}>Save Changes</Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
             )}
 
             {isManagingMembers && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4">
-                    <div className="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-lg w-full max-w-md max-h-[90vh] overflow-y-auto">
-                        <h2 className="text-xl font-semibold mb-4">Manage Group Members</h2>
+                <Dialog open={isManagingMembers} onOpenChange={(open) => {
+                    if (!open) {
+                        setIsManagingMembers(false);
+                        setSelectedMembers(group.members);
+                    }
+                }}>
+                    <DialogContent className="sm:max-w-[600px]">
+                        <DialogHeader>
+                            <DialogTitle>Manage Group Members</DialogTitle>
+                            <DialogDescription>
+                                Select the members to include in this group.
+                            </DialogDescription>
+                        </DialogHeader>
                         <div className="border-t border-gray-200 dark:border-gray-700 mb-4" />
                         <div className="space-y-4">
                             <div className="max-h-[50vh] overflow-y-auto">
@@ -381,21 +410,21 @@ export default function GroupDetailsPage({
                                     ))}
                                 </div>
                             </div>
-                            <div className="flex justify-end space-x-2">
-                                <Button
-                                    variant="outline"
-                                    onClick={() => {
-                                        setIsManagingMembers(false);
-                                        setSelectedMembers(group.members);
-                                    }}
-                                >
-                                    Cancel
-                                </Button>
-                                <Button onClick={handleUpdateMembers}>Save Members</Button>
-                            </div>
                         </div>
-                    </div>
-                </div>
+                        <DialogFooter>
+                            <Button
+                                variant="outline"
+                                onClick={() => {
+                                    setIsManagingMembers(false);
+                                    setSelectedMembers(group.members);
+                                }}
+                            >
+                                Cancel
+                            </Button>
+                            <Button onClick={handleUpdateMembers}>Save Members</Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
             )}
 
             {/* Add/Edit Expense Modal */}
@@ -453,92 +482,87 @@ export default function GroupDetailsPage({
                             <Label htmlFor="paidBy" className="text-right">
                                 Paid By
                             </Label>
-                            <Select
-                                value={isEditingExpense ? editingExpense?.paidBy[0] || '' : newExpense.paidBy[0] || ''}
-                                onValueChange={(value) => {
-                                    if (isEditingExpense && editingExpense) {
-                                        setEditingExpense({ ...editingExpense, paidBy: [value] });
-                                    } else {
-                                        setNewExpense({ ...newExpense, paidBy: [value] });
-                                    }
-                                }}
-                            >
-                                <SelectTrigger className="col-span-3">
-                                    <SelectValue placeholder="Select member" />
-                                </SelectTrigger>
-                                <SelectContent>
+                            <div className="col-span-3">
+                                <select
+                                    id="paidBy"
+                                    className="w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600"
+                                    value={isEditingExpense ? editingExpense?.paidBy[0] || '' : newExpense.paidBy[0] || ''}
+                                    onChange={(e) => {
+                                        if (isEditingExpense && editingExpense) {
+                                            setEditingExpense({ ...editingExpense, paidBy: [e.target.value] });
+                                        } else {
+                                            setNewExpense({ ...newExpense, paidBy: [e.target.value] });
+                                        }
+                                    }}
+                                >
+                                    <option value="">Select member</option>
                                     {group.members.map((memberId) => {
                                         const member = state.members.find(m => m.id === memberId);
                                         if (!member) return null;
                                         return (
-                                            <SelectItem key={memberId} value={memberId}>
+                                            <option key={memberId} value={memberId}>
                                                 {member.name}
-                                            </SelectItem>
+                                            </option>
                                         );
                                     })}
-                                </SelectContent>
-                            </Select>
+                                </select>
+                            </div>
                         </div>
                         <div className="grid grid-cols-4 items-center gap-4">
                             <Label htmlFor="splitBetween" className="text-right">
                                 Split Between
                             </Label>
                             <div className="col-span-3">
-                                <div className="relative">
-                                    <Select
-                                        value={isEditingExpense ? editingExpense?.splitBetween.join(',') : newExpense.splitBetween.join(',')}
-                                        onValueChange={(value) => {
-                                            const currentSplit = isEditingExpense ? editingExpense?.splitBetween || [] : newExpense.splitBetween;
-                                            const newSplit = currentSplit.includes(value)
-                                                ? currentSplit.filter(id => id !== value)
-                                                : [...currentSplit, value];
+                                <div className="space-y-2 max-h-[200px] overflow-y-auto p-2 border rounded-md">
+                                    {group.members.map((memberId) => {
+                                        const member = state.members.find(m => m.id === memberId);
+                                        if (!member) return null;
+                                        const isSelected = isEditingExpense
+                                            ? editingExpense?.splitBetween.includes(memberId)
+                                            : newExpense.splitBetween.includes(memberId);
+                                        return (
+                                            <div key={memberId} className="flex items-center space-x-2">
+                                                <Checkbox
+                                                    id={`split-${memberId}`}
+                                                    checked={isSelected}
+                                                    onCheckedChange={(checked) => {
+                                                        const currentSplit = isEditingExpense
+                                                            ? [...(editingExpense?.splitBetween || [])]
+                                                            : [...newExpense.splitBetween];
 
-                                            if (isEditingExpense && editingExpense) {
-                                                setEditingExpense({ ...editingExpense, splitBetween: newSplit });
-                                            } else {
-                                                setNewExpense({ ...newExpense, splitBetween: newSplit });
-                                            }
-                                        }}
-                                    >
-                                        <SelectTrigger className="w-full">
-                                            <SelectValue>
-                                                {(() => {
-                                                    const selectedMembers = isEditingExpense ? editingExpense?.splitBetween || [] : newExpense.splitBetween;
-                                                    if (selectedMembers.length === 0) return "Select members";
-                                                    return selectedMembers
-                                                        .map(id => state.members.find(m => m.id === id)?.name)
-                                                        .filter(Boolean)
-                                                        .join(', ');
-                                                })()}
-                                            </SelectValue>
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {group.members.map((memberId) => {
-                                                const member = state.members.find(m => m.id === memberId);
-                                                if (!member) return null;
-                                                const isSelected = isEditingExpense
-                                                    ? editingExpense?.splitBetween.includes(memberId)
-                                                    : newExpense.splitBetween.includes(memberId);
-                                                return (
-                                                    <SelectItem
-                                                        key={memberId}
-                                                        value={memberId}
-                                                        className={`flex items-center gap-2 ${isSelected ? "bg-primary/10" : ""}`}
-                                                    >
-                                                        <div className="flex items-center gap-2 w-full">
-                                                            <input
-                                                                type="checkbox"
-                                                                checked={isSelected}
-                                                                onChange={() => { }}
-                                                                className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary accent-primary"
-                                                            />
-                                                            <span>{member.name}</span>
-                                                        </div>
-                                                    </SelectItem>
-                                                );
-                                            })}
-                                        </SelectContent>
-                                    </Select>
+                                                        if (checked) {
+                                                            if (!currentSplit.includes(memberId)) {
+                                                                currentSplit.push(memberId);
+                                                            }
+                                                        } else {
+                                                            const index = currentSplit.indexOf(memberId);
+                                                            if (index > -1) {
+                                                                currentSplit.splice(index, 1);
+                                                            }
+                                                        }
+
+                                                        if (isEditingExpense && editingExpense) {
+                                                            setEditingExpense({
+                                                                ...editingExpense,
+                                                                splitBetween: currentSplit
+                                                            });
+                                                        } else {
+                                                            setNewExpense({
+                                                                ...newExpense,
+                                                                splitBetween: currentSplit
+                                                            });
+                                                        }
+                                                    }}
+                                                />
+                                                <Label
+                                                    htmlFor={`split-${memberId}`}
+                                                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                                                >
+                                                    {member.name}
+                                                </Label>
+                                            </div>
+                                        );
+                                    })}
                                 </div>
                             </div>
                         </div>
@@ -546,25 +570,33 @@ export default function GroupDetailsPage({
                             <Label htmlFor="splitMode" className="text-right">
                                 Split Mode
                             </Label>
-                            <Select
-                                value={isEditingExpense ? editingExpense?.splitMode : newExpense.splitMode}
-                                onValueChange={(value) => {
-                                    if (isEditingExpense && editingExpense) {
-                                        setEditingExpense({ ...editingExpense, splitMode: value as SplitMode });
-                                    } else {
-                                        setNewExpense({ ...newExpense, splitMode: value as SplitMode });
-                                    }
-                                }}
-                            >
-                                <SelectTrigger className="col-span-3">
-                                    <SelectValue placeholder="Select split mode" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="equal">Equal</SelectItem>
-                                    <SelectItem value="percentage">Percentage</SelectItem>
-                                    <SelectItem value="manual">Manual</SelectItem>
-                                </SelectContent>
-                            </Select>
+                            <div className="col-span-3">
+                                <select
+                                    id="splitMode"
+                                    className="w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600"
+                                    value={isEditingExpense ? editingExpense?.splitMode : newExpense.splitMode}
+                                    onChange={(e) => {
+                                        const newSplitMode = e.target.value as SplitMode;
+                                        if (isEditingExpense && editingExpense) {
+                                            setEditingExpense({
+                                                ...editingExpense,
+                                                splitMode: newSplitMode,
+                                                splitDetails: {} // Clear split details when changing mode
+                                            });
+                                        } else {
+                                            setNewExpense({
+                                                ...newExpense,
+                                                splitMode: newSplitMode,
+                                                splitDetails: {} // Clear split details when changing mode
+                                            });
+                                        }
+                                    }}
+                                >
+                                    <option value="equal">Equal</option>
+                                    <option value="percentage">Percentage</option>
+                                    <option value="manual">Manual</option>
+                                </select>
+                            </div>
                         </div>
                         {(isEditingExpense ? editingExpense?.splitMode === 'percentage' : newExpense.splitMode === 'percentage') && (
                             <div className="grid gap-4">
@@ -668,14 +700,13 @@ export default function GroupDetailsPage({
 
             {deleteConfirmation.show && (
                 <Dialog open={deleteConfirmation.show} onOpenChange={(open) => !open && setDeleteConfirmation({ show: false, id: null })}>
-                    <DialogContent>
+                    <DialogContent className="sm:max-w-[425px]">
                         <DialogHeader>
                             <DialogTitle>Confirm Delete</DialogTitle>
                             <DialogDescription>
                                 Are you sure you want to delete this expense? This action cannot be undone.
                             </DialogDescription>
                         </DialogHeader>
-                        <div className="border-t border-gray-200 dark:border-gray-700 mb-4" />
                         <DialogFooter>
                             <Button
                                 variant="outline"
