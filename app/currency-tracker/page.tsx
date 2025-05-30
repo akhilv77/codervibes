@@ -15,6 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { db } from '@/lib/db/indexed-db';
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { useCurrencyRatesStore } from '@/lib/stores/currency-rates-store';
 
 export default function CurrencyTracker() {
     const { trackServiceUsage } = useServiceTracking();
@@ -24,30 +25,19 @@ export default function CurrencyTracker() {
     const [amount, setAmount] = useState<number>(1);
     const [fromCurrency, setFromCurrency] = useState('USD');
     const [toCurrency, setToCurrency] = useState('EUR');
-    const [preferredCurrency, setPreferredCurrency] = useState('USD');
-    const [popularCurrencies, setPopularCurrencies] = useState<string[]>(DEFAULT_POPULAR_CURRENCIES);
     const [refreshing, setRefreshing] = useState(false);
 
+    const {
+        preferredCurrency,
+        popularCurrencies,
+        setPreferredCurrency,
+        setPopularCurrencies,
+        initialize: initializeCurrencyRates
+    } = useCurrencyRatesStore();
+
     useEffect(() => {
-        const initializeCurrencies = async () => {
-            try {
-                await db.init();
-                const storedPreferred = await db.get<string>('settings', STORAGE_KEYS.PREFERRED_CURRENCY);
-                if (storedPreferred) {
-                    setPreferredCurrency(storedPreferred);
-                }
-
-                const storedPopular = await db.get<string[]>('settings', STORAGE_KEYS.POPULAR_CURRENCIES);
-                if (storedPopular) {
-                    setPopularCurrencies(storedPopular);
-                }
-            } catch (err) {
-                console.error('Error initializing currencies:', err);
-            }
-        };
-
-        initializeCurrencies();
-    }, []);
+        initializeCurrencyRates();
+    }, [initializeCurrencyRates]);
 
     const fetchRates = async () => {
         try {
@@ -69,30 +59,6 @@ export default function CurrencyTracker() {
         trackServiceUsage('Currency Tracker', 'page_view');
         fetchRates();
     }, []);
-
-    useEffect(() => {
-        const savePreferredCurrency = async () => {
-            try {
-                await db.set('settings', STORAGE_KEYS.PREFERRED_CURRENCY, preferredCurrency);
-            } catch (err) {
-                console.error('Error saving preferred currency:', err);
-            }
-        };
-
-        savePreferredCurrency();
-    }, [preferredCurrency]);
-
-    useEffect(() => {
-        const savePopularCurrencies = async () => {
-            try {
-                await db.set('settings', STORAGE_KEYS.POPULAR_CURRENCIES, popularCurrencies);
-            } catch (err) {
-                console.error('Error saving popular currencies:', err);
-            }
-        };
-
-        savePopularCurrencies();
-    }, [popularCurrencies]);
 
     const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setAmount(Number(e.target.value));
@@ -148,27 +114,27 @@ export default function CurrencyTracker() {
     );
 
     return (
-        <div className="container mx-auto px-4 py-8 max-w-screen-xl">
-            <div className="flex items-center justify-between mb-8">
+        <div className="container mx-auto px-4 py-4 sm:py-8 max-w-screen-xl">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 sm:mb-8">
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight">Currency Tracker</h1>
-                    <p className="text-muted-foreground mt-1">Track and convert currencies in real-time</p>
+                    <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Currency Tracker</h1>
+                    <p className="text-muted-foreground mt-1 text-sm sm:text-base">Track and convert currencies in real-time</p>
                 </div>
-                <Button variant="outline" onClick={fetchRates} disabled={refreshing}>
+                <Button variant="outline" onClick={fetchRates} disabled={refreshing} className="w-full sm:w-auto">
                     {refreshing ? <RefreshCw className="h-4 w-4 animate-spin mr-2" /> : null}
                     Refresh Rates
                 </Button>
             </div>
 
-            <Alert className="mb-8 dark:bg-yellow-800/20">
+            <Alert className="mb-6 sm:mb-8 dark:bg-yellow-800/20 text-sm">
                 <InfoIcon className="h-4 w-4" />
                 <AlertDescription>
                     Exchange rates are updated once per day. Last updated: <b>{rates?.time_last_update_utc}</b>
                 </AlertDescription>
             </Alert>
 
-            <div className="grid gap-8">
-                <div className="grid gap-8 md:grid-cols-2">
+            <div className="grid gap-6 sm:gap-8">
+                <div className="grid gap-6 sm:gap-8 md:grid-cols-2">
                     <PreferredCurrency
                         rates={rates?.rates || null}
                         preferredCurrency={preferredCurrency}
@@ -183,29 +149,29 @@ export default function CurrencyTracker() {
                 </div>
 
                 <Card>
-                    <CardHeader>
-                        <CardTitle>Currency Converter</CardTitle>
-                        <CardDescription>Convert between different currencies using real-time exchange rates</CardDescription>
+                    <CardHeader className="pb-4">
+                        <CardTitle className="text-xl sm:text-2xl">Currency Converter</CardTitle>
+                        <CardDescription className="text-sm">Convert between different currencies using real-time exchange rates</CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <div className="grid gap-8">
-                            <div className="grid gap-4 md:grid-cols-2">
+                        <div className="grid gap-6 sm:gap-8">
+                            <div className="grid gap-4 sm:grid-cols-2">
                                 <div className="space-y-2">
-                                    <Label htmlFor="amount">Amount</Label>
+                                    <Label htmlFor="amount" className="text-sm">Amount</Label>
                                     <Input
                                         id="amount"
                                         type="number"
                                         value={amount}
                                         onChange={handleAmountChange}
                                         min="0"
-                                        className="h-12 text-lg"
+                                        className="h-10 sm:h-12 text-base sm:text-lg"
                                     />
                                 </div>
 
                                 <div className="space-y-2">
-                                    <Label htmlFor="fromCurrency">From Currency</Label>
+                                    <Label htmlFor="fromCurrency" className="text-sm">From Currency</Label>
                                     <Select value={fromCurrency} onValueChange={handleFromCurrencyChange}>
-                                        <SelectTrigger id="fromCurrency" className="h-12 text-lg">
+                                        <SelectTrigger id="fromCurrency" className="h-10 sm:h-12 text-base sm:text-lg">
                                             <SelectValue placeholder="Select currency" />
                                         </SelectTrigger>
                                         <SelectContent>
@@ -220,14 +186,14 @@ export default function CurrencyTracker() {
                             </div>
 
                             <div className="flex justify-center">
-                                <ArrowRight className="h-6 w-6 text-muted-foreground" />
+                                <ArrowRight className="h-5 w-5 sm:h-6 sm:w-6 text-muted-foreground" />
                             </div>
 
-                            <div className="grid gap-4 md:grid-cols-2">
+                            <div className="grid gap-4 sm:grid-cols-2">
                                 <div className="space-y-2">
-                                    <Label htmlFor="toCurrency">To Currency</Label>
+                                    <Label htmlFor="toCurrency" className="text-sm">To Currency</Label>
                                     <Select value={toCurrency} onValueChange={handleToCurrencyChange}>
-                                        <SelectTrigger id="toCurrency" className="h-12 text-lg">
+                                        <SelectTrigger id="toCurrency" className="h-10 sm:h-12 text-base sm:text-lg">
                                             <SelectValue placeholder="Select currency" />
                                         </SelectTrigger>
                                         <SelectContent>
@@ -241,8 +207,8 @@ export default function CurrencyTracker() {
                                 </div>
 
                                 <div className="space-y-2">
-                                    <Label>Converted Amount</Label>
-                                    <div className="h-12 px-4 py-2 border rounded-md bg-muted/50 flex items-center text-lg font-medium">
+                                    <Label className="text-sm">Converted Amount</Label>
+                                    <div className="h-10 sm:h-12 px-3 sm:px-4 py-2 border rounded-md bg-muted/50 flex items-center text-base sm:text-lg font-medium">
                                         {convertCurrency().toFixed(2)} {toCurrency}
                                     </div>
                                 </div>
