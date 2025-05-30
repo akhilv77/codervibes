@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { formatCurrency } from '@/lib/utils';
 import type { Expense, SplitMode, Group, Member, Settlement } from '@/types/money-tracker';
 import { PencilIcon, UserGroupIcon, PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
-import { CheckCircle2, Pencil, Trash2 } from 'lucide-react';
+import { CheckCircle2, Pencil, Trash2, Plus } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
@@ -437,6 +437,14 @@ export default function GroupDetailsPage({
                         </DialogHeader>
                         <div className="border-t border-gray-200 dark:border-gray-700 mb-4" />
                         <div className="grid gap-4 py-4">
+                            <div className="flex justify-end">
+                                <Button asChild variant="outline" size="sm">
+                                    <a href="/money-tracker/members" className="flex items-center">
+                                        <Plus className="h-4 w-4 mr-2" />
+                                        Add New Member
+                                    </a>
+                                </Button>
+                            </div>
                             <ScrollArea className="h-[300px] rounded-md border p-4">
                                 <div className="grid gap-4">
                                     {members.map((member) => (
@@ -501,245 +509,261 @@ export default function GroupDetailsPage({
                         <DialogTitle>{isEditingExpense ? 'Edit Expense' : 'Add Expense'}</DialogTitle>
                     </DialogHeader>
                     <div className="border-t border-gray-200 dark:border-gray-700 mb-4" />
-                    <div className="grid gap-4 py-4">
-                        <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="description" className="text-right">
-                                Description
-                            </Label>
-                            <Input
-                                id="description"
-                                value={isEditingExpense ? editingExpense?.description : newExpense.description}
-                                onChange={(e) => {
-                                    if (isEditingExpense && editingExpense) {
-                                        setEditingExpense({ ...ensureEditingExpense(editingExpense), description: e.target.value });
-                                    } else {
-                                        setNewExpense({ ...newExpense, description: e.target.value });
-                                    }
+                    {(!group?.members || group.members.length === 0) ? (
+                        <div className="flex flex-col items-center justify-center min-h-[200px] px-2">
+                            <p className="text-sm text-muted-foreground text-center mb-4">
+                                No members in this group. Add members to start tracking expenses.
+                            </p>
+                            <Button 
+                                variant="outline" 
+                                className="w-full sm:w-auto"
+                                onClick={() => {
+                                    setSelectedMembers(group?.members || []);
+                                    setIsManagingMembers(true);
+                                    setIsAddingExpense(false);
                                 }}
-                                className="col-span-3"
-                            />
+                            >
+                                <UserGroupIcon className="h-4 w-4 mr-2" />
+                                Manage Group Members
+                            </Button>
                         </div>
-                        <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="amount" className="text-right">
-                                Amount
-                            </Label>
-                            <Input
-                                id="amount"
-                                type="number"
-                                value={isEditingExpense ? editingExpense?.amount : newExpense.amount}
-                                onChange={(e) => {
-                                    if (isEditingExpense && editingExpense) {
-                                        setEditingExpense({ ...ensureEditingExpense(editingExpense), amount: e.target.value });
-                                    } else {
-                                        setNewExpense({ ...newExpense, amount: e.target.value });
-                                    }
-                                }}
-                                className="col-span-3"
-                            />
-                        </div>
-                        <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="paidBy" className="text-right">
-                                Paid By
-                            </Label>
-                            <div className="col-span-3">
-                                <select
-                                    id="paidBy"
-                                    className="w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600"
-                                    value={isEditingExpense ? editingExpense?.paidBy[0] || '' : newExpense.paidBy[0] || ''}
+                    ) : (
+                        <div className="grid gap-4 py-4">
+                            <div className="grid grid-cols-4 items-center gap-4">
+                                <Label htmlFor="description" className="text-right">
+                                    Description
+                                </Label>
+                                <Input
+                                    id="description"
+                                    value={isEditingExpense ? editingExpense?.description : newExpense.description}
                                     onChange={(e) => {
                                         if (isEditingExpense && editingExpense) {
-                                            setEditingExpense({ ...editingExpense, paidBy: [e.target.value] });
+                                            setEditingExpense({ ...ensureEditingExpense(editingExpense), description: e.target.value });
                                         } else {
-                                            setNewExpense({ ...newExpense, paidBy: [e.target.value] });
+                                            setNewExpense({ ...newExpense, description: e.target.value });
                                         }
                                     }}
-                                >
-                                    <option value="">Select member</option>
-                                    {group.members.map((memberId) => {
-                                        const member = members.find(m => m.id === memberId);
-                                        if (!member) return null;
-                                        return (
-                                            <option key={memberId} value={memberId}>
-                                                {member.name}
-                                            </option>
-                                        );
-                                    })}
-                                </select>
+                                    className="col-span-3"
+                                />
                             </div>
-                        </div>
-                        <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="splitBetween" className="text-right">
-                                Split Between
-                            </Label>
-                            <div className="col-span-3">
-                                <div className="space-y-2 max-h-[200px] overflow-y-auto p-2 border rounded-md">
+                            <div className="grid grid-cols-4 items-center gap-4">
+                                <Label htmlFor="amount" className="text-right">
+                                    Amount
+                                </Label>
+                                <Input
+                                    id="amount"
+                                    type="number"
+                                    value={isEditingExpense ? editingExpense?.amount : newExpense.amount}
+                                    onChange={(e) => {
+                                        if (isEditingExpense && editingExpense) {
+                                            setEditingExpense({ ...ensureEditingExpense(editingExpense), amount: e.target.value });
+                                        } else {
+                                            setNewExpense({ ...newExpense, amount: e.target.value });
+                                        }
+                                    }}
+                                    className="col-span-3"
+                                />
+                            </div>
+                            <div className="grid grid-cols-4 items-center gap-4">
+                                <Label htmlFor="paidBy" className="text-right">
+                                    Paid By
+                                </Label>
+                                <div className="col-span-3">
+                                    <select
+                                        id="paidBy"
+                                        className="w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600"
+                                        value={isEditingExpense ? editingExpense?.paidBy[0] || '' : newExpense.paidBy[0] || ''}
+                                        onChange={(e) => {
+                                            if (isEditingExpense && editingExpense) {
+                                                setEditingExpense({ ...editingExpense, paidBy: [e.target.value] });
+                                            } else {
+                                                setNewExpense({ ...newExpense, paidBy: [e.target.value] });
+                                            }
+                                        }}
+                                    >
+                                        <option value="">Select member</option>
+                                        {group.members.map((memberId) => {
+                                            const member = members.find(m => m.id === memberId);
+                                            if (!member) return null;
+                                            return (
+                                                <option key={memberId} value={memberId}>
+                                                    {member.name}
+                                                </option>
+                                            );
+                                        })}
+                                    </select>
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-4 items-center gap-4">
+                                <Label className="text-right">Split Between</Label>
+                                <div className="col-span-3">
+                                    <div className="space-y-2">
+                                        {group.members.map((memberId) => {
+                                            const member = members.find(m => m.id === memberId);
+                                            if (!member) return null;
+                                            return (
+                                                <div key={memberId} className="flex items-center space-x-2">
+                                                    <Checkbox
+                                                        id={`split-${memberId}`}
+                                                        checked={isEditingExpense
+                                                            ? editingExpense?.splitBetween.includes(memberId)
+                                                            : newExpense.splitBetween.includes(memberId)
+                                                        }
+                                                        onCheckedChange={(checked) => {
+                                                            const currentSplit = isEditingExpense
+                                                                ? [...(editingExpense?.splitBetween || [])]
+                                                                : [...newExpense.splitBetween];
+
+                                                            if (checked) {
+                                                                currentSplit.push(memberId);
+                                                            } else {
+                                                                const index = currentSplit.indexOf(memberId);
+                                                                if (index > -1) {
+                                                                    currentSplit.splice(index, 1);
+                                                                }
+                                                            }
+
+                                                            if (isEditingExpense && editingExpense) {
+                                                                setEditingExpense({
+                                                                    ...editingExpense,
+                                                                    splitBetween: currentSplit
+                                                                });
+                                                            } else {
+                                                                setNewExpense({
+                                                                    ...newExpense,
+                                                                    splitBetween: currentSplit
+                                                                });
+                                                            }
+                                                        }}
+                                                    />
+                                                    <Label
+                                                        htmlFor={`split-${memberId}`}
+                                                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer hover:text-primary transition-colors"
+                                                    >
+                                                        {member.name}
+                                                    </Label>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-4 items-center gap-4">
+                                <Label htmlFor="splitMode" className="text-right">
+                                    Split Mode
+                                </Label>
+                                <div className="col-span-3">
+                                    <select
+                                        id="splitMode"
+                                        className="w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600"
+                                        value={isEditingExpense ? editingExpense?.splitMode : newExpense.splitMode}
+                                        onChange={(e) => {
+                                            const newSplitMode = e.target.value as SplitMode;
+                                            if (isEditingExpense && editingExpense) {
+                                                setEditingExpense({
+                                                    ...editingExpense,
+                                                    splitMode: newSplitMode,
+                                                    splitDetails: {} // Clear split details when changing mode
+                                                });
+                                            } else {
+                                                setNewExpense({
+                                                    ...newExpense,
+                                                    splitMode: newSplitMode,
+                                                    splitDetails: {} // Clear split details when changing mode
+                                                });
+                                            }
+                                        }}
+                                    >
+                                        <option value="equal">Equal</option>
+                                        <option value="percentage">Percentage</option>
+                                        <option value="manual">Manual</option>
+                                    </select>
+                                </div>
+                            </div>
+                            {(isEditingExpense ? editingExpense?.splitMode === 'percentage' : newExpense.splitMode === 'percentage') && (
+                                <div className="grid gap-4">
                                     {group.members.map((memberId) => {
                                         const member = members.find(m => m.id === memberId);
                                         if (!member) return null;
-                                        const isSelected = isEditingExpense
-                                            ? editingExpense?.splitBetween.includes(memberId)
-                                            : newExpense.splitBetween.includes(memberId);
                                         return (
-                                            <div key={memberId} className="flex items-center space-x-2">
-                                                <Checkbox
-                                                    id={`split-${memberId}`}
-                                                    checked={isSelected}
-                                                    onCheckedChange={(checked) => {
-                                                        const currentSplit = isEditingExpense
-                                                            ? [...(editingExpense?.splitBetween || [])]
-                                                            : [...newExpense.splitBetween];
-
-                                                        if (checked) {
-                                                            if (!currentSplit.includes(memberId)) {
-                                                                currentSplit.push(memberId);
-                                                            }
-                                                        } else {
-                                                            const index = currentSplit.indexOf(memberId);
-                                                            if (index > -1) {
-                                                                currentSplit.splice(index, 1);
-                                                            }
-                                                        }
-
+                                            <div key={memberId} className="grid grid-cols-4 items-center gap-4">
+                                                <Label htmlFor={`percentage-${memberId}`} className="text-right">
+                                                    {member.name}
+                                                </Label>
+                                                <Input
+                                                    id={`percentage-${memberId}`}
+                                                    type="number"
+                                                    value={isEditingExpense ? editingExpense?.splitDetails[memberId] || '' : newExpense.splitDetails[memberId] || ''}
+                                                    onChange={(e) => {
+                                                        const value = parseFloat(e.target.value) || 0;
                                                         if (isEditingExpense && editingExpense) {
                                                             setEditingExpense({
                                                                 ...editingExpense,
-                                                                splitBetween: currentSplit
+                                                                splitDetails: {
+                                                                    ...editingExpense.splitDetails,
+                                                                    [memberId]: value
+                                                                }
                                                             });
                                                         } else {
                                                             setNewExpense({
                                                                 ...newExpense,
-                                                                splitBetween: currentSplit
+                                                                splitDetails: {
+                                                                    ...newExpense.splitDetails,
+                                                                    [memberId]: value
+                                                                }
                                                             });
                                                         }
                                                     }}
+                                                    className="col-span-3"
                                                 />
-                                                <Label
-                                                    htmlFor={`split-${memberId}`}
-                                                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer hover:text-primary transition-colors"
-                                                >
-                                                    {member.name}
-                                                </Label>
                                             </div>
                                         );
                                     })}
                                 </div>
-                            </div>
+                            )}
+                            {(isEditingExpense ? editingExpense?.splitMode === 'manual' : newExpense.splitMode === 'manual') && (
+                                <div className="grid gap-4">
+                                    {group.members.map((memberId) => {
+                                        const member = members.find(m => m.id === memberId);
+                                        if (!member) return null;
+                                        return (
+                                            <div key={memberId} className="grid grid-cols-4 items-center gap-4">
+                                                <Label htmlFor={`amount-${memberId}`} className="text-right">
+                                                    {member.name}
+                                                </Label>
+                                                <Input
+                                                    id={`amount-${memberId}`}
+                                                    type="number"
+                                                    value={isEditingExpense ? editingExpense?.splitDetails[memberId] || '' : newExpense.splitDetails[memberId] || ''}
+                                                    onChange={(e) => {
+                                                        const value = parseFloat(e.target.value) || 0;
+                                                        if (isEditingExpense && editingExpense) {
+                                                            setEditingExpense({
+                                                                ...editingExpense,
+                                                                splitDetails: {
+                                                                    ...editingExpense.splitDetails,
+                                                                    [memberId]: value
+                                                                }
+                                                            });
+                                                        } else {
+                                                            setNewExpense({
+                                                                ...newExpense,
+                                                                splitDetails: {
+                                                                    ...newExpense.splitDetails,
+                                                                    [memberId]: value
+                                                                }
+                                                            });
+                                                        }
+                                                    }}
+                                                    className="col-span-3"
+                                                />
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            )}
                         </div>
-                        <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="splitMode" className="text-right">
-                                Split Mode
-                            </Label>
-                            <div className="col-span-3">
-                                <select
-                                    id="splitMode"
-                                    className="w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600"
-                                    value={isEditingExpense ? editingExpense?.splitMode : newExpense.splitMode}
-                                    onChange={(e) => {
-                                        const newSplitMode = e.target.value as SplitMode;
-                                        if (isEditingExpense && editingExpense) {
-                                            setEditingExpense({
-                                                ...editingExpense,
-                                                splitMode: newSplitMode,
-                                                splitDetails: {} // Clear split details when changing mode
-                                            });
-                                        } else {
-                                            setNewExpense({
-                                                ...newExpense,
-                                                splitMode: newSplitMode,
-                                                splitDetails: {} // Clear split details when changing mode
-                                            });
-                                        }
-                                    }}
-                                >
-                                    <option value="equal">Equal</option>
-                                    <option value="percentage">Percentage</option>
-                                    <option value="manual">Manual</option>
-                                </select>
-                            </div>
-                        </div>
-                        {(isEditingExpense ? editingExpense?.splitMode === 'percentage' : newExpense.splitMode === 'percentage') && (
-                            <div className="grid gap-4">
-                                {group.members.map((memberId) => {
-                                    const member = members.find(m => m.id === memberId);
-                                    if (!member) return null;
-                                    return (
-                                        <div key={memberId} className="grid grid-cols-4 items-center gap-4">
-                                            <Label htmlFor={`percentage-${memberId}`} className="text-right">
-                                                {member.name}
-                                            </Label>
-                                            <Input
-                                                id={`percentage-${memberId}`}
-                                                type="number"
-                                                value={isEditingExpense ? editingExpense?.splitDetails[memberId] || '' : newExpense.splitDetails[memberId] || ''}
-                                                onChange={(e) => {
-                                                    const value = parseFloat(e.target.value) || 0;
-                                                    if (isEditingExpense && editingExpense) {
-                                                        setEditingExpense({
-                                                            ...editingExpense,
-                                                            splitDetails: {
-                                                                ...editingExpense.splitDetails,
-                                                                [memberId]: value
-                                                            }
-                                                        });
-                                                    } else {
-                                                        setNewExpense({
-                                                            ...newExpense,
-                                                            splitDetails: {
-                                                                ...newExpense.splitDetails,
-                                                                [memberId]: value
-                                                            }
-                                                        });
-                                                    }
-                                                }}
-                                                className="col-span-3"
-                                            />
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                        )}
-                        {(isEditingExpense ? editingExpense?.splitMode === 'manual' : newExpense.splitMode === 'manual') && (
-                            <div className="grid gap-4">
-                                {group.members.map((memberId) => {
-                                    const member = members.find(m => m.id === memberId);
-                                    if (!member) return null;
-                                    return (
-                                        <div key={memberId} className="grid grid-cols-4 items-center gap-4">
-                                            <Label htmlFor={`amount-${memberId}`} className="text-right">
-                                                {member.name}
-                                            </Label>
-                                            <Input
-                                                id={`amount-${memberId}`}
-                                                type="number"
-                                                value={isEditingExpense ? editingExpense?.splitDetails[memberId] || '' : newExpense.splitDetails[memberId] || ''}
-                                                onChange={(e) => {
-                                                    const value = parseFloat(e.target.value) || 0;
-                                                    if (isEditingExpense && editingExpense) {
-                                                        setEditingExpense({
-                                                            ...editingExpense,
-                                                            splitDetails: {
-                                                                ...editingExpense.splitDetails,
-                                                                [memberId]: value
-                                                            }
-                                                        });
-                                                    } else {
-                                                        setNewExpense({
-                                                            ...newExpense,
-                                                            splitDetails: {
-                                                                ...newExpense.splitDetails,
-                                                                [memberId]: value
-                                                            }
-                                                        });
-                                                    }
-                                                }}
-                                                className="col-span-3"
-                                            />
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                        )}
-                    </div>
+                    )}
                     <DialogFooter>
                         <Button variant="outline" onClick={() => {
                             if (isEditingExpense) {
@@ -750,9 +774,11 @@ export default function GroupDetailsPage({
                         }}>
                             Cancel
                         </Button>
-                        <Button onClick={isEditingExpense ? handleUpdateExpense : handleAddExpense}>
-                            {isEditingExpense ? 'Update' : 'Add'}
-                        </Button>
+                        {group?.members && group.members.length > 0 && (
+                            <Button onClick={isEditingExpense ? handleUpdateExpense : handleAddExpense}>
+                                {isEditingExpense ? 'Update' : 'Add'}
+                            </Button>
+                        )}
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
