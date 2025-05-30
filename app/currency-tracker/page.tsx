@@ -104,10 +104,10 @@ export default function CurrencyTracker() {
     return (
         <CurrencyPageShell>
             <div className="container mx-auto px-4 py-4 sm:py-8">
-                <Alert className="mb-6">
+                <Alert className="mb-6 dark:bg-yellow-800">
                     <InfoIcon className="h-4 w-4" />
                     <AlertDescription>
-                        Exchange rates are updated once per day. Last updated: {rates?.time_last_update_utc}
+                        Exchange rates are updated once per day. Last updated: <b>{rates?.time_last_update_utc}</b>
                     </AlertDescription>
                 </Alert>
 
@@ -170,7 +170,7 @@ export default function CurrencyTracker() {
 
                         <div>
                             <label className="block text-sm font-medium mb-2">Converted Amount</label>
-                            <div className="w-full p-2 border rounded bg-gray-50">
+                            <div className="w-full p-2 border rounded bg-background text-foreground">
                                 {convertCurrency().toFixed(2)} {toCurrency}
                             </div>
                         </div>

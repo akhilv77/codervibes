@@ -3,6 +3,8 @@
 import { NavTabs } from "@/components/layout/nav-tabs";
 import { BackButton } from "../ui/back-button";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertTriangle } from "lucide-react";
 
 interface CurrencyPageShellProps {
     children: React.ReactNode;
