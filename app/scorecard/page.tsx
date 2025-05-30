@@ -254,7 +254,7 @@ export default function GamesPage() {
                     <div className="flex justify-between items-start">
                       <div>
                         <CardTitle className="text-base">{game.name}</CardTitle>
-                        <CardDescription className="text-xs">
+                        <CardDescription className="text-xs mt-2">
                           Created {new Date(game.createdAt).toLocaleString()}
                         </CardDescription>
                       </div>

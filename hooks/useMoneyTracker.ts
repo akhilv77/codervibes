@@ -1,120 +1,231 @@
 import { useState, useEffect, useCallback } from 'react';
-import { StorageManager } from '@/lib/storage';
 import type { AppState, Member, Group, Expense, Settlement } from '@/types/money-tracker';
+import { db } from '@/lib/db/indexed-db';
+import { v4 as uuidv4 } from 'uuid';
 
 export function useMoneyTracker() {
-  const [state, setState] = useState<AppState>(() => StorageManager.getInstance().getState());
+  const [state, setState] = useState<AppState>({
+    members: [],
+    groups: [],
+    expenses: [],
+    settlements: [],
+    version: '1.0.0'
+  });
 
-  // Update local state when storage changes
+  // Load initial state from IndexedDB
   useEffect(() => {
-    const handleStorageChange = () => {
-      setState(StorageManager.getInstance().getState());
+    const loadState = async () => {
+      try {
+        await db.init();
+        const [members, groups, expenses, settlements] = await Promise.all([
+          db.getAll<Member>('members'),
+          db.getAll<Group>('groups'),
+          db.getAll<Expense>('expenses'),
+          db.getAll<Settlement>('settlements')
+        ]);
+
+        setState({
+          members: members || [],
+          groups: groups || [],
+          expenses: expenses || [],
+          settlements: settlements || [],
+          version: '1.0.0'
+        });
+      } catch (err) {
+        console.error('Error loading state from IndexedDB:', err);
+      }
     };
 
-    window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
+    loadState();
   }, []);
-
-  const storage = StorageManager.getInstance();
 
   // Member operations
-  const addMember = useCallback((member: Omit<Member, 'id'>) => {
-    const id = storage.addMember(member);
-    setState(storage.getState());
-    return id;
+  const addMember = useCallback(async (member: Omit<Member, 'id'>) => {
+    const id = uuidv4();
+    const newMember = { ...member, id };
+    try {
+      await db.set('members', id, newMember);
+      setState(prev => ({
+        ...prev,
+        members: [...prev.members, newMember]
+      }));
+      return id;
+    } catch (err) {
+      console.error('Error adding member:', err);
+      return null;
+    }
   }, []);
 
-  const updateMember = useCallback((id: string, updates: Partial<Member>) => {
-    const newState = {
-      ...state,
-      members: state.members.map(member =>
-        member.id === id ? { ...member, ...updates } : member
-      ),
-    };
-    storage.updateState(newState);
-    setState(newState);
-  }, [state]);
+  const updateMember = useCallback(async (id: string, updates: Partial<Member>) => {
+    try {
+      const member = await db.get<Member>('members', id);
+      if (member) {
+        const updatedMember = { ...member, ...updates };
+        await db.set('members', id, updatedMember);
+        setState(prev => ({
+          ...prev,
+          members: prev.members.map(m => m.id === id ? updatedMember : m)
+        }));
+      }
+    } catch (err) {
+      console.error('Error updating member:', err);
+    }
+  }, []);
 
-  const deleteMember = useCallback((id: string) => {
-    const newState = {
-      ...state,
-      members: state.members.filter(member => member.id !== id),
-    };
-    storage.updateState(newState);
-    setState(newState);
-  }, [state]);
+  const deleteMember = useCallback(async (id: string) => {
+    try {
+      await db.delete('members', id);
+      setState(prev => ({
+        ...prev,
+        members: prev.members.filter(m => m.id !== id)
+      }));
+    } catch (err) {
+      console.error('Error deleting member:', err);
+    }
+  }, []);
 
   // Group operations
-  const addGroup = useCallback((group: Omit<Group, 'id' | 'createdAt' | 'updatedAt'>) => {
-    const id = storage.addGroup(group);
-    setState(storage.getState());
-    return id;
+  const addGroup = useCallback(async (group: Omit<Group, 'id' | 'createdAt' | 'updatedAt'>) => {
+    const id = uuidv4();
+    const newGroup: Group = {
+      ...group,
+      id,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    try {
+      await db.set('groups', id, newGroup);
+      setState(prev => ({
+        ...prev,
+        groups: [...prev.groups, newGroup]
+      }));
+      return id;
+    } catch (err) {
+      console.error('Error adding group:', err);
+      return null;
+    }
   }, []);
 
-  const updateGroup = useCallback((id: string, updates: Partial<Group>) => {
-    const newState = {
-      ...state,
-      groups: state.groups.map(group =>
-        group.id === id ? { ...group, ...updates, updatedAt: new Date().toISOString() } : group
-      ),
-    };
-    storage.updateState(newState);
-    setState(newState);
-  }, [state]);
+  const updateGroup = useCallback(async (id: string, updates: Partial<Group>) => {
+    try {
+      const group = await db.get<Group>('groups', id);
+      if (group) {
+        const updatedGroup = {
+          ...group,
+          ...updates,
+          updatedAt: new Date().toISOString()
+        };
+        await db.set('groups', id, updatedGroup);
+        setState(prev => ({
+          ...prev,
+          groups: prev.groups.map(g => g.id === id ? updatedGroup : g)
+        }));
+      }
+    } catch (err) {
+      console.error('Error updating group:', err);
+    }
+  }, []);
 
-  const deleteGroup = useCallback((id: string) => {
-    const newState = {
-      ...state,
-      groups: state.groups.filter(group => group.id !== id),
-      expenses: state.expenses.filter(expense => expense.groupId !== id),
-      settlements: state.settlements.filter(settlement => settlement.groupId !== id),
-    };
-    storage.updateState(newState);
-    setState(newState);
-  }, [state]);
+  const deleteGroup = useCallback(async (id: string) => {
+    try {
+      await db.delete('groups', id);
+      setState(prev => ({
+        ...prev,
+        groups: prev.groups.filter(g => g.id !== id),
+        expenses: prev.expenses.filter(e => e.groupId !== id),
+        settlements: prev.settlements.filter(s => s.groupId !== id)
+      }));
+    } catch (err) {
+      console.error('Error deleting group:', err);
+    }
+  }, []);
 
   // Expense operations
-  const addExpense = useCallback((expense: Omit<Expense, 'id' | 'createdAt' | 'updatedAt'>) => {
-    const id = storage.addExpense(expense);
-    setState(storage.getState());
-    return id;
+  const addExpense = useCallback(async (expense: Omit<Expense, 'id' | 'createdAt' | 'updatedAt'>) => {
+    const id = uuidv4();
+    const newExpense: Expense = {
+      ...expense,
+      id,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    try {
+      await db.set('expenses', id, newExpense);
+      setState(prev => ({
+        ...prev,
+        expenses: [...prev.expenses, newExpense]
+      }));
+      return id;
+    } catch (err) {
+      console.error('Error adding expense:', err);
+      return null;
+    }
   }, []);
 
-  const updateExpense = useCallback((id: string, updates: Partial<Expense>) => {
-    const newState = {
-      ...state,
-      expenses: state.expenses.map(expense =>
-        expense.id === id ? { ...expense, ...updates, updatedAt: new Date().toISOString() } : expense
-      ),
-    };
-    storage.updateState(newState);
-    setState(newState);
-  }, [state]);
+  const updateExpense = useCallback(async (id: string, updates: Partial<Expense>) => {
+    try {
+      const expense = await db.get<Expense>('expenses', id);
+      if (expense) {
+        const updatedExpense = {
+          ...expense,
+          ...updates,
+          updatedAt: new Date().toISOString()
+        };
+        await db.set('expenses', id, updatedExpense);
+        setState(prev => ({
+          ...prev,
+          expenses: prev.expenses.map(e => e.id === id ? updatedExpense : e)
+        }));
+      }
+    } catch (err) {
+      console.error('Error updating expense:', err);
+    }
+  }, []);
 
-  const deleteExpense = useCallback((id: string) => {
-    const newState = {
-      ...state,
-      expenses: state.expenses.filter(expense => expense.id !== id),
-    };
-    storage.updateState(newState);
-    setState(newState);
-  }, [state]);
+  const deleteExpense = useCallback(async (id: string) => {
+    try {
+      await db.delete('expenses', id);
+      setState(prev => ({
+        ...prev,
+        expenses: prev.expenses.filter(e => e.id !== id)
+      }));
+    } catch (err) {
+      console.error('Error deleting expense:', err);
+    }
+  }, []);
 
   // Settlement operations
-  const addSettlement = useCallback((settlement: Omit<Settlement, 'id' | 'createdAt'>) => {
-    const id = storage.addSettlement(settlement);
-    setState(storage.getState());
-    return id;
+  const addSettlement = useCallback(async (settlement: Omit<Settlement, 'id' | 'createdAt'>) => {
+    const id = uuidv4();
+    const newSettlement: Settlement = {
+      ...settlement,
+      id,
+      createdAt: new Date().toISOString()
+    };
+    try {
+      await db.set('settlements', id, newSettlement);
+      setState(prev => ({
+        ...prev,
+        settlements: [...prev.settlements, newSettlement]
+      }));
+      return id;
+    } catch (err) {
+      console.error('Error adding settlement:', err);
+      return null;
+    }
   }, []);
 
-  const deleteSettlement = useCallback((id: string) => {
-    const newState = {
-      ...state,
-      settlements: state.settlements.filter(settlement => settlement.id !== id),
-    };
-    storage.updateState(newState);
-    setState(newState);
-  }, [state]);
+  const deleteSettlement = useCallback(async (id: string) => {
+    try {
+      await db.delete('settlements', id);
+      setState(prev => ({
+        ...prev,
+        settlements: prev.settlements.filter(s => s.id !== id)
+      }));
+    } catch (err) {
+      console.error('Error deleting settlement:', err);
+    }
+  }, []);
 
   // Utility functions
   const getGroupBalance = useCallback((groupId: string) => {

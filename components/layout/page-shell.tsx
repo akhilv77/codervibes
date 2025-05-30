@@ -28,11 +28,6 @@ export function PageShell({ children }: PageShellProps) {
       <main className="flex-1 flex justify-center">
         <div className="container max-w-screen-xl px-4 py-4">{children}</div>
       </main>
-      <footer className="border-t py-4">
-        <div className="container max-w-screen-xl px-4 flex justify-center text-sm text-muted-foreground">
-          <p>© {new Date().getFullYear()} Scorecard App</p>
-        </div>
-      </footer>
     </div>
   );
 }

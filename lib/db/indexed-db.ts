@@ -1,6 +1,6 @@
 import { openDB, DBSchema, IDBPDatabase } from 'idb';
 
-type StoreNames = 'settings' | 'currencyRates' | 'moneyTracker' | 'scorecard';
+type StoreNames = 'settings' | 'currencyRates' | 'moneyTracker' | 'scorecard' | 'groups' | 'members' | 'expenses' | 'settlements';
 
 interface CoderVibesDB extends DBSchema {
   settings: {
@@ -16,6 +16,22 @@ interface CoderVibesDB extends DBSchema {
     value: any;
   };
   scorecard: {
+    key: string;
+    value: any;
+  };
+  groups: {
+    key: string;
+    value: any;
+  };
+  members: {
+    key: string;
+    value: any;
+  };
+  expenses: {
+    key: string;
+    value: any;
+  };
+  settlements: {
     key: string;
     value: any;
   };
@@ -55,6 +71,18 @@ class IndexedDBService {
             }
             if (!db.objectStoreNames.contains('scorecard')) {
               db.createObjectStore('scorecard');
+            }
+            if (!db.objectStoreNames.contains('groups')) {
+              db.createObjectStore('groups');
+            }
+            if (!db.objectStoreNames.contains('members')) {
+              db.createObjectStore('members');
+            }
+            if (!db.objectStoreNames.contains('expenses')) {
+              db.createObjectStore('expenses');
+            }
+            if (!db.objectStoreNames.contains('settlements')) {
+              db.createObjectStore('settlements');
             }
           },
         });
