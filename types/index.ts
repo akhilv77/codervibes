@@ -15,9 +15,11 @@ export interface Game {
 }
 
 export interface Score {
+  id: string;
   gameId: string;
   playerId: string;
   value: number;
+  timestamp: number;
 }
 
 export interface AppState {

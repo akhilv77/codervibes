@@ -38,6 +38,9 @@ export const useStore = create<AppState & {
   addGame: (name: string, selectedPlayers: string[], maxScore?: number) => Game;
   addPlayer: (name: string) => void;
   addScore: (gameId: string, playerId: string, value: number) => void;
+  deleteScore: (scoreId: string) => void;
+  updateScore: (scoreId: string, value: number) => void;
+  getGameScores: (gameId: string) => Score[];
   resetAll: () => void;
   isPlayerGameOver: (playerId: string) => boolean;
   getPlayerScoreInGame: (gameId: string, playerId: string) => number;
@@ -103,9 +106,11 @@ export const useStore = create<AppState & {
     
     addScore: (gameId, playerId, value) => {
       const newScore = {
+        id: uuidv4(),
         gameId,
         playerId,
-        value
+        value,
+        timestamp: Date.now()
       };
       
       set((state) => {
@@ -115,6 +120,36 @@ export const useStore = create<AppState & {
       });
       
       get().updatePlayerGameOverStatus();
+    },
+    
+    deleteScore: (scoreId) => {
+      set((state) => {
+        const updatedScores = state.scores.filter(score => score.id !== scoreId);
+        storage.setItem('scores', JSON.stringify(updatedScores));
+        return { scores: updatedScores };
+      });
+      
+      get().updatePlayerGameOverStatus();
+    },
+    
+    updateScore: (scoreId, value) => {
+      set((state) => {
+        const updatedScores = state.scores.map(score =>
+          score.id === scoreId
+            ? { ...score, value }
+            : score
+        );
+        storage.setItem('scores', JSON.stringify(updatedScores));
+        return { scores: updatedScores };
+      });
+      
+      get().updatePlayerGameOverStatus();
+    },
+    
+    getGameScores: (gameId) => {
+      return get().scores
+        .filter(score => score.gameId === gameId)
+        .sort((a, b) => b.timestamp - a.timestamp);
     },
     
     resetAll: () => {

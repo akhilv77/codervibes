@@ -195,9 +195,17 @@ export default function GamesPage() {
                         </div>
                       ))}
                       {players.length === 0 && (
-                        <p className="text-sm text-muted-foreground">
-                          No players available. Add players first.
-                        </p>
+                        <div className="flex flex-col items-center justify-center min-h-[120px] px-2">
+                          <p className="text-sm text-muted-foreground text-center mb-4">
+                            No players available. Create players to start a game.
+                          </p>
+                          <Button asChild variant="outline" className="w-full sm:w-auto">
+                            <a href="/scorecard/players" className="flex items-center justify-center">
+                              <Plus className="h-4 w-4 mr-2" />
+                              Create Players
+                            </a>
+                          </Button>
+                        </div>
                       )}
                     </div>
                   </ScrollArea>
@@ -366,9 +374,17 @@ export default function GamesPage() {
                     </div>
                   ))}
                   {players.length === 0 && (
-                    <p className="text-sm text-muted-foreground">
-                      No players available. Add players first.
-                    </p>
+                    <div className="flex flex-col items-center justify-center min-h-[120px] px-2">
+                      <p className="text-sm text-muted-foreground text-center mb-4">
+                        No players available. Create players to start a game.
+                      </p>
+                      <Button asChild variant="outline" className="w-full sm:w-auto">
+                        <a href="/scorecard/players" className="flex items-center justify-center">
+                          <Plus className="h-4 w-4 mr-2" />
+                          Create Players
+                        </a>
+                      </Button>
+                    </div>
                   )}
                 </div>
               </ScrollArea>
