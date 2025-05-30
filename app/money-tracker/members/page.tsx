@@ -8,25 +8,36 @@ import type { Member } from '@/types/money-tracker';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
+import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Pencil, Trash2, Search } from 'lucide-react';
 
 export default function MembersPage() {
-    const { state, addMember, updateMember, deleteMember } = useMoneyTracker();
+    const {
+        members = [],
+        addMember,
+        updateMember,
+        deleteMember
+    } = useMoneyTracker();
 
     const [isAddingMember, setIsAddingMember] = useState(false);
     const [newMemberName, setNewMemberName] = useState('');
     const [newMemberEmail, setNewMemberEmail] = useState('');
 
-    const handleAddMember = () => {
+    const handleAddMember = async () => {
         if (!newMemberName.trim() || !newMemberEmail.trim()) return;
 
-        addMember({
-            name: newMemberName.trim(),
-            email: newMemberEmail.trim().toLowerCase(),
-        });
+        try {
+            await addMember({
+                name: newMemberName.trim(),
+                email: newMemberEmail.trim().toLowerCase(),
+            });
 
-        setNewMemberName('');
-        setNewMemberEmail('');
-        setIsAddingMember(false);
+            setNewMemberName('');
+            setNewMemberEmail('');
+            setIsAddingMember(false);
+        } catch (error) {
+            console.error('Error adding member:', error);
+        }
     };
 
     return (
@@ -80,7 +91,7 @@ export default function MembersPage() {
                 </DialogContent>
             </Dialog>
 
-            {state.members.length === 0 ? (
+            {members.length === 0 ? (
                 <div className="text-center py-12">
                     <h2 className="text-xl font-semibold mb-2">No Members Yet</h2>
                     <p className="text-gray-600 dark:text-gray-400">
@@ -89,7 +100,7 @@ export default function MembersPage() {
                 </div>
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {state.members.map((member) => (
+                    {members.map((member) => (
                         <div
                             key={member.id}
                             className="bg-white dark:bg-gray-800 rounded-lg shadow p-6"

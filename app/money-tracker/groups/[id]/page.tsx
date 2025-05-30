@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useMoneyTracker } from '@/hooks/useMoneyTracker';
 import { Button } from '@/components/ui/button';
 import { formatCurrency } from '@/lib/utils';
-import type { Expense, SplitMode, Group, Member } from '@/types/money-tracker';
+import type { Expense, SplitMode, Group, Member, Settlement } from '@/types/money-tracker';
 import { PencilIcon, UserGroupIcon, PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { CheckCircle2, Pencil, Trash2 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
@@ -33,15 +33,20 @@ export default function GroupDetailsPage({
     params: { id: string };
 }) {
     const {
-        state,
-        addExpense,
-        deleteExpense,
+        groups = [],
+        members = [],
+        expenses = [],
         getGroupBalance,
-        updateGroup,
+        addExpense,
         updateExpense,
+        deleteExpense,
+        addSettlement,
+        updateSettlement,
+        deleteSettlement,
+        updateGroup,
     } = useMoneyTracker();
 
-    const group = state.groups.find((g) => g.id === params.id);
+    const group = groups.find((g) => g.id === params.id);
     const balances = group ? getGroupBalance(group.id) : null;
 
     const [isAddingExpense, setIsAddingExpense] = useState(false);
@@ -52,7 +57,24 @@ export default function GroupDetailsPage({
     const [newExpense, setNewExpense] = useState(initialExpenseState);
     const [isEditingExpense, setIsEditingExpense] = useState(false);
     const [editingExpense, setEditingExpense] = useState<EditingExpense | null>(null);
+    const [isAddingSettlement, setIsAddingSettlement] = useState(false);
+    const [editingSettlement, setEditingSettlement] = useState<Settlement | null>(null);
     const [deleteConfirmation, setDeleteConfirmation] = useState<{ show: boolean; id: string | null }>({ show: false, id: null });
+    const [searchQuery, setSearchQuery] = useState('');
+
+    const totalExpenses = expenses
+        .filter((expense: Expense) => expense.groupId === params.id)
+        .reduce((sum: number, expense: Expense) => sum + expense.amount, 0);
+
+    const memberCount = group?.members?.length || 0;
+    const expenseCount = expenses.filter((expense: Expense) => expense.groupId === params.id).length;
+
+    const filteredExpenses = expenses
+        .filter((expense: Expense) => expense.groupId === params.id)
+        .filter((expense: Expense) =>
+            expense.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            expense.paidBy.some((m: string) => members.find((member: Member) => member.id === m)?.name.toLowerCase().includes(searchQuery.toLowerCase()))
+        );
 
     // Initialize newExpense with group members when group is available
     useEffect(() => {
@@ -64,7 +86,7 @@ export default function GroupDetailsPage({
         }
     }, [group]);
 
-    const handleAddExpense = useCallback(() => {
+    const handleAddExpense = useCallback(async () => {
         if (!group) return;
         if (!newExpense.description || !newExpense.amount || !newExpense.paidBy.length || !newExpense.splitBetween.length) return;
 
@@ -98,20 +120,24 @@ export default function GroupDetailsPage({
             });
         }
 
-        addExpense({
-            groupId: group.id,
-            description: newExpense.description,
-            amount,
-            paidBy: newExpense.paidBy,
-            splitBetween: newExpense.splitBetween,
-            splitMode: newExpense.splitMode,
-            splitDetails,
-            date: newExpense.date,
-            notes: newExpense.notes,
-        });
+        try {
+            await addExpense({
+                groupId: group.id,
+                description: newExpense.description,
+                amount,
+                paidBy: newExpense.paidBy,
+                splitBetween: newExpense.splitBetween,
+                splitMode: newExpense.splitMode,
+                splitDetails,
+                date: newExpense.date,
+                notes: newExpense.notes,
+            });
 
-        setNewExpense(initialExpenseState);
-        setIsAddingExpense(false);
+            setNewExpense(initialExpenseState);
+            setIsAddingExpense(false);
+        } catch (error) {
+            console.error('Error adding expense:', error);
+        }
     }, [newExpense, group, addExpense]);
 
     const handleUpdateGroup = useCallback(() => {
@@ -242,7 +268,7 @@ export default function GroupDetailsPage({
                     <div>
                         <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-2">{group.name}</h1>
                         <p className="text-gray-600 dark:text-gray-300">{group.type} • {group.currency}  ~ {formatCurrency(
-                            state.expenses
+                            expenses
                                 .filter(expense => expense.groupId === group.id)
                                 .reduce((sum, expense) => sum + expense.amount, 0),
                             group.currency
@@ -273,7 +299,7 @@ export default function GroupDetailsPage({
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     {balances && Object.entries(balances).map(([memberId, balance]) => {
-                        const member = state.members.find(m => m.id === memberId);
+                        const member = members.find(m => m.id === memberId);
                         if (!member) return null;
 
                         return (
@@ -388,7 +414,7 @@ export default function GroupDetailsPage({
                         <div className="space-y-4">
                             <div className="max-h-[50vh] overflow-y-auto">
                                 <div className="space-y-2">
-                                    {state.members.map((member) => (
+                                    {members.map((member) => (
                                         <label
                                             key={member.id}
                                             className="flex items-center space-x-3 p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md cursor-pointer"
@@ -497,7 +523,7 @@ export default function GroupDetailsPage({
                                 >
                                     <option value="">Select member</option>
                                     {group.members.map((memberId) => {
-                                        const member = state.members.find(m => m.id === memberId);
+                                        const member = members.find(m => m.id === memberId);
                                         if (!member) return null;
                                         return (
                                             <option key={memberId} value={memberId}>
@@ -515,7 +541,7 @@ export default function GroupDetailsPage({
                             <div className="col-span-3">
                                 <div className="space-y-2 max-h-[200px] overflow-y-auto p-2 border rounded-md">
                                     {group.members.map((memberId) => {
-                                        const member = state.members.find(m => m.id === memberId);
+                                        const member = members.find(m => m.id === memberId);
                                         if (!member) return null;
                                         const isSelected = isEditingExpense
                                             ? editingExpense?.splitBetween.includes(memberId)
@@ -601,7 +627,7 @@ export default function GroupDetailsPage({
                         {(isEditingExpense ? editingExpense?.splitMode === 'percentage' : newExpense.splitMode === 'percentage') && (
                             <div className="grid gap-4">
                                 {group.members.map((memberId) => {
-                                    const member = state.members.find(m => m.id === memberId);
+                                    const member = members.find(m => m.id === memberId);
                                     if (!member) return null;
                                     return (
                                         <div key={memberId} className="grid grid-cols-4 items-center gap-4">
@@ -642,7 +668,7 @@ export default function GroupDetailsPage({
                         {(isEditingExpense ? editingExpense?.splitMode === 'manual' : newExpense.splitMode === 'manual') && (
                             <div className="grid gap-4">
                                 {group.members.map((memberId) => {
-                                    const member = state.members.find(m => m.id === memberId);
+                                    const member = members.find(m => m.id === memberId);
                                     if (!member) return null;
                                     return (
                                         <div key={memberId} className="grid grid-cols-4 items-center gap-4">
@@ -740,7 +766,7 @@ export default function GroupDetailsPage({
                     </Button>
                 </div>
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                    {state.expenses
+                    {expenses
                         .filter((expense) => expense.groupId === group.id)
                         .map((expense) => (
                             <Card key={expense.id} className="hover:shadow-lg transition-shadow duration-200 dark:border-white">
@@ -778,11 +804,11 @@ export default function GroupDetailsPage({
                                 <div className="px-6 pb-4 space-y-2">
                                     <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
                                         <span className="font-medium">Paid by:</span>
-                                        <span>{expense.paidBy.map(id => state.members.find(m => m.id === id)?.name).join(', ')}</span>
+                                        <span>{expense.paidBy.map(id => members.find(m => m.id === id)?.name).join(', ')}</span>
                                     </div>
                                     <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
                                         <span className="font-medium">Split between:</span>
-                                        <span>{expense.splitBetween.map(id => state.members.find(m => m.id === id)?.name).join(', ')}</span>
+                                        <span>{expense.splitBetween.map(id => members.find(m => m.id === id)?.name).join(', ')}</span>
                                     </div>
                                     {expense.notes && (
                                         <div className="text-sm text-gray-500 dark:text-gray-400 mt-2 pt-2 border-t border-gray-100 dark:border-gray-700">
@@ -793,7 +819,7 @@ export default function GroupDetailsPage({
                             </Card>
                         ))}
                 </div>
-                {state.expenses.filter((expense) => expense.groupId === group.id).length === 0 && (
+                {expenses.filter((expense) => expense.groupId === group.id).length === 0 && (
                     <div className="text-center py-8">
                         <p className="text-gray-500 dark:text-gray-400">No expenses added yet</p>
                         <Button
@@ -805,13 +831,13 @@ export default function GroupDetailsPage({
                         </Button>
                     </div>
                 )}
-                {state.expenses.filter((expense) => expense.groupId === group.id).length > 0 && (
+                {expenses.filter((expense) => expense.groupId === group.id).length > 0 && (
                     <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
                         <div className="flex justify-between items-center">
                             <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Total Amount:</span>
                             <span className="text-lg font-semibold text-blue-600 dark:text-blue-400">
                                 {formatCurrency(
-                                    state.expenses
+                                    expenses
                                         .filter((expense) => expense.groupId === group.id)
                                         .reduce((sum, expense) => sum + expense.amount, 0),
                                     group.currency

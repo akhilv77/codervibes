@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useMoneyTracker } from '@/hooks/useMoneyTracker';
 import { Button } from '@/components/ui/button';
 import { formatCurrency } from '@/lib/utils';
-import type { Group } from '@/types/money-tracker';
+import type { Group, Expense, Currency, GroupType } from '@/types/money-tracker';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Pencil, Trash2, Search } from 'lucide-react';
@@ -16,20 +16,33 @@ import { useServiceTracking } from '@/hooks/useServiceTracking';
 export default function MoneyTrackerPage() {
     const { trackServiceUsage } = useServiceTracking();
     const {
-        state,
+        groups = [],
+        members = [],
+        expenses = [],
+        settlements = [],
         addGroup,
+        updateGroup,
         deleteGroup,
+        addMember,
+        updateMember,
+        deleteMember,
+        addExpense,
+        updateExpense,
+        deleteExpense,
+        addSettlement,
+        updateSettlement,
+        deleteSettlement,
         getGroupBalance,
     } = useMoneyTracker();
 
     const naviagte = useRouter();
     const [isAddingGroup, setIsAddingGroup] = useState(false);
-    const [newGroupName, setNewGroupName] = useState('');
-    const [newGroupType, setNewGroupType] = useState<Group['type']>('Trip');
-    const [newGroupCurrency, setNewGroupCurrency] = useState<Group['currency']>('USD');
-    const [deleteConfirmation, setDeleteConfirmation] = useState<{ show: boolean; id: string | null }>({ show: false, id: null });
-    const [searchQuery, setSearchQuery] = useState('');
     const [editingGroup, setEditingGroup] = useState<Group | null>(null);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [newGroupName, setNewGroupName] = useState('');
+    const [newGroupType, setNewGroupType] = useState<GroupType>('trip');
+    const [newGroupCurrency, setNewGroupCurrency] = useState<Currency>('USD');
+    const [deleteConfirmation, setDeleteConfirmation] = useState<{ show: boolean; id: string | null }>({ show: false, id: null });
 
     useEffect(() => {
         trackServiceUsage('Money Tracker', 'page_view');
@@ -49,19 +62,24 @@ export default function MoneyTrackerPage() {
         }
     };
 
-    const handleAddGroup = () => {
+    const handleAddGroup = async () => {
         if (!newGroupName.trim()) return;
 
-        addGroup({
-            name: newGroupName.trim(),
-            type: newGroupType,
-            currency: newGroupCurrency,
-            members: [],
-        });
+        try {
+            await addGroup({
+                name: newGroupName,
+                type: newGroupType,
+                currency: newGroupCurrency,
+                members: [],
+            });
 
-        trackServiceUsage('Money Tracker', 'group_created', `Type: ${newGroupType}, Currency: ${newGroupCurrency}`);
-        setNewGroupName('');
-        setIsAddingGroup(false);
+            setNewGroupName('');
+            setNewGroupType('trip');
+            setNewGroupCurrency('USD');
+            setIsAddingGroup(false);
+        } catch (error) {
+            console.error('Error adding group:', error);
+        }
     };
 
     const handleEditGroup = (group: Group) => {
@@ -73,45 +91,40 @@ export default function MoneyTrackerPage() {
         trackServiceUsage('Money Tracker', 'group_edit_started', `Group: ${group.name}`);
     };
 
-    const handleSaveEdit = () => {
-        if (!editingGroup || !newGroupName.trim()) return;
+    const handleSaveEdit = async () => {
+        if (!editingGroup) return;
 
-        // Update the group with new values
-        const updatedGroup = {
-            ...editingGroup,
-            name: newGroupName.trim(),
-            type: newGroupType,
-            currency: newGroupCurrency,
-        };
-
-        trackServiceUsage('Money Tracker', 'group_edited', `Group: ${updatedGroup.name}, Type: ${updatedGroup.type}`);
-        setEditingGroup(null);
-        setNewGroupName('');
-        setIsAddingGroup(false);
+        try {
+            await updateGroup(editingGroup.id, editingGroup);
+            setEditingGroup(null);
+            setIsAddingGroup(false);
+        } catch (error) {
+            console.error('Error updating group:', error);
+        }
     };
 
-    const handleDeleteGroup = (id: string) => {
-        const group = state.groups.find(g => g.id === id);
-        if (group) {
-            trackServiceUsage('Money Tracker', 'group_delete_initiated', `Group: ${group.name}`);
+    const handleDeleteGroup = async (id: string) => {
+        try {
+            await deleteGroup(id);
+            setDeleteConfirmation({ show: false, id: null });
+        } catch (error) {
+            console.error('Error deleting group:', error);
         }
-        setDeleteConfirmation({ show: true, id });
     };
 
     const confirmDelete = () => {
         if (deleteConfirmation.id) {
-            const group = state.groups.find(g => g.id === deleteConfirmation.id);
+            const group = groups.find(g => g.id === deleteConfirmation.id);
             if (group) {
                 trackServiceUsage('Money Tracker', 'group_deleted', `Group: ${group.name}`);
             }
-            deleteGroup(deleteConfirmation.id);
-            setDeleteConfirmation({ show: false, id: null });
+            handleDeleteGroup(deleteConfirmation.id);
         }
     };
 
-    const filteredGroups = state.groups.filter(group =>
+    const filteredGroups = groups.filter(group =>
         group.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        group.type.toLowerCase().includes(searchQuery.toLowerCase())
+        (group.type?.toLowerCase() || '').includes(searchQuery.toLowerCase())
     );
 
     return (
@@ -199,7 +212,7 @@ export default function MoneyTrackerPage() {
                         >
                             Cancel
                         </Button>
-                        <Button onClick={editingGroup ? handleSaveEdit : handleAddGroup}>
+                        <Button onClick={handleAddGroup}>
                             {editingGroup ? 'Save Changes' : 'Create Group'}
                         </Button>
                     </DialogFooter>
@@ -248,12 +261,12 @@ export default function MoneyTrackerPage() {
             ) : (
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                     {filteredGroups.map((group) => {
-                        const totalExpenses = state.expenses
-                            .filter((expense) => expense.groupId === group.id)
-                            .reduce((sum, expense) => sum + expense.amount, 0);
+                        const totalExpenses = expenses
+                            .filter((expense: Expense) => expense.groupId === group.id)
+                            .reduce((sum: number, expense: Expense) => sum + expense.amount, 0);
 
-                        const memberCount = group.members.length;
-                        const expenseCount = state.expenses.filter((expense) => expense.groupId === group.id).length;
+                        const memberCount = group.members?.length || 0;
+                        const expenseCount = expenses.filter((expense: Expense) => expense.groupId === group.id).length;
 
                         return (
                             <Card key={group.id} className="group hover:shadow-lg transition-all duration-200">
@@ -264,7 +277,7 @@ export default function MoneyTrackerPage() {
                                                 {group.name}
                                             </CardTitle>
                                             <CardDescription className="text-sm">
-                                                {group.type} • {group.currency}
+                                                {group.type} • {group.currency || 'USD'}
                                             </CardDescription>
                                         </div>
                                         <div className="flex gap-1">
@@ -292,7 +305,7 @@ export default function MoneyTrackerPage() {
                                         <div className="space-y-1">
                                             <p className="text-sm text-gray-500 dark:text-gray-400">Total Expenses</p>
                                             <p className="text-lg font-semibold text-blue-600 dark:text-blue-400">
-                                                {formatCurrency(totalExpenses, group.currency)}
+                                                {formatCurrency(totalExpenses, group.currency || 'USD')}
                                             </p>
                                         </div>
                                         <div className="space-y-1 flex flex-col items-end">

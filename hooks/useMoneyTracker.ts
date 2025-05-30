@@ -1,237 +1,259 @@
-import { useState, useEffect, useCallback } from 'react';
-import type { AppState, Member, Group, Expense, Settlement } from '@/types/money-tracker';
+import { create } from 'zustand';
 import { db } from '@/lib/db/indexed-db';
-import { v4 as uuidv4 } from 'uuid';
+import type { Group, Member, Expense, Settlement, Currency, GroupType, SplitMode } from '@/types/money-tracker';
 
-export function useMoneyTracker() {
-  const [state, setState] = useState<AppState>({
-    members: [],
-    groups: [],
-    expenses: [],
-    settlements: [],
-    version: '1.0.0'
-  });
+interface MoneyTrackerState {
+  groups: Group[];
+  members: Member[];
+  expenses: Expense[];
+  settlements: Settlement[];
+  isLoading: boolean;
+  error: string | null;
+  addGroup: (group: Omit<Group, 'id' | 'createdAt' | 'updatedAt'>) => Promise<void>;
+  updateGroup: (id: string, group: Partial<Group>) => Promise<void>;
+  deleteGroup: (id: string) => Promise<void>;
+  addMember: (member: Omit<Member, 'id'>) => Promise<void>;
+  updateMember: (id: string, member: Partial<Member>) => Promise<void>;
+  deleteMember: (id: string) => Promise<void>;
+  addExpense: (expense: Omit<Expense, 'id' | 'createdAt' | 'updatedAt'>) => Promise<void>;
+  updateExpense: (id: string, expense: Partial<Expense>) => Promise<void>;
+  deleteExpense: (id: string) => Promise<void>;
+  addSettlement: (settlement: Omit<Settlement, 'id' | 'createdAt'>) => Promise<void>;
+  updateSettlement: (id: string, settlement: Partial<Settlement>) => Promise<void>;
+  deleteSettlement: (id: string) => Promise<void>;
+  getGroupBalance: (groupId: string) => { [key: string]: { owes: number; owed: number; net: number } } | null;
+}
 
-  // Load initial state from IndexedDB
-  useEffect(() => {
-    const loadState = async () => {
-      try {
-        await db.init();
-        const [members, groups, expenses, settlements] = await Promise.all([
-          db.getAll<Member>('members'),
-          db.getAll<Group>('groups'),
-          db.getAll<Expense>('expenses'),
-          db.getAll<Settlement>('settlements')
-        ]);
+const initialState = {
+  groups: [] as Group[],
+  members: [] as Member[],
+  expenses: [] as Expense[],
+  settlements: [] as Settlement[],
+  isLoading: true,
+  error: null as string | null,
+};
 
-        setState({
-          members: members || [],
-          groups: groups || [],
-          expenses: expenses || [],
-          settlements: settlements || [],
-          version: '1.0.0'
-        });
-      } catch (err) {
-        console.error('Error loading state from IndexedDB:', err);
-      }
-    };
+const useMoneyTracker = create<MoneyTrackerState>((set, get) => ({
+  ...initialState,
 
-    loadState();
-  }, []);
-
-  // Member operations
-  const addMember = useCallback(async (member: Omit<Member, 'id'>) => {
-    const id = uuidv4();
-    const newMember = { ...member, id };
+  addGroup: async (group) => {
     try {
-      await db.set('members', id, newMember);
-      setState(prev => ({
-        ...prev,
-        members: [...prev.members, newMember]
-      }));
-      return id;
-    } catch (err) {
-      console.error('Error adding member:', err);
-      return null;
-    }
-  }, []);
+      const newGroup: Group = {
+        ...group,
+        id: crypto.randomUUID(),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
 
-  const updateMember = useCallback(async (id: string, updates: Partial<Member>) => {
+      const state = get();
+      const currentGroups = Array.isArray(state.groups) ? state.groups : [];
+      const updatedGroups = [...currentGroups, newGroup];
+      
+      await db.set('moneyTracker', 'groups', updatedGroups);
+      set({ groups: updatedGroups });
+    } catch (error) {
+      console.error('Error adding group:', error);
+      set({ error: 'Failed to add group' });
+    }
+  },
+
+  updateGroup: async (id, group) => {
     try {
-      const member = await db.get<Member>('members', id);
-      if (member) {
-        const updatedMember = { ...member, ...updates };
-        await db.set('members', id, updatedMember);
-        setState(prev => ({
-          ...prev,
-          members: prev.members.map(m => m.id === id ? updatedMember : m)
-        }));
-      }
-    } catch (err) {
-      console.error('Error updating member:', err);
+      const state = get();
+      const currentGroups = Array.isArray(state.groups) ? state.groups : [];
+      const updatedGroups = currentGroups.map((g) =>
+        g.id === id
+          ? { ...g, ...group, updatedAt: new Date().toISOString() }
+          : g
+      );
+      
+      await db.set('moneyTracker', 'groups', updatedGroups);
+      set({ groups: updatedGroups });
+    } catch (error) {
+      console.error('Error updating group:', error);
+      set({ error: 'Failed to update group' });
     }
-  }, []);
+  },
 
-  const deleteMember = useCallback(async (id: string) => {
+  deleteGroup: async (id) => {
     try {
-      await db.delete('members', id);
-      setState(prev => ({
-        ...prev,
-        members: prev.members.filter(m => m.id !== id)
-      }));
-    } catch (err) {
-      console.error('Error deleting member:', err);
+      const state = get();
+      const currentGroups = Array.isArray(state.groups) ? state.groups : [];
+      const updatedGroups = currentGroups.filter((g) => g.id !== id);
+      
+      await db.set('moneyTracker', 'groups', updatedGroups);
+      set({ groups: updatedGroups });
+    } catch (error) {
+      console.error('Error deleting group:', error);
+      set({ error: 'Failed to delete group' });
     }
-  }, []);
+  },
 
-  // Group operations
-  const addGroup = useCallback(async (group: Omit<Group, 'id' | 'createdAt' | 'updatedAt'>) => {
-    const id = uuidv4();
-    const newGroup: Group = {
-      ...group,
-      id,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    };
+  addMember: async (member) => {
     try {
-      await db.set('groups', id, newGroup);
-      setState(prev => ({
-        ...prev,
-        groups: [...prev.groups, newGroup]
-      }));
-      return id;
-    } catch (err) {
-      console.error('Error adding group:', err);
-      return null;
-    }
-  }, []);
+      const newMember: Member = {
+        ...member,
+        id: crypto.randomUUID(),
+      };
 
-  const updateGroup = useCallback(async (id: string, updates: Partial<Group>) => {
+      const state = get();
+      const currentMembers = Array.isArray(state.members) ? state.members : [];
+      const updatedMembers = [...currentMembers, newMember];
+      
+      await db.set('moneyTracker', 'members', updatedMembers);
+      set({ members: updatedMembers });
+    } catch (error) {
+      console.error('Error adding member:', error);
+      set({ error: 'Failed to add member' });
+    }
+  },
+
+  updateMember: async (id, member) => {
     try {
-      const group = await db.get<Group>('groups', id);
-      if (group) {
-        const updatedGroup = {
-          ...group,
-          ...updates,
-          updatedAt: new Date().toISOString()
-        };
-        await db.set('groups', id, updatedGroup);
-        setState(prev => ({
-          ...prev,
-          groups: prev.groups.map(g => g.id === id ? updatedGroup : g)
-        }));
-      }
-    } catch (err) {
-      console.error('Error updating group:', err);
+      const state = get();
+      const currentMembers = Array.isArray(state.members) ? state.members : [];
+      const updatedMembers = currentMembers.map((m) =>
+        m.id === id
+          ? { ...m, ...member }
+          : m
+      );
+      
+      await db.set('moneyTracker', 'members', updatedMembers);
+      set({ members: updatedMembers });
+    } catch (error) {
+      console.error('Error updating member:', error);
+      set({ error: 'Failed to update member' });
     }
-  }, []);
+  },
 
-  const deleteGroup = useCallback(async (id: string) => {
+  deleteMember: async (id) => {
     try {
-      await db.delete('groups', id);
-      setState(prev => ({
-        ...prev,
-        groups: prev.groups.filter(g => g.id !== id),
-        expenses: prev.expenses.filter(e => e.groupId !== id),
-        settlements: prev.settlements.filter(s => s.groupId !== id)
-      }));
-    } catch (err) {
-      console.error('Error deleting group:', err);
+      const state = get();
+      const currentMembers = Array.isArray(state.members) ? state.members : [];
+      const updatedMembers = currentMembers.filter((m) => m.id !== id);
+      
+      await db.set('moneyTracker', 'members', updatedMembers);
+      set({ members: updatedMembers });
+    } catch (error) {
+      console.error('Error deleting member:', error);
+      set({ error: 'Failed to delete member' });
     }
-  }, []);
+  },
 
-  // Expense operations
-  const addExpense = useCallback(async (expense: Omit<Expense, 'id' | 'createdAt' | 'updatedAt'>) => {
-    const id = uuidv4();
-    const newExpense: Expense = {
-      ...expense,
-      id,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    };
+  addExpense: async (expense) => {
     try {
-      await db.set('expenses', id, newExpense);
-      setState(prev => ({
-        ...prev,
-        expenses: [...prev.expenses, newExpense]
-      }));
-      return id;
-    } catch (err) {
-      console.error('Error adding expense:', err);
-      return null;
-    }
-  }, []);
+      const newExpense: Expense = {
+        ...expense,
+        id: crypto.randomUUID(),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
 
-  const updateExpense = useCallback(async (id: string, updates: Partial<Expense>) => {
+      const state = get();
+      const currentExpenses = Array.isArray(state.expenses) ? state.expenses : [];
+      const updatedExpenses = [...currentExpenses, newExpense];
+      
+      await db.set('moneyTracker', 'expenses', updatedExpenses);
+      set({ expenses: updatedExpenses });
+    } catch (error) {
+      console.error('Error adding expense:', error);
+      set({ error: 'Failed to add expense' });
+    }
+  },
+
+  updateExpense: async (id, expense) => {
     try {
-      const expense = await db.get<Expense>('expenses', id);
-      if (expense) {
-        const updatedExpense = {
-          ...expense,
-          ...updates,
-          updatedAt: new Date().toISOString()
-        };
-        await db.set('expenses', id, updatedExpense);
-        setState(prev => ({
-          ...prev,
-          expenses: prev.expenses.map(e => e.id === id ? updatedExpense : e)
-        }));
-      }
-    } catch (err) {
-      console.error('Error updating expense:', err);
+      const state = get();
+      const currentExpenses = Array.isArray(state.expenses) ? state.expenses : [];
+      const updatedExpenses = currentExpenses.map((e) =>
+        e.id === id
+          ? { ...e, ...expense, updatedAt: new Date().toISOString() }
+          : e
+      );
+      
+      await db.set('moneyTracker', 'expenses', updatedExpenses);
+      set({ expenses: updatedExpenses });
+    } catch (error) {
+      console.error('Error updating expense:', error);
+      set({ error: 'Failed to update expense' });
     }
-  }, []);
+  },
 
-  const deleteExpense = useCallback(async (id: string) => {
+  deleteExpense: async (id) => {
     try {
-      await db.delete('expenses', id);
-      setState(prev => ({
-        ...prev,
-        expenses: prev.expenses.filter(e => e.id !== id)
-      }));
-    } catch (err) {
-      console.error('Error deleting expense:', err);
+      const state = get();
+      const currentExpenses = Array.isArray(state.expenses) ? state.expenses : [];
+      const updatedExpenses = currentExpenses.filter((e) => e.id !== id);
+      
+      await db.set('moneyTracker', 'expenses', updatedExpenses);
+      set({ expenses: updatedExpenses });
+    } catch (error) {
+      console.error('Error deleting expense:', error);
+      set({ error: 'Failed to delete expense' });
     }
-  }, []);
+  },
 
-  // Settlement operations
-  const addSettlement = useCallback(async (settlement: Omit<Settlement, 'id' | 'createdAt'>) => {
-    const id = uuidv4();
-    const newSettlement: Settlement = {
-      ...settlement,
-      id,
-      createdAt: new Date().toISOString()
-    };
+  addSettlement: async (settlement) => {
     try {
-      await db.set('settlements', id, newSettlement);
-      setState(prev => ({
-        ...prev,
-        settlements: [...prev.settlements, newSettlement]
-      }));
-      return id;
-    } catch (err) {
-      console.error('Error adding settlement:', err);
-      return null;
-    }
-  }, []);
+      const newSettlement: Settlement = {
+        ...settlement,
+        id: crypto.randomUUID(),
+        createdAt: new Date().toISOString(),
+      };
 
-  const deleteSettlement = useCallback(async (id: string) => {
+      const state = get();
+      const currentSettlements = Array.isArray(state.settlements) ? state.settlements : [];
+      const updatedSettlements = [...currentSettlements, newSettlement];
+      
+      await db.set('moneyTracker', 'settlements', updatedSettlements);
+      set({ settlements: updatedSettlements });
+    } catch (error) {
+      console.error('Error adding settlement:', error);
+      set({ error: 'Failed to add settlement' });
+    }
+  },
+
+  updateSettlement: async (id, settlement) => {
     try {
-      await db.delete('settlements', id);
-      setState(prev => ({
-        ...prev,
-        settlements: prev.settlements.filter(s => s.id !== id)
-      }));
-    } catch (err) {
-      console.error('Error deleting settlement:', err);
+      const state = get();
+      const currentSettlements = Array.isArray(state.settlements) ? state.settlements : [];
+      const updatedSettlements = currentSettlements.map((s) =>
+        s.id === id
+          ? { ...s, ...settlement }
+          : s
+      );
+      
+      await db.set('moneyTracker', 'settlements', updatedSettlements);
+      set({ settlements: updatedSettlements });
+    } catch (error) {
+      console.error('Error updating settlement:', error);
+      set({ error: 'Failed to update settlement' });
     }
-  }, []);
+  },
 
-  // Utility functions
-  const getGroupBalance = useCallback((groupId: string) => {
-    const groupExpenses = state.expenses.filter(expense => expense.groupId === groupId);
-    const groupSettlements = state.settlements.filter(settlement => settlement.groupId === groupId);
-    const group = state.groups.find(g => g.id === groupId);
+  deleteSettlement: async (id) => {
+    try {
+      const state = get();
+      const currentSettlements = Array.isArray(state.settlements) ? state.settlements : [];
+      const updatedSettlements = currentSettlements.filter((s) => s.id !== id);
+      
+      await db.set('moneyTracker', 'settlements', updatedSettlements);
+      set({ settlements: updatedSettlements });
+    } catch (error) {
+      console.error('Error deleting settlement:', error);
+      set({ error: 'Failed to delete settlement' });
+    }
+  },
+
+  getGroupBalance: (groupId: string) => {
+    const state = get();
+    const currentExpenses = Array.isArray(state.expenses) ? state.expenses : [];
+    const currentSettlements = Array.isArray(state.settlements) ? state.settlements : [];
+    const currentGroups = Array.isArray(state.groups) ? state.groups : [];
+    
+    const groupExpenses = currentExpenses.filter(expense => expense.groupId === groupId);
+    const groupSettlements = currentSettlements.filter(settlement => settlement.groupId === groupId);
+    const group = currentGroups.find(g => g.id === groupId);
     
     if (!group) return null;
 
@@ -272,21 +294,38 @@ export function useMoneyTracker() {
     });
 
     return memberBalances;
-  }, [state]);
+  },
+}));
 
-  return {
-    state,
-    addMember,
-    updateMember,
-    deleteMember,
-    addGroup,
-    updateGroup,
-    deleteGroup,
-    addExpense,
-    updateExpense,
-    deleteExpense,
-    addSettlement,
-    deleteSettlement,
-    getGroupBalance,
+// Load initial state from IndexedDB
+if (typeof window !== 'undefined') {
+  const loadState = async () => {
+    try {
+      const [groups, members, expenses, settlements] = await Promise.all([
+        db.get<Group[]>('moneyTracker', 'groups') || [],
+        db.get<Member[]>('moneyTracker', 'members') || [],
+        db.get<Expense[]>('moneyTracker', 'expenses') || [],
+        db.get<Settlement[]>('moneyTracker', 'settlements') || [],
+      ]);
+
+      useMoneyTracker.setState({
+        groups: Array.isArray(groups) ? groups : [],
+        members: Array.isArray(members) ? members : [],
+        expenses: Array.isArray(expenses) ? expenses : [],
+        settlements: Array.isArray(settlements) ? settlements : [],
+        isLoading: false,
+      });
+    } catch (error) {
+      console.error('Error loading state from IndexedDB:', error);
+      useMoneyTracker.setState({
+        ...initialState,
+        isLoading: false,
+        error: 'Failed to load data from storage',
+      });
+    }
   };
-} 
+
+  loadState();
+}
+
+export { useMoneyTracker }; 

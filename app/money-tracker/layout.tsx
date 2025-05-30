@@ -81,11 +81,6 @@ export default function MoneyTrackerLayout({
             <main className="flex-1 flex justify-center bg-background">
                 <div className="container max-w-screen-xl px-4 py-4">{children}</div>
             </main>
-            <footer className="border-t py-4 bg-background">
-                <div className="container max-w-screen-xl px-4 flex justify-center text-sm text-muted-foreground">
-                    <p>© {new Date().getFullYear()} Money Tracker</p>
-                </div>
-            </footer>
         </div>
     );
 } 
