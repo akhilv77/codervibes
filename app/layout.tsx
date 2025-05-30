@@ -7,8 +7,8 @@ import { Toaster } from "@/components/ui/toaster";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "App Suite",
-  description: "Your personal app suite for managing scores and expenses",
+  title: "Coder Vibes",
+  description: "Building daily useful tools to make life easier",
 };
 
 export default function RootLayout({
@@ -18,6 +18,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <link rel="icon" type="image/png" href="/assets/favicon.png" />
+      </head>
       <body className={inter.className}>
         <ThemeProvider
           attribute="class"

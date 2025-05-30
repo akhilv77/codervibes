@@ -29,7 +29,7 @@ export default function HomePage() {
         <header className="border-b">
           <div className="container flex items-center justify-between">
             {/* <h1 className="text-3xl font-bold">App Suite</h1> */}
-            <Image src="/assets/logo.png" alt="CoderVibes Logo" width={80} height={80} />
+            <Image src="/assets/logo.png" alt="CoderVibes Logo" width={120} height={120} />
             <Button variant="ghost" size="icon" asChild>
               <Link href="/settings">
                 <Settings className="h-5 w-5" />
