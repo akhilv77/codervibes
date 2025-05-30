@@ -574,10 +574,17 @@ export default function GroupDetailsPage({
                                         className="w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600"
                                         value={isEditingExpense ? editingExpense?.paidBy[0] || '' : newExpense.paidBy[0] || ''}
                                         onChange={(e) => {
+                                            const selectedMemberId = e.target.value;
                                             if (isEditingExpense && editingExpense) {
-                                                setEditingExpense({ ...editingExpense, paidBy: [e.target.value] });
+                                                setEditingExpense({ 
+                                                    ...editingExpense, 
+                                                    paidBy: selectedMemberId ? [selectedMemberId] : [] 
+                                                });
                                             } else {
-                                                setNewExpense({ ...newExpense, paidBy: [e.target.value] });
+                                                setNewExpense({ 
+                                                    ...newExpense, 
+                                                    paidBy: selectedMemberId ? [selectedMemberId] : [] 
+                                                });
                                             }
                                         }}
                                     >
@@ -597,55 +604,77 @@ export default function GroupDetailsPage({
                             <div className="grid grid-cols-4 items-center gap-4">
                                 <Label className="text-right">Split Between</Label>
                                 <div className="col-span-3">
-                                    <div className="space-y-2">
-                                        {group.members.map((memberId) => {
-                                            const member = members.find(m => m.id === memberId);
-                                            if (!member) return null;
-                                            return (
-                                                <div key={memberId} className="flex items-center space-x-2">
-                                                    <Checkbox
-                                                        id={`split-${memberId}`}
-                                                        checked={isEditingExpense
-                                                            ? editingExpense?.splitBetween.includes(memberId)
-                                                            : newExpense.splitBetween.includes(memberId)
-                                                        }
-                                                        onCheckedChange={(checked) => {
-                                                            const currentSplit = isEditingExpense
-                                                                ? [...(editingExpense?.splitBetween || [])]
-                                                                : [...newExpense.splitBetween];
-
-                                                            if (checked) {
-                                                                currentSplit.push(memberId);
-                                                            } else {
-                                                                const index = currentSplit.indexOf(memberId);
-                                                                if (index > -1) {
-                                                                    currentSplit.splice(index, 1);
+                                    {(!group || !group.members || group.members.length === 0) ? (
+                                        <div className="flex flex-col items-center justify-center min-h-[120px] border rounded-md p-4">
+                                            <p className="text-sm text-muted-foreground text-center mb-4">
+                                                No members in this group. Add members to split expenses.
+                                            </p>
+                                            <Button 
+                                                variant="outline" 
+                                                className="w-full sm:w-auto"
+                                                onClick={() => {
+                                                    setSelectedMembers(group?.members || []);
+                                                    setIsManagingMembers(true);
+                                                    setIsAddingExpense(false);
+                                                }}
+                                            >
+                                                <UserGroupIcon className="h-4 w-4 mr-2" />
+                                                Manage Group Members
+                                            </Button>
+                                        </div>
+                                    ) : (
+                                        <ScrollArea className="h-[200px] rounded-md border p-4">
+                                            <div className="space-y-2">
+                                                {group.members.map((memberId) => {
+                                                    const member = members.find(m => m.id === memberId);
+                                                    if (!member) return null;
+                                                    return (
+                                                        <div key={memberId} className="flex items-center space-x-2">
+                                                            <Checkbox
+                                                                id={`split-${memberId}`}
+                                                                checked={isEditingExpense
+                                                                    ? editingExpense?.splitBetween.includes(memberId)
+                                                                    : newExpense.splitBetween.includes(memberId)
                                                                 }
-                                                            }
+                                                                onCheckedChange={(checked) => {
+                                                                    const currentSplit = isEditingExpense
+                                                                        ? [...(editingExpense?.splitBetween || [])]
+                                                                        : [...newExpense.splitBetween];
 
-                                                            if (isEditingExpense && editingExpense) {
-                                                                setEditingExpense({
-                                                                    ...editingExpense,
-                                                                    splitBetween: currentSplit
-                                                                });
-                                                            } else {
-                                                                setNewExpense({
-                                                                    ...newExpense,
-                                                                    splitBetween: currentSplit
-                                                                });
-                                                            }
-                                                        }}
-                                                    />
-                                                    <Label
-                                                        htmlFor={`split-${memberId}`}
-                                                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer hover:text-primary transition-colors"
-                                                    >
-                                                        {member.name}
-                                                    </Label>
-                                                </div>
-                                            );
-                                        })}
-                                    </div>
+                                                                    if (checked) {
+                                                                        currentSplit.push(memberId);
+                                                                    } else {
+                                                                        const index = currentSplit.indexOf(memberId);
+                                                                        if (index > -1) {
+                                                                            currentSplit.splice(index, 1);
+                                                                        }
+                                                                    }
+
+                                                                    if (isEditingExpense && editingExpense) {
+                                                                        setEditingExpense({
+                                                                            ...editingExpense,
+                                                                            splitBetween: currentSplit
+                                                                        });
+                                                                    } else {
+                                                                        setNewExpense({
+                                                                            ...newExpense,
+                                                                            splitBetween: currentSplit
+                                                                        });
+                                                                    }
+                                                                }}
+                                                            />
+                                                            <Label
+                                                                htmlFor={`split-${memberId}`}
+                                                                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer hover:text-primary transition-colors"
+                                                            >
+                                                                {member.name}
+                                                            </Label>
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        </ScrollArea>
+                                    )}
                                 </div>
                             </div>
                             <div className="grid grid-cols-4 items-center gap-4">
