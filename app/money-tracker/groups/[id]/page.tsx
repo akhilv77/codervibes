@@ -205,6 +205,25 @@ export default function GroupDetailsPage({
         }
     };
 
+    // Helper to ensure all required fields are present for EditingExpense
+    function ensureEditingExpense(exp: EditingExpense | null): EditingExpense {
+        if (!exp) throw new Error('editingExpense is null');
+        return {
+            id: exp.id!,
+            groupId: exp.groupId!,
+            description: exp.description!,
+            paidBy: exp.paidBy!,
+            splitBetween: exp.splitBetween!,
+            splitMode: exp.splitMode!,
+            splitDetails: exp.splitDetails!,
+            date: exp.date!,
+            notes: exp.notes || '',
+            amount: exp.amount,
+            createdAt: exp.createdAt!,
+            updatedAt: exp.updatedAt!
+        };
+    }
+
     return (
         <div className="container mx-auto px-4 py-4 sm:py-8">
             <div className="bg-white dark:bg-transparent border-2 rounded-lg shadow-md p-4 sm:p-6 mb-4 sm:mb-6">
@@ -385,9 +404,8 @@ export default function GroupDetailsPage({
                         setIsEditingExpense(false);
                     }
                 }}
-                className="z-[100]"
             >
-                <DialogContent className="sm:max-w-[600px]">
+                <DialogContent className="sm:max-w-[600px] z-[100]">
                     <DialogHeader>
                         <DialogTitle>{isEditingExpense ? 'Edit Expense' : 'Add Expense'}</DialogTitle>
                     </DialogHeader>
@@ -401,8 +419,8 @@ export default function GroupDetailsPage({
                                 id="description"
                                 value={isEditingExpense ? editingExpense?.description : newExpense.description}
                                 onChange={(e) => {
-                                    if (isEditingExpense) {
-                                        setEditingExpense({ ...editingExpense, description: e.target.value });
+                                    if (isEditingExpense && editingExpense) {
+                                        setEditingExpense({ ...ensureEditingExpense(editingExpense), description: e.target.value });
                                     } else {
                                         setNewExpense({ ...newExpense, description: e.target.value });
                                     }
@@ -419,8 +437,8 @@ export default function GroupDetailsPage({
                                 type="number"
                                 value={isEditingExpense ? editingExpense?.amount : newExpense.amount}
                                 onChange={(e) => {
-                                    if (isEditingExpense) {
-                                        setEditingExpense({ ...editingExpense, amount: e.target.value });
+                                    if (isEditingExpense && editingExpense) {
+                                        setEditingExpense({ ...ensureEditingExpense(editingExpense), amount: e.target.value });
                                     } else {
                                         setNewExpense({ ...newExpense, amount: e.target.value });
                                     }
@@ -560,7 +578,7 @@ export default function GroupDetailsPage({
                                                 type="number"
                                                 value={isEditingExpense ? editingExpense?.splitDetails[memberId] || '' : newExpense.splitDetails[memberId] || ''}
                                                 onChange={(e) => {
-                                                    const value = e.target.value;
+                                                    const value = parseFloat(e.target.value) || 0;
                                                     if (isEditingExpense && editingExpense) {
                                                         setEditingExpense({
                                                             ...editingExpense,
@@ -601,7 +619,7 @@ export default function GroupDetailsPage({
                                                 type="number"
                                                 value={isEditingExpense ? editingExpense?.splitDetails[memberId] || '' : newExpense.splitDetails[memberId] || ''}
                                                 onChange={(e) => {
-                                                    const value = e.target.value;
+                                                    const value = parseFloat(e.target.value) || 0;
                                                     if (isEditingExpense && editingExpense) {
                                                         setEditingExpense({
                                                             ...editingExpense,

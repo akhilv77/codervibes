@@ -25,7 +25,7 @@ export const apps: AppConfig[] = [
   {
     id: "money-tracker",
     name: "Money Tracker",
-    description: "Split expenses and track balances with friends and family",
+    description: "Split expenses and track balances with Others",
     href: "/money-tracker",
     icon: Wallet,
     features: [
