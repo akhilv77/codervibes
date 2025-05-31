@@ -6,6 +6,7 @@ import { Toaster } from "@/components/ui/toaster";
 import Script from "next/script";
 import { useAnalytics } from "@/hooks/useAnalytics";
 import { RootPageShell } from "@/components/layout/root-page-shell";
+import { MiniMusicPlayer } from "@/components/ui/mini-music-player";
 
 const inter = Inter({ subsets: ["latin"] });
 

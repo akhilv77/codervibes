@@ -2,7 +2,7 @@
 
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
-import { Moon, Sun, Monitor, AlertTriangle, Info } from "lucide-react";
+import { Moon, Sun, Monitor, AlertTriangle, Info, Volume2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useStore } from "@/lib/store";
 import { useSettingsStore } from "@/lib/stores/settings-store";
@@ -22,6 +22,20 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { BackButton } from "@/components/ui/back-button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Slider,
+} from "@/components/ui/slider";
+import {
+  Checkbox,
+} from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 
 export default function SettingsPage() {
   const { theme, setTheme } = useTheme();
@@ -71,12 +85,12 @@ export default function SettingsPage() {
       </div>
       <div className="container max-w-screen-xl">
         <div className="grid gap-8">
-          {/* Appearance Section */}
+          {/* Theme Preferences Section */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Sun className="h-5 w-5" />
-                Appearance
+                Theme Preferences
               </CardTitle>
               <CardDescription>
                 Customize how the app looks on your device
@@ -121,6 +135,70 @@ export default function SettingsPage() {
             </CardContent>
           </Card>
 
+          {/* Sound Preferences Section */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Volume2 className="h-5 w-5" />
+                Sound Preferences
+              </CardTitle>
+              <CardDescription>
+                Customize your ambient sound preferences
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-6">
+                <div className="space-y-2">
+                  <Label>Default Ambient Sound</Label>
+                  <Select
+                    value={settings.preferredSound}
+                    onValueChange={(value) => {
+                      setSettings({ preferredSound: value });
+                    }}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a sound" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="rain">Rain</SelectItem>
+                      <SelectItem value="forest">Forest</SelectItem>
+                      <SelectItem value="water">Water Stream</SelectItem>
+                      <SelectItem value="waves">Ocean Waves</SelectItem>
+                      <SelectItem value="fire">Crackling Fire</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Default Volume</Label>
+                  <div className="flex items-center gap-4">
+                    <Slider
+                      value={[settings.preferredVolume]}
+                      max={1}
+                      step={0.1}
+                      onValueChange={(value) => {
+                        setSettings({ preferredVolume: value[0] });
+                      }}
+                      className="flex-1"
+                    />
+                    <span className="text-sm text-muted-foreground w-12 text-right">
+                      {Math.round(settings.preferredVolume * 100)}%
+                    </span>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="autoPlay"
+                    checked={settings.autoPlaySound}
+                    onCheckedChange={(checked) => {
+                      setSettings({ autoPlaySound: checked as boolean });
+                    }}
+                  />
+                  <Label htmlFor="autoPlay">Auto-play sound on app start</Label>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Data Management Section */}
           <Card>
             <CardHeader>
@@ -158,12 +236,12 @@ export default function SettingsPage() {
             </CardContent>
           </Card>
 
-          {/* About Section */}
+          {/* App Info Section */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Info className="h-5 w-5" />
-                About Codervibes App
+                App Information
               </CardTitle>
               <CardDescription>
                 App information and resources
