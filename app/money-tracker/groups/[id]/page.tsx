@@ -968,7 +968,7 @@ export default function GroupDetailsPage({
                         <p className="text-gray-500 dark:text-gray-400">No expenses added yet</p>
                         <Button
                             variant="outline"
-                            onClick={() => setIsAddingExpense(true)}
+                            onClick={handleAddExpenseClick}
                             className="mt-4"
                         >
                             Add your first expense
