@@ -291,7 +291,9 @@ export default function MoneyTrackerPage() {
                             .filter((expense: Expense) => expense.groupId === group.id)
                             .reduce((sum: number, expense: Expense) => sum + expense.amount, 0);
 
-                        const memberCount = group.members?.length || 0;
+                        const memberCount = group.members?.filter(memberId => 
+                            members.some(m => m.id === memberId)
+                        ).length || 0;
                         const expenseCount = expenses.filter((expense: Expense) => expense.groupId === group.id).length;
 
                         return (

@@ -65,6 +65,8 @@ export default function GroupDetailsPage({
     const [editingSettlement, setEditingSettlement] = useState<Settlement | null>(null);
     const [deleteConfirmation, setDeleteConfirmation] = useState<{ show: boolean; id: string | null }>({ show: false, id: null });
     const [searchQuery, setSearchQuery] = useState('');
+    const [showNoMembersAlert, setShowNoMembersAlert] = useState(false);
+    const [showNoGroupMembersAlert, setShowNoGroupMembersAlert] = useState(false);
 
     const totalExpenses = expenses
         .filter((expense: Expense) => expense.groupId === params.id)
@@ -82,13 +84,67 @@ export default function GroupDetailsPage({
 
     // Initialize newExpense with group members when group is available
     useEffect(() => {
-        if (group && newExpense.splitBetween.length === 0) {
-            setNewExpense(prev => ({
-                ...prev,
-                splitBetween: group.members
-            }));
+        if (group) {
+            console.log('Group members in useEffect:', {
+                groupId: group.id,
+                groupMembers: group.members,
+                membersLength: group.members?.length || 0,
+                hasMembers: Boolean(group.members && group.members.length > 0),
+                globalMembers: members.map(m => m.id),
+                groupMemberIds: group.members || []
+            });
+            
+            // Check if any global members are actually added to the group
+            const hasGroupMembers = Array.isArray(group.members) && 
+                group.members.length > 0 && 
+                group.members.some(memberId => members.some(m => m.id === memberId));
+
+            if (hasGroupMembers) {
+                setNewExpense(prev => ({
+                    ...prev,
+                    splitBetween: [...group.members],
+                    paidBy: prev.paidBy.length === 0 ? [group.members[0]] : prev.paidBy
+                }));
+            }
         }
-    }, [group]);
+    }, [group, members]);
+
+    const handleAddExpenseClick = useCallback(() => {
+        // Check for global members
+        if (members.length === 0) {
+            setShowNoMembersAlert(true);
+            return;
+        }
+
+        // Check for group members
+        if (!group) {
+            console.error('Group not found');
+            return;
+        }
+
+        // Debug group members
+        console.log('Group members check:', {
+            groupId: group.id,
+            groupMembers: group.members,
+            membersLength: group.members?.length || 0,
+            hasMembers: Boolean(group.members && group.members.length > 0),
+            globalMembers: members.map(m => m.id),
+            groupMemberIds: group.members || []
+        });
+
+        // Check if any global members are actually added to the group
+        const hasGroupMembers = Array.isArray(group.members) && 
+            group.members.length > 0 && 
+            group.members.some(memberId => members.some(m => m.id === memberId));
+        
+        if (!hasGroupMembers) {
+            setShowNoGroupMembersAlert(true);
+            return;
+        }
+
+        // If both checks pass, show add expense dialog
+        setIsAddingExpense(true);
+    }, [members, group]);
 
     const handleAddExpense = useCallback(async () => {
         if (!group) return;
@@ -439,7 +495,7 @@ export default function GroupDetailsPage({
                         <div className="grid gap-4 py-4">
                             <div className="flex justify-end">
                                 <Button asChild variant="outline" size="sm">
-                                    <a href="/money-tracker/members" className="flex items-center">
+                                    <a href={`/money-tracker/members?alert=true&redirect=${group?.id}`} className="flex items-center">
                                         <Plus className="h-4 w-4 mr-2" />
                                         Add New Member
                                     </a>
@@ -846,7 +902,7 @@ export default function GroupDetailsPage({
                         <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Track and manage group expenses</p>
                     </div>
                     <Button
-                        onClick={() => setIsAddingExpense(true)}
+                        onClick={handleAddExpenseClick}
                         className="w-full sm:w-auto"
                     >
                         <PlusIcon className="h-4 w-4 mr-1.5" />
@@ -935,6 +991,60 @@ export default function GroupDetailsPage({
                     </div>
                 )}
             </div>
+
+            {/* No Global Members Alert */}
+            <Dialog open={showNoMembersAlert} onOpenChange={setShowNoMembersAlert}>
+                <DialogContent className="sm:max-w-[425px]">
+                    <DialogHeader>
+                        <DialogTitle>No Members Available</DialogTitle>
+                        <DialogDescription>
+                            You need to add members first before tracking expenses.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter>
+                        <Button
+                            variant="outline"
+                            onClick={() => setShowNoMembersAlert(false)}
+                        >
+                            Cancel
+                        </Button>
+                        <Button asChild>
+                            <a href={`/money-tracker/members?alert=true&redirect=${group?.id}`}>
+                                Add New Member
+                            </a>
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            {/* No Group Members Alert */}
+            <Dialog open={showNoGroupMembersAlert} onOpenChange={setShowNoGroupMembersAlert}>
+                <DialogContent className="sm:max-w-[425px]">
+                    <DialogHeader>
+                        <DialogTitle>No Members in Group</DialogTitle>
+                        <DialogDescription>
+                            You need to add members to this group before tracking expenses.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter>
+                        <Button
+                            variant="outline"
+                            onClick={() => setShowNoGroupMembersAlert(false)}
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            onClick={() => {
+                                setShowNoGroupMembersAlert(false);
+                                setSelectedMembers(group?.members || []);
+                                setIsManagingMembers(true);
+                            }}
+                        >
+                            Manage Group Members
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 } 

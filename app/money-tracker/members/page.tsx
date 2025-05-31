@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useMoneyTracker } from '@/hooks/useMoneyTracker';
 import { Button } from '@/components/ui/button';
 import { getGravatarUrl, getInitials } from '@/lib/utils';
@@ -9,10 +9,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Pencil, Trash2, Search } from 'lucide-react';
+import { Pencil, Trash2, Search, ArrowLeft } from 'lucide-react';
 import { Loading } from '@/components/ui/loading';
+import { useRouter } from 'next/navigation';
 
 export default function MembersPage() {
+    const router = useRouter();
     const {
         members,
         isLoading,
@@ -28,6 +30,21 @@ export default function MembersPage() {
     const [newMemberEmail, setNewMemberEmail] = useState('');
     const [editingMember, setEditingMember] = useState<Member | null>(null);
     const [deleteConfirmation, setDeleteConfirmation] = useState<{ show: boolean; id: string | null }>({ show: false, id: null });
+    const [redirectGroupId, setRedirectGroupId] = useState<string | null>(null);
+
+    // Check for alert and redirect query parameters
+    useEffect(() => {
+        const searchParams = new URLSearchParams(window.location.search);
+        if (searchParams.get('alert') === 'true') {
+            setIsAddingMember(true);
+        }
+        const redirectId = searchParams.get('redirect');
+        if (redirectId) {
+            setRedirectGroupId(redirectId);
+        }
+        // Remove the query parameters from the URL without refreshing the page
+        window.history.replaceState({}, '', '/money-tracker/members');
+    }, []);
 
     if (isLoading) {
         return (
@@ -108,7 +125,19 @@ export default function MembersPage() {
         <div className="container mx-auto py-8">
             <div className="flex justify-between items-center mb-8">
                 <h1 className="text-3xl font-bold">Members</h1>
-                <Button onClick={() => setIsAddingMember(true)}>Add Member</Button>
+                <div className="flex items-center gap-2">
+                    {redirectGroupId && (
+                        <Button
+                            variant="outline"
+                            onClick={() => router.push(`/money-tracker/groups/${redirectGroupId}`)}
+                            className="flex items-center gap-2"
+                        >
+                            <ArrowLeft className="h-4 w-4" />
+                            Back to Group
+                        </Button>
+                    )}
+                    <Button onClick={() => setIsAddingMember(true)}>Add Member</Button>
+                </div>
             </div>
 
             <Dialog open={isAddingMember || isEditingMember} onOpenChange={(open) => {
@@ -124,7 +153,7 @@ export default function MembersPage() {
                     <DialogHeader>
                         <DialogTitle>{isEditingMember ? 'Edit Member' : 'Add New Member'}</DialogTitle>
                         <DialogDescription>
-                            {isEditingMember ? 'Update the member details below.' : 'Add a new member to your expense tracking group.'}
+                            {isEditingMember ? 'Update the member details below.' : 'Add a new member to track expenses.'}
                         </DialogDescription>
                     </DialogHeader>
                     <div className="grid gap-4 py-4">
