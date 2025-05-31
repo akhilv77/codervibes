@@ -14,8 +14,11 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { AlertCircle } from "lucide-react";
 import { Loading } from "@/components/ui/loading";
+import { useRouter, useSearchParams } from "next/navigation";
 
 export default function PlayersPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -35,8 +38,16 @@ export default function PlayersPage() {
     const timer = setTimeout(() => {
       setIsLoading(false);
     }, 500);
+
+    // Check for auto parameter
+    if (searchParams?.get('auto') === 'true') {
+      setAddDialogOpen(true);
+      // Clean up the URL
+      router.replace('/scorecard/players');
+    }
+
     return () => clearTimeout(timer);
-  }, []);
+  }, [searchParams, router]);
 
   const handleAddPlayer = () => {
     if (playerName.trim()) {

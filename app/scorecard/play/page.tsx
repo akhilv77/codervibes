@@ -189,7 +189,7 @@ export default function PlayPage() {
               {!selectedGameId && (
                 <div className="self-end">
                   <Button asChild variant="outline">
-                    <a href="/">Create New Game</a>
+                    <a href="/scorecard?auto=true">Create New Game</a>
                   </Button>
                 </div>
               )}

@@ -26,9 +26,12 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useServiceTracking } from '@/hooks/useServiceTracking';
 import { Loading } from "@/components/ui/loading";
+import { useRouter, useSearchParams } from "next/navigation";
 
 export default function GamesPage() {
   const { trackServiceUsage } = useServiceTracking();
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [open, setOpen] = useState(false);
   const [gameName, setGameName] = useState("");
   const [maxScore, setMaxScore] = useState<string>("");
@@ -56,8 +59,16 @@ export default function GamesPage() {
     const timer = setTimeout(() => {
       setIsLoading(false);
     }, 500);
+
+    // Check for auto parameter
+    if (searchParams?.get('auto') === 'true') {
+      setOpen(true);
+      // Clean up the URL
+      router.replace('/scorecard');
+    }
+
     return () => clearTimeout(timer);
-  }, []);
+  }, [searchParams, router]);
 
   const handleMaxScoreChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -200,7 +211,7 @@ export default function GamesPage() {
                             No players available. Create players to start a game.
                           </p>
                           <Button asChild variant="outline" className="w-full sm:w-auto">
-                            <a href="/scorecard/players" className="flex items-center justify-center">
+                            <a href="/scorecard/players?auto=true" className="flex items-center justify-center">
                               <Plus className="h-4 w-4 mr-2" />
                               Create Players
                             </a>
