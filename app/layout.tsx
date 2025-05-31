@@ -7,12 +7,14 @@ import Script from "next/script";
 import { useAnalytics } from "@/hooks/useAnalytics";
 import { RootPageShell } from "@/components/layout/root-page-shell";
 import { MiniMusicPlayer } from "@/components/ui/mini-music-player";
+import { MusicProvider } from "@/components/providers/music-provider";
+import { TimerProvider } from "@/components/providers/timer-provider";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "CoderVibes - Tools for Developers",
-  description: "A collection of useful tools for developers",
+  title: "Coder Vibes",
+  description: "Your coding companion for focus and productivity",
 };
 
 export default function RootLayout({
@@ -49,9 +51,13 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <RootPageShell>
-            {children}
-          </RootPageShell>
+          <MusicProvider>
+            <TimerProvider>
+              <RootPageShell>
+                {children}
+              </RootPageShell>
+            </TimerProvider>
+          </MusicProvider>
           <Toaster />
         </ThemeProvider>
       </body>

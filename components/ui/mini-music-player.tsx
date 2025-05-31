@@ -9,6 +9,8 @@ import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useSettingsStore } from '@/lib/stores/settings-store';
 import { motion, AnimatePresence } from 'framer-motion';
+import { cn } from '@/lib/utils';
+import { useMusic } from '@/components/providers/music-provider';
 
 const AMBIENT_SOUNDS = {
   rain: {
@@ -22,12 +24,12 @@ const AMBIENT_SOUNDS = {
     icon: '🌲',
   },
   water: {
-    name: 'Water Stream',
+    name: 'Water',
     url: '/sounds/water.mp3',
     icon: '💧',
   },
   waves: {
-    name: 'Ocean Waves',
+    name: 'Waves',
     url: '/sounds/waves.mp3',
     icon: '🌊',
   },
@@ -41,14 +43,21 @@ const AMBIENT_SOUNDS = {
 type SoundKey = keyof typeof AMBIENT_SOUNDS;
 
 export function MiniMusicPlayer() {
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [dialogPosition, setDialogPosition] = useState<'top' | 'bottom'>('bottom');
-  const [isLoading, setIsLoading] = useState(true);
   const { settings, setSettings } = useSettingsStore();
   const playerRef = useRef<HTMLDivElement>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const { isPlaying, setIsPlaying, currentSound, setCurrentSound } = useMusic();
+
+  // Set default sound if none is selected
+  useEffect(() => {
+    if (!currentSound) {
+      setCurrentSound('rain');
+    }
+  }, [currentSound, setCurrentSound]);
 
   // Update dialog position based on available space
   useEffect(() => {
@@ -89,11 +98,6 @@ export function MiniMusicPlayer() {
     };
   }, []);
 
-  // Ensure we have a valid sound
-  const currentSound = AMBIENT_SOUNDS[settings.preferredSound as SoundKey] 
-    ? settings.preferredSound 
-    : 'rain';
-
   // Load saved preferences
   useEffect(() => {
     if (settings.autoPlaySound) {
@@ -103,20 +107,20 @@ export function MiniMusicPlayer() {
 
   // Handle audio playback
   useEffect(() => {
-    if (audio) {
-      audio.volume = settings.preferredVolume;
+    if (audioRef.current) {
+      audioRef.current.volume = settings.preferredVolume;
       if (isPlaying) {
-        audio.play();
+        audioRef.current.play();
       } else {
-        audio.pause();
+        audioRef.current.pause();
       }
     }
-  }, [isPlaying, settings.preferredVolume, audio]);
+  }, [isPlaying, settings.preferredVolume, audioRef]);
 
   // Create new audio when sound changes
   useEffect(() => {
-    if (audio) {
-      audio.pause();
+    if (audioRef.current) {
+      audioRef.current.pause();
     }
 
     const sound = AMBIENT_SOUNDS[currentSound as SoundKey];
@@ -126,35 +130,33 @@ export function MiniMusicPlayer() {
     }
 
     setIsLoading(true);
-    const newAudio = new Audio(sound.url);
-    newAudio.loop = true;
-    newAudio.volume = settings.preferredVolume;
+    audioRef.current = new Audio(sound.url);
+    audioRef.current.loop = true;
+    audioRef.current.volume = settings.preferredVolume;
     
     // Add event listener for when audio ends to ensure looping
-    newAudio.addEventListener('ended', () => {
-      newAudio.currentTime = 0;
-      newAudio.play();
+    audioRef.current.addEventListener('ended', () => {
+      audioRef.current!.currentTime = 0;
+      audioRef.current!.play();
     });
 
     // Add event listener for when audio is loaded
-    newAudio.addEventListener('canplaythrough', () => {
+    audioRef.current.addEventListener('canplaythrough', () => {
       setIsLoading(false);
       if (isPlaying) {
-        newAudio.play().catch(error => {
+        audioRef.current!.play().catch(error => {
           console.error('Error playing audio:', error);
         });
       }
     });
-    
-    setAudio(newAudio);
 
     return () => {
-      newAudio.pause();
-      newAudio.removeEventListener('ended', () => {
-        newAudio.currentTime = 0;
-        newAudio.play();
+      audioRef.current!.pause();
+      audioRef.current!.removeEventListener('ended', () => {
+        audioRef.current!.currentTime = 0;
+        audioRef.current!.play();
       });
-      newAudio.removeEventListener('canplaythrough', () => {
+      audioRef.current!.removeEventListener('canplaythrough', () => {
         setIsLoading(false);
       });
     };
@@ -165,14 +167,45 @@ export function MiniMusicPlayer() {
     setSettings({ preferredVolume: newVolume });
   };
 
-  const handleSoundChange = (value: string) => {
-    if (value in AMBIENT_SOUNDS) {
-      setSettings({ preferredSound: value });
+  const handleSoundSelect = async (sound: { name: string; url: string }) => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      setIsPlaying(false);
     }
+
+    setCurrentSound(sound.name);
+    audioRef.current = new Audio(sound.url);
+    audioRef.current.loop = true;
+
+    try {
+      setIsLoading(true);
+      await audioRef.current.play();
+      setIsPlaying(true);
+    } catch (error) {
+      console.error('Error playing audio:', error);
+    } finally {
+      setIsLoading(false);
+    }
+    setShowSettings(false);
   };
 
-  const togglePlay = () => {
-    setIsPlaying(!isPlaying);
+  const togglePlay = async () => {
+    if (!audioRef.current) return;
+
+    if (isPlaying) {
+      audioRef.current.pause();
+      setIsPlaying(false);
+    } else {
+      try {
+        setIsLoading(true);
+        await audioRef.current.play();
+        setIsPlaying(true);
+      } catch (error) {
+        console.error('Error playing audio:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
   };
 
   return (
@@ -213,7 +246,7 @@ export function MiniMusicPlayer() {
             )}
           </Button>
           <div className="flex items-center gap-1 sm:gap-2 relative z-10">
-            {!isLoading && (
+            {!isLoading && currentSound && (
               <>
                 <motion.span 
                   className="text-lg sm:text-xl"
@@ -227,10 +260,10 @@ export function MiniMusicPlayer() {
                     ease: "easeInOut",
                   }}
                 >
-                  {AMBIENT_SOUNDS[currentSound as SoundKey].icon}
+                  {AMBIENT_SOUNDS[currentSound as SoundKey]?.icon}
                 </motion.span>
                 <span className="text-xs sm:text-sm font-medium whitespace-nowrap">
-                  {AMBIENT_SOUNDS[currentSound as SoundKey].name}
+                  {AMBIENT_SOUNDS[currentSound as SoundKey]?.name}
                 </span>
               </>
             )}
@@ -261,16 +294,21 @@ export function MiniMusicPlayer() {
               <div className="space-y-2">
                 <Label>Ambient Sound</Label>
                 <RadioGroup
-                  value={currentSound}
-                  onValueChange={handleSoundChange}
+                  value={currentSound || 'rain'}
+                  onValueChange={(value) => {
+                    const sound = AMBIENT_SOUNDS[value as SoundKey];
+                    if (sound) {
+                      handleSoundSelect(sound);
+                    }
+                  }}
                   className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4"
                 >
                   {Object.entries(AMBIENT_SOUNDS).map(([key, sound]) => (
                     <div key={key} className="flex items-center space-x-2">
                       <RadioGroupItem value={key} id={key} />
-                      <Label htmlFor={key} className="flex items-center gap-2 text-sm">
-                        <span>{sound.icon}</span>
-                        {sound.name}
+                      <Label htmlFor={key} className="flex items-center gap-2">
+                        {sound.icon}
+                        <span>{sound.name}</span>
                       </Label>
                     </div>
                   ))}

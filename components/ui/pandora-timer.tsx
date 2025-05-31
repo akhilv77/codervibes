@@ -6,17 +6,25 @@ import { Input } from '@/components/ui/input';
 import { Play, Pause, Timer, Bell, RotateCcw } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
+import { useTimer } from '@/components/providers/timer-provider';
 
 export function PandoraTimer() {
-  const [isRunning, setIsRunning] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(0);
-  const [initialTime, setInitialTime] = useState(0);
   const [showInput, setShowInput] = useState(false);
-  const [minutes, setMinutes] = useState('');
-  const [seconds, setSeconds] = useState('');
   const [hasNotificationPermission, setHasNotificationPermission] = useState(false);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const notificationSentRef = useRef(false);
+  const {
+    isRunning,
+    setIsRunning,
+    timeLeft,
+    setTimeLeft,
+    initialTime,
+    setInitialTime,
+    minutes,
+    setMinutes,
+    seconds,
+    setSeconds
+  } = useTimer();
 
   // Check notification permission on mount
   useEffect(() => {
@@ -68,14 +76,14 @@ export function PandoraTimer() {
     if (isRunning && timeLeft > 0) {
       notificationSentRef.current = false;
       timerRef.current = setInterval(() => {
-        setTimeLeft((prev) => {
-          if (prev <= 1) {
-            clearInterval(timerRef.current!);
-            handleTimerComplete();
-            return 0;
-          }
-          return prev - 1;
-        });
+        const newTime = timeLeft - 1;
+        if (newTime <= 0) {
+          clearInterval(timerRef.current!);
+          handleTimerComplete();
+          setTimeLeft(0);
+        } else {
+          setTimeLeft(newTime);
+        }
       }, 1000);
     }
 
@@ -100,16 +108,6 @@ export function PandoraTimer() {
     }
   };
 
-  const toggleTimer = () => {
-    if (isRunning) {
-      setIsRunning(false);
-    } else if (timeLeft > 0) {
-      setIsRunning(true);
-    } else {
-      setShowInput(true);
-    }
-  };
-
   const resetTimer = () => {
     setIsRunning(false);
     setTimeLeft(0);
@@ -120,6 +118,16 @@ export function PandoraTimer() {
     notificationSentRef.current = false;
     if (timerRef.current) {
       clearInterval(timerRef.current);
+    }
+  };
+
+  const toggleTimer = () => {
+    if (isRunning) {
+      setIsRunning(false);
+    } else if (timeLeft > 0) {
+      setIsRunning(true);
+    } else {
+      setShowInput(true);
     }
   };
 
