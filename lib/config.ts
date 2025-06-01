@@ -1,4 +1,4 @@
-import { Trophy, Wallet, type LucideIcon, DollarSign, BadgeDollarSignIcon, Globe, Calculator, LineChart, Code, FileJson } from "lucide-react";
+import { Trophy, Wallet, type LucideIcon, DollarSign, BadgeDollarSignIcon, Globe, Calculator, LineChart, Code, FileJson, Key } from "lucide-react";
 
 export interface AppConfig {
   id: string;
@@ -83,6 +83,19 @@ export const apps: AppConfig[] = [
       "Minification",
       "Validation",
       "History tracking"
+    ]
+  },
+  {
+    id: 'jwt-decoder',
+    name: 'JWT Decoder',
+    description: 'Decode and inspect JSON Web Tokens',
+    href: '/jwt-decoder',
+    icon: Key,
+    features: [
+      'Pretty JSON View',
+      'Signature Verification',
+      'Token Expiry Check',
+      'Algorithm Warnings'
     ]
   }
 ]; 

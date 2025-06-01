@@ -1,6 +1,6 @@
 import { openDB, DBSchema, IDBPDatabase } from 'idb';
 
-export type StoreNames = 'settings' | 'currencyRates' | 'moneyTracker' | 'scorecard' | 'ipTracker' | 'regex' | 'regexTester' | 'jsonFormatter';
+export type StoreNames = 'settings' | 'currencyRates' | 'moneyTracker' | 'scorecard' | 'ipTracker' | 'regex' | 'regexTester' | 'jsonFormatter' | 'jwtDecoder';
 
 interface CoderVibesDB extends DBSchema {
   settings: {
@@ -21,7 +21,7 @@ interface CoderVibesDB extends DBSchema {
   };
   ipTracker: {
     key: string;
-    value: any;
+    value: string[];
   };
   regex: {
     key: string;
@@ -32,6 +32,10 @@ interface CoderVibesDB extends DBSchema {
     value: any;
   };
   jsonFormatter: {
+    key: string;
+    value: any;
+  };
+  jwtDecoder: {
     key: string;
     value: any;
   };
@@ -57,7 +61,7 @@ class IndexedDBService {
 
     this.initPromise = (async () => {
       try {
-        this.db = await openDB<CoderVibesDB>('codervibes', 5, {
+        this.db = await openDB<CoderVibesDB>('codervibes', 6, {
           upgrade(db, oldVersion, newVersion) {
             // Create stores if they don't exist
             if (!db.objectStoreNames.contains('settings')) {
@@ -83,6 +87,9 @@ class IndexedDBService {
             }
             if (!db.objectStoreNames.contains('jsonFormatter')) {
               db.createObjectStore('jsonFormatter');
+            }
+            if (!db.objectStoreNames.contains('jwtDecoder')) {
+              db.createObjectStore('jwtDecoder');
             }
           },
         });
