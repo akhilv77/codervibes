@@ -7,11 +7,12 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { Copy, Check, AlertCircle, Info, History, Clock, Code } from "lucide-react";
+import { Copy, Check, AlertCircle, Info, History, Clock, Code, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { RegexTesterPageShell } from '@/components/layout/regex-tester-page-shell';
 import { useServiceTracking } from '@/hooks/useServiceTracking';
 import { useRegexStore } from '@/lib/regex-store';
+import { useServiceUsage } from '@/lib/hooks/use-service-usage';
 
 interface Match {
     index: number;
@@ -21,10 +22,18 @@ interface Match {
 
 export default function RegexTester() {
     const { trackServiceUsage } = useServiceTracking();
-    const { history, addToHistory, loadHistory } = useRegexStore();
+    const { history, addToHistory, loadHistory, clearHistory } = useRegexStore();
+    const { trackUsage } = useServiceUsage();
     const [pattern, setPattern] = useState('');
     const [testString, setTestString] = useState('');
-    const [flags, setFlags] = useState('g');
+    const [flags, setFlags] = useState({
+        g: true,
+        i: false,
+        m: false,
+        s: false,
+        u: false,
+        y: false
+    });
     const [matches, setMatches] = useState<Match[]>([]);
     const [copied, setCopied] = useState<string | null>(null);
 
@@ -75,7 +84,12 @@ export default function RegexTester() {
                 return;
             }
 
-            const regex = new RegExp(pattern, flags);
+            const flagString = Object.entries(flags)
+                .filter(([_, enabled]) => enabled)
+                .map(([flag]) => flag)
+                .join('');
+
+            const regex = new RegExp(pattern, flagString);
             const matches: Match[] = [];
             let match;
 
@@ -95,10 +109,11 @@ export default function RegexTester() {
 
             setMatches(matches);
             if (pattern) {
-                addToHistory(pattern, flags);
+                addToHistory(pattern, flagString);
             }
             toast.success(`Found ${matches.length} match${matches.length !== 1 ? 'es' : ''} in the test string`);
             trackServiceUsage('Regex Tester', 'regex_test', `Pattern: ${pattern}`);
+            trackUsage('regex-tester', 'test');
         } catch (err) {
             if (testString.trim()) {
                 toast.error(getErrorMessage(err));
@@ -118,20 +133,37 @@ export default function RegexTester() {
         }
     };
 
-    const toggleFlag = (flag: string) => {
-        const newFlags = flags.includes(flag)
-            ? flags.replace(flag, '')
-            : flags + flag;
-        setFlags(newFlags);
+    const toggleFlag = (flag: keyof typeof flags) => {
+        setFlags(prev => ({ ...prev, [flag]: !prev[flag] }));
     };
 
     const loadHistoryItem = (pattern: string, flags: string) => {
         setPattern(pattern);
-        setFlags(flags);
+        setFlags({
+            g: flags.includes('g'),
+            i: flags.includes('i'),
+            m: flags.includes('m'),
+            s: flags.includes('s'),
+            u: flags.includes('u'),
+            y: flags.includes('y')
+        });
         // Add a small delay to ensure state updates before testing
         setTimeout(() => {
             testRegex();
         }, 0);
+    };
+
+    const handleHistoryClick = (pattern: string, flags: string) => {
+        setPattern(pattern);
+        setFlags({
+            g: flags.includes('g'),
+            i: flags.includes('i'),
+            m: flags.includes('m'),
+            s: flags.includes('s'),
+            u: flags.includes('u'),
+            y: flags.includes('y')
+        });
+        setMatches([]);
     };
 
     return (
@@ -146,7 +178,7 @@ export default function RegexTester() {
 
                 <div className="grid gap-6 sm:gap-8">
                     <Card>
-                        <CardHeader className="pb-4">
+                        <CardHeader className="pb-4 mb-4">
                             <div className="flex items-center justify-between">
                                 <div>
                                     <CardTitle className="text-xl sm:text-2xl flex items-center gap-2">
@@ -196,12 +228,12 @@ export default function RegexTester() {
                                 <div className="space-y-3">
                                     <Label className="text-sm font-medium">Flags</Label>
                                     <div className="flex flex-wrap gap-2 p-3 rounded-lg bg-muted/50 border border-muted-foreground/20">
-                                        {['g', 'i', 'm', 's', 'u', 'y'].map((flag) => (
+                                        {Object.entries(flags).map(([flag, enabled]) => (
                                             <Badge
                                                 key={flag}
-                                                variant={flags.includes(flag) ? "default" : "secondary"}
+                                                variant={enabled ? "default" : "secondary"}
                                                 className="cursor-pointer hover:bg-primary/10 transition-colors h-8 px-3 text-sm"
-                                                onClick={() => toggleFlag(flag)}
+                                                onClick={() => toggleFlag(flag as keyof typeof flags)}
                                             >
                                                 <div className="flex items-center gap-2">
                                                     <span className="font-mono">{flag}</span>
