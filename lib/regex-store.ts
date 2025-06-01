@@ -20,31 +20,28 @@ export const useRegexStore = create<RegexState>((set) => ({
     history: [],
 
     addToHistory: async (pattern: string, flags: string) => {
-        const newEntry: RegexHistory = {
-            pattern,
-            flags,
-            timestamp: Date.now()
-        };
-
         set((state) => {
-            const updatedHistory = [newEntry, ...state.history].slice(0, 10); // Keep last 10 entries
-            db.set('regex', 'history', updatedHistory);
-            return { history: updatedHistory };
+            const newHistory = [
+                { pattern, flags, timestamp: Date.now() },
+                ...state.history.filter(item => item.pattern !== pattern || item.flags !== flags)
+            ].slice(0, 10);
+            db.set('regexTester', 'history', newHistory);
+            return { history: newHistory };
         });
     },
 
     clearHistory: async () => {
         set({ history: [] });
-        await db.delete('regex', 'history');
+        await db.delete('regexTester', 'history');
     },
 
     loadHistory: async () => {
         try {
-            const history = await db.get('regex', 'history') || [];
+            const history = (await db.get<RegexHistory[]>('regexTester', 'history')) || [];
             set({ history });
         } catch (error) {
             console.error('Error loading regex history:', error);
             set({ history: [] });
         }
-    }
+    },
 })); 

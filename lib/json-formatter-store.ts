@@ -36,7 +36,7 @@ export const useJSONFormatterStore = create<JSONFormatterState>((set) => ({
 
     loadHistory: async () => {
         try {
-            const history = await db.get('jsonFormatter', 'history') || [];
+            const history = (await db.get<JSONHistory[]>('jsonFormatter', 'history')) || [];
             set({ history });
         } catch (error) {
             console.error('Error loading JSON history:', error);

@@ -28,7 +28,7 @@ export const useIPTrackerStore = create<IPTrackerState>((set) => ({
 
   loadHistory: async () => {
     try {
-      const history = await db.get('ipTracker', 'history') || [];
+      const history = (await db.get<string[]>('ipTracker', 'history')) || [];
       set({ searchHistory: history });
     } catch (error) {
       console.error('Error loading IP history:', error);
