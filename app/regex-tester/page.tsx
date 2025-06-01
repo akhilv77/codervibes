@@ -176,29 +176,29 @@ export default function RegexTester() {
                     </div>
                 </div>
 
-                <div className="grid gap-6 sm:gap-8">
+                <div className="grid gap-4 sm:gap-6">
                     <Card>
-                        <CardHeader className="pb-4 mb-4">
-                            <div className="flex items-center justify-between">
+                        <CardHeader className="p-4 sm:p-6">
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                                 <div>
-                                    <CardTitle className="text-xl sm:text-2xl flex items-center gap-2">
-                                        <Code className="h-5 w-5" />
+                                    <CardTitle className="text-lg sm:text-xl flex items-center gap-2">
+                                        <Code className="h-4 w-4 sm:h-5 sm:w-5" />
                                         Regular Expression
                                     </CardTitle>
-                                    <CardDescription className="text-sm mt-1">
+                                    <CardDescription className="text-xs sm:text-sm mt-1">
                                         Enter your pattern and test string
                                     </CardDescription>
                                 </div>
-                                <Badge variant="outline" className="text-xs">
+                                <Badge variant="outline" className="text-xs w-fit">
                                     Real-time Testing
                                 </Badge>
                             </div>
                         </CardHeader>
-                        <CardContent>
-                            <div className="space-y-6">
-                                <div className="space-y-3">
-                                    <Label className="text-sm flex items-center gap-2 font-medium">
-                                        <Info className="h-4 w-4 text-muted-foreground" />
+                        <CardContent className="p-4 sm:p-6">
+                            <div className="space-y-4 sm:space-y-6">
+                                <div className="space-y-2 sm:space-y-3">
+                                    <Label className="text-xs sm:text-sm flex items-center gap-2 font-medium">
+                                        <Info className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
                                         Pattern
                                     </Label>
                                     <div className="relative group">
@@ -206,7 +206,7 @@ export default function RegexTester() {
                                             value={pattern}
                                             onChange={(e) => setPattern(e.target.value)}
                                             placeholder="Enter your regular expression"
-                                            className="font-mono h-12 text-base bg-muted/50 border-muted-foreground/20 focus:border-primary/50 transition-colors"
+                                            className="font-mono h-10 sm:h-12 text-sm sm:text-base bg-muted/50 border-muted-foreground/20 focus:border-primary/50 transition-colors"
                                         />
                                         <div className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity">
                                             <Button
@@ -225,19 +225,19 @@ export default function RegexTester() {
                                     </div>
                                 </div>
 
-                                <div className="space-y-3">
-                                    <Label className="text-sm font-medium">Flags</Label>
-                                    <div className="flex flex-wrap gap-2 p-3 rounded-lg bg-muted/50 border border-muted-foreground/20">
+                                <div className="space-y-2 sm:space-y-3">
+                                    <Label className="text-xs sm:text-sm font-medium">Flags</Label>
+                                    <div className="flex flex-wrap gap-2 p-2 sm:p-3 rounded-lg bg-muted/50 border border-muted-foreground/20">
                                         {Object.entries(flags).map(([flag, enabled]) => (
                                             <Badge
                                                 key={flag}
                                                 variant={enabled ? "default" : "secondary"}
-                                                className="cursor-pointer hover:bg-primary/10 transition-colors h-8 px-3 text-sm"
+                                                className="cursor-pointer hover:bg-primary/10 transition-colors h-7 sm:h-8 px-2 sm:px-3 text-xs sm:text-sm"
                                                 onClick={() => toggleFlag(flag as keyof typeof flags)}
                                             >
-                                                <div className="flex items-center gap-2">
+                                                <div className="flex items-center gap-1 sm:gap-2">
                                                     <span className="font-mono">{flag}</span>
-                                                    <span className="text-xs opacity-70">
+                                                    <span className="text-[10px] sm:text-xs opacity-70">
                                                         {flag === 'g' ? '(global)' :
                                                          flag === 'i' ? '(case-insensitive)' :
                                                          flag === 'm' ? '(multiline)' :
@@ -251,9 +251,9 @@ export default function RegexTester() {
                                     </div>
                                 </div>
 
-                                <div className="space-y-3">
-                                    <Label className="text-sm flex items-center gap-2 font-medium">
-                                        <Info className="h-4 w-4 text-muted-foreground" />
+                                <div className="space-y-2 sm:space-y-3">
+                                    <Label className="text-xs sm:text-sm flex items-center gap-2 font-medium">
+                                        <Info className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
                                         Test String
                                     </Label>
                                     <div className="relative group">
@@ -261,7 +261,7 @@ export default function RegexTester() {
                                             value={testString}
                                             onChange={(e) => setTestString(e.target.value)}
                                             placeholder="Enter text to test against"
-                                            className="min-h-[120px] font-mono text-base bg-muted/50 border-muted-foreground/20 focus:border-primary/50 transition-colors resize-none"
+                                            className="min-h-[100px] sm:min-h-[120px] font-mono text-sm sm:text-base bg-muted/50 border-muted-foreground/20 focus:border-primary/50 transition-colors resize-none"
                                         />
                                         <div className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                             <Button
@@ -282,7 +282,7 @@ export default function RegexTester() {
 
                                 <Button 
                                     onClick={testRegex} 
-                                    className="w-full sm:w-auto h-12 px-6 text-base font-medium bg-primary hover:bg-primary/90 transition-colors"
+                                    className="w-full md:w-fit h-9 sm:h-10 text-sm sm:text-base font-medium"
                                 >
                                     Test Pattern
                                 </Button>
@@ -292,34 +292,44 @@ export default function RegexTester() {
 
                     {history.length > 0 && (
                         <Card>
-                            <CardHeader className="pb-4">
-                                <div className="flex items-center justify-between">
+                            <CardHeader className="p-4 sm:p-6">
+                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                                     <div className="flex items-center gap-2">
-                                        <History className="h-5 w-5" />
-                                        <CardTitle className="text-xl sm:text-2xl">Recent Patterns</CardTitle>
+                                        <History className="h-4 w-4 sm:h-5 sm:w-5" />
+                                        <CardTitle className="text-lg sm:text-xl">Recent Patterns</CardTitle>
                                     </div>
-                                    <Badge variant="outline" className="text-xs">
-                                        Last 10 patterns
-                                    </Badge>
+                                    <div className="flex items-center gap-2">
+                                        <Badge variant="outline" className="text-xs">
+                                            Last 10 patterns
+                                        </Badge>
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            className="h-8 w-8"
+                                            onClick={clearHistory}
+                                        >
+                                            <Trash2 className="h-4 w-4" />
+                                        </Button>
+                                    </div>
                                 </div>
-                                <CardDescription className="text-sm">
+                                <CardDescription className="text-xs sm:text-sm">
                                     Your recently used regular expressions
                                 </CardDescription>
                             </CardHeader>
-                            <CardContent>
+                            <CardContent className="p-4 sm:p-6">
                                 <div className="flex flex-wrap gap-2">
                                     {history.map((item, index) => (
                                         <Badge
                                             key={index}
                                             variant="secondary"
-                                            className="cursor-pointer hover:bg-secondary/80 transition-colors"
+                                            className="cursor-pointer hover:bg-secondary/80 transition-colors h-7 sm:h-8 px-2 sm:px-3"
                                             onClick={() => loadHistoryItem(item.pattern, item.flags)}
                                         >
-                                            <div className="flex items-center gap-2">
-                                                <Clock className="h-3 w-3" />
-                                                <span className="font-mono">{item.pattern}</span>
+                                            <div className="flex items-center gap-1 sm:gap-2">
+                                                <Clock className="h-3 w-3 sm:h-4 sm:w-4" />
+                                                <span className="font-mono text-xs sm:text-sm">{item.pattern}</span>
                                                 {item.flags && (
-                                                    <span className="text-xs opacity-70">
+                                                    <span className="text-[10px] sm:text-xs opacity-70">
                                                         /{item.flags}
                                                     </span>
                                                 )}
@@ -333,44 +343,44 @@ export default function RegexTester() {
 
                     {matches.length > 0 && (
                         <Card>
-                            <CardHeader className="pb-4">
-                                <CardTitle className="text-xl sm:text-2xl">Matches</CardTitle>
-                                <CardDescription className="text-sm">
+                            <CardHeader className="p-4 sm:p-6">
+                                <CardTitle className="text-lg sm:text-xl">Matches</CardTitle>
+                                <CardDescription className="text-xs sm:text-sm">
                                     Found {matches.length} match{matches.length !== 1 ? 'es' : ''}
                                 </CardDescription>
                             </CardHeader>
-                            <CardContent>
-                                <div className="space-y-4">
+                            <CardContent className="p-4 sm:p-6">
+                                <div className="space-y-3 sm:space-y-4">
                                     {matches.map((match, index) => (
-                                        <div key={index} className="p-4 rounded-lg border bg-card">
+                                        <div key={index} className="p-3 sm:p-4 rounded-lg border bg-card">
                                             <div className="flex items-center justify-between mb-2">
-                                                <div className="text-sm font-medium text-muted-foreground">
+                                                <div className="text-xs sm:text-sm font-medium text-muted-foreground">
                                                     Match {index + 1} at index {match.index}
                                                 </div>
                                                 <Button
                                                     variant="ghost"
                                                     size="icon"
-                                                    className="h-8 w-8"
+                                                    className="h-7 w-7 sm:h-8 sm:w-8"
                                                     onClick={() => copyToClipboard(match.match, `Match ${index + 1}`)}
                                                 >
                                                     {copied === `Match ${index + 1}` ? (
-                                                        <Check className="h-4 w-4 text-green-500" />
+                                                        <Check className="h-3 w-3 sm:h-4 sm:w-4 text-green-500" />
                                                     ) : (
-                                                        <Copy className="h-4 w-4" />
+                                                        <Copy className="h-3 w-3 sm:h-4 sm:w-4" />
                                                     )}
                                                 </Button>
                                             </div>
-                                            <div className="font-mono bg-muted/50 p-2 rounded">
+                                            <div className="font-mono text-xs sm:text-sm bg-muted/50 p-2 rounded">
                                                 {match.match}
                                             </div>
                                             {match.groups.length > 0 && (
                                                 <div className="mt-2">
-                                                    <div className="text-sm font-medium text-muted-foreground mb-1">
+                                                    <div className="text-xs sm:text-sm font-medium text-muted-foreground mb-1">
                                                         Capture Groups
                                                     </div>
                                                     <div className="space-y-1">
                                                         {match.groups.map((group, groupIndex) => (
-                                                            <div key={groupIndex} className="font-mono bg-muted/50 p-2 rounded">
+                                                            <div key={groupIndex} className="font-mono text-xs sm:text-sm bg-muted/50 p-2 rounded">
                                                                 Group {groupIndex + 1}: {group}
                                                             </div>
                                                         ))}
