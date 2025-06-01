@@ -10,25 +10,29 @@ interface IPTrackerState {
   loadHistory: () => Promise<void>;
 }
 
-export const useIPTrackerStore = create<IPTrackerState>((set, get) => ({
+export const useIPTrackerStore = create<IPTrackerState>((set) => ({
   searchHistory: [],
 
   addToHistory: async (ip: string) => {
-    const currentHistory = get().searchHistory;
-    const newHistory = [ip, ...currentHistory.filter(i => i !== ip)].slice(0, 5);
-    set({ searchHistory: newHistory });
-    await db.set('ipTracker', 'searchHistory', newHistory);
+    set((state) => {
+      const updatedHistory = [ip, ...state.searchHistory.filter(item => item !== ip)].slice(0, 10);
+      db.set('ipTracker', 'history', updatedHistory);
+      return { searchHistory: updatedHistory };
+    });
   },
 
   clearHistory: async () => {
     set({ searchHistory: [] });
-    await db.set('ipTracker', 'searchHistory', []);
+    await db.delete('ipTracker', 'history');
   },
 
   loadHistory: async () => {
-    const history = await db.get<string[]>('ipTracker', 'searchHistory');
-    if (history) {
+    try {
+      const history = await db.get('ipTracker', 'history') || [];
       set({ searchHistory: history });
+    } catch (error) {
+      console.error('Error loading IP history:', error);
+      set({ searchHistory: [] });
     }
   },
 })); 

@@ -1,4 +1,4 @@
-import { Trophy, Wallet, type LucideIcon, DollarSign, BadgeDollarSignIcon, Globe } from "lucide-react";
+import { Trophy, Wallet, type LucideIcon, DollarSign, BadgeDollarSignIcon, Globe, Calculator, LineChart, Code } from "lucide-react";
 
 export interface AppConfig {
   id: string;
@@ -57,6 +57,19 @@ export const apps: AppConfig[] = [
       "Network information",
       "Interactive map view",
       "Browser & device details"
+    ]
+  },
+  {
+    id: "regex-tester",
+    name: "Regex Tester",
+    description: "Test and debug regular expressions in real-time",
+    href: "/regex-tester",
+    icon: Code,
+    features: [
+      "Real-time pattern testing",
+      "Multiple regex flags",
+      "Capture group support",
+      "Copy matches to clipboard"
     ]
   },
 ]; 

@@ -201,39 +201,42 @@ export default function IPTracker() {
                 </form>
 
                 {searchHistory.length > 0 && (
-                    <div className="mb-6">
-                        <div className="flex items-center justify-between mb-2">
-                            <div className="flex items-center gap-2">
-                                <History className="h-4 w-4" />
-                                <span className="text-sm font-medium">Recent Searches</span>
-                            </div>
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => {
-                                    clearHistory();
-                                    toast.success('Search history cleared');
-                                }}
-                            >
-                                <Trash2 className="h-4 w-4" />
-                            </Button>
-                        </div>
-                        <div className="flex flex-wrap gap-2">
-                            {searchHistory.map((ip) => (
-                                <Badge
-                                    key={ip}
-                                    variant="secondary"
-                                    className="cursor-pointer hover:bg-secondary/80"
-                                    onClick={() => {
-                                        setSearchIp(ip);
-                                        fetchIPInfo(ip);
-                                    }}
-                                >
-                                    {ip}
+                    <Card className='mb-6'>
+                        <CardHeader className="pb-4">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                    <History className="h-5 w-5" />
+                                    <CardTitle className="text-xl sm:text-2xl">Recent Searches</CardTitle>
+                                </div>
+                                <Badge variant="outline" className="text-xs">
+                                    Last 10 searches
                                 </Badge>
-                            ))}
-                        </div>
-                    </div>
+                            </div>
+                            <CardDescription className="text-sm">
+                                Your recently searched IP addresses
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="flex flex-wrap gap-2">
+                                {searchHistory.map((ip, index) => (
+                                    <Badge
+                                        key={index}
+                                        variant="secondary"
+                                        className="cursor-pointer hover:bg-secondary/80 transition-colors"
+                                        onClick={() => {
+                                            setSearchIp(ip);
+                                            fetchIPInfo(ip);
+                                        }}
+                                    >
+                                        <div className="flex items-center gap-2">
+                                            <Clock className="h-3 w-3" />
+                                            <span className="font-mono">{ip}</span>
+                                        </div>
+                                    </Badge>
+                                ))}
+                            </div>
+                        </CardContent>
+                    </Card>
                 )}
 
                 {ipInfo && (
