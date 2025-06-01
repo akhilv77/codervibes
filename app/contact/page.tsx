@@ -1,154 +1,161 @@
 'use client';
 
-import { RootPageShell } from "@/components/layout/root-page-shell";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Mail, MessageSquare, Github } from "lucide-react";
-import { useState } from "react";
+import { Mail, Send, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 export default function ContactPage() {
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const [formData, setFormData] = useState({
         name: '',
         email: '',
+        subject: '',
         message: ''
     });
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        // Here you would typically handle the form submission
-        // For now, we'll just log it
-        console.log('Form submitted:', formData);
-        // Reset form
-        setFormData({ name: '', email: '', message: '' });
+        setIsSubmitting(true);
+
+        try {
+            const response = await fetch('/api/sendgrid', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || 'Failed to send message');
+            }
+
+            toast.success('Message sent successfully!');
+            setFormData({
+                name: '',
+                email: '',
+                subject: '',
+                message: ''
+            });
+        } catch (error: any) {
+            toast.error(error.message || 'Failed to send message');
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({
+            ...prev,
+            [name]: value
+        }));
     };
 
     return (
-        <div className="container flex justify-center">
-            <div className="w-full max-w-screen-xl py-8">
-                <div className="space-y-8">
-                    {/* Header */}
-                    <div className="text-center space-y-4">
-                        <h1 className="text-4xl font-bold tracking-tight">Contact Us</h1>
-                        <p className="text-xl text-muted-foreground">
-                            Have questions or feedback? We&apos;d love to hear from you.
-                        </p>
-                    </div>
-
-                    <div className="grid gap-8 md:grid-cols-2">
-                        {/* Contact Form */}
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Send us a message</CardTitle>
-                                <CardDescription>
-                                    Fill out the form below and we&apos;ll get back to you as soon as possible.
-                                </CardDescription>
-                            </CardHeader>
-                            <CardContent>
-                                <form onSubmit={handleSubmit} className="space-y-4">
-                                    <div className="space-y-2">
-                                        <label htmlFor="name" className="text-sm font-medium">
-                                            Name
-                                        </label>
-                                        <Input
-                                            id="name"
-                                            placeholder="Your name"
-                                            value={formData.name}
-                                            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                            required
-                                        />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <label htmlFor="email" className="text-sm font-medium">
-                                            Email
-                                        </label>
-                                        <Input
-                                            id="email"
-                                            type="email"
-                                            placeholder="your.email@example.com"
-                                            value={formData.email}
-                                            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                            required
-                                        />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <label htmlFor="message" className="text-sm font-medium">
-                                            Message
-                                        </label>
-                                        <Textarea
-                                            id="message"
-                                            placeholder="Your message..."
-                                            value={formData.message}
-                                            onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                                            required
-                                            className="min-h-[100px]"
-                                        />
-                                    </div>
-                                    <Button type="submit" className="w-full">
-                                        Send Message
-                                    </Button>
-                                </form>
-                            </CardContent>
-                        </Card>
-
-                        {/* Contact Information */}
-                        <div className="space-y-6">
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle>Get in Touch</CardTitle>
-                                    <CardDescription>
-                                        Choose your preferred method of contact
-                                    </CardDescription>
-                                </CardHeader>
-                                <CardContent className="space-y-4">
-                                    <div className="flex items-center gap-4">
-                                        <Mail className="h-5 w-5 text-primary" />
-                                        <div>
-                                            <h3 className="font-medium">Email</h3>
-                                            <p className="text-sm text-muted-foreground">
-                                                support@codervibes.in
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <div className="flex items-center gap-4">
-                                        <MessageSquare className="h-5 w-5 text-primary" />
-                                        <div>
-                                            <h3 className="font-medium">Discord</h3>
-                                            <p className="text-sm text-muted-foreground">
-                                                Join our community
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <div className="flex items-center gap-4">
-                                        <Github className="h-5 w-5 text-primary" />
-                                        <div>
-                                            <h3 className="font-medium">GitHub</h3>
-                                            <p className="text-sm text-muted-foreground">
-                                                Follow our development
-                                            </p>
-                                        </div>
-                                    </div>
-                                </CardContent>
-                            </Card>
-
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle>Response Time</CardTitle>
-                                    <CardDescription>
-                                        What to expect after contacting us
-                                    </CardDescription>
-                                </CardHeader>
-                                <CardContent>
-                                    <p className="text-sm text-muted-foreground">
-                                        We typically respond to all inquiries within 24-48 hours during business days.
-                                        For urgent matters, please use our Discord community for faster assistance.
-                                    </p>
-                                </CardContent>
-                            </Card>
-                        </div>
-                    </div>
+        <div className="container mx-auto px-4 py-4 sm:py-8 max-w-screen-xl">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 sm:mb-8">
+                <div>
+                    <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Contact Us</h1>
+                    <p className="text-muted-foreground mt-1 text-sm sm:text-base">Get in touch with our team</p>
                 </div>
+            </div>
+
+            <div className="grid gap-4 sm:gap-6">
+                <Card>
+                    <CardHeader className="p-4 sm:p-6">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                            <div>
+                                <CardTitle className="text-lg sm:text-xl flex items-center gap-2">
+                                    <Mail className="h-4 w-4 sm:h-5 sm:w-5" />
+                                    Send Message
+                                </CardTitle>
+                                <CardDescription className="text-xs sm:text-sm mt-1">
+                                    Fill out the form below to contact us
+                                </CardDescription>
+                            </div>
+                        </div>
+                    </CardHeader>
+                    <CardContent className="p-4 sm:p-6">
+                        <form onSubmit={handleSubmit} className="space-y-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <Label htmlFor="name" className="text-xs sm:text-sm">Name</Label>
+                                    <Input
+                                        id="name"
+                                        name="name"
+                                        value={formData.name}
+                                        onChange={handleChange}
+                                        placeholder="Your name"
+                                        required
+                                        className="text-xs sm:text-sm"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="email" className="text-xs sm:text-sm">Email</Label>
+                                    <Input
+                                        id="email"
+                                        name="email"
+                                        type="email"
+                                        value={formData.email}
+                                        onChange={handleChange}
+                                        placeholder="your.email@example.com"
+                                        required
+                                        className="text-xs sm:text-sm"
+                                    />
+                                </div>
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="subject" className="text-xs sm:text-sm">Subject</Label>
+                                <Input
+                                    id="subject"
+                                    name="subject"
+                                    value={formData.subject}
+                                    onChange={handleChange}
+                                    placeholder="Message subject"
+                                    required
+                                    className="text-xs sm:text-sm"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="message" className="text-xs sm:text-sm">Message</Label>
+                                <Textarea
+                                    id="message"
+                                    name="message"
+                                    value={formData.message}
+                                    onChange={handleChange}
+                                    placeholder="Your message"
+                                    required
+                                    className="min-h-[100px] sm:min-h-[120px] text-xs sm:text-sm resize-none"
+                                />
+                            </div>
+                            <Button
+                                type="submit"
+                                className="w-full"
+                                disabled={isSubmitting}
+                            >
+                                {isSubmitting ? (
+                                    <>
+                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                        Sending...
+                                    </>
+                                ) : (
+                                    <>
+                                        <Send className="mr-2 h-4 w-4" />
+                                        Send Message
+                                    </>
+                                )}
+                            </Button>
+                        </form>
+                    </CardContent>
+                </Card>
             </div>
         </div>
     );
