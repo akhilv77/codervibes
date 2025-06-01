@@ -1,4 +1,4 @@
-import { Trophy, Wallet, type LucideIcon, DollarSign, BadgeDollarSignIcon } from "lucide-react";
+import { Trophy, Wallet, type LucideIcon, DollarSign, BadgeDollarSignIcon, Globe } from "lucide-react";
 
 export interface AppConfig {
   id: string;
@@ -44,6 +44,19 @@ export const apps: AppConfig[] = [
       "Real-time currency conversion",
       "Daily rate updates",
       "Support for 170+ currencies"
+    ]
+  },
+  {
+    id: "ip-tracker",
+    name: "IP Tracker",
+    description: "Track and analyze IP addresses with detailed information",
+    href: "/ip-tracker",
+    icon: Globe,
+    features: [
+      "IP geolocation",
+      "Network information",
+      "Interactive map view",
+      "Browser & device details"
     ]
   },
 ]; 

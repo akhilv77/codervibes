@@ -1,6 +1,6 @@
 import { openDB, DBSchema, IDBPDatabase } from 'idb';
 
-type StoreNames = 'settings' | 'currencyRates' | 'moneyTracker' | 'scorecard';
+type StoreNames = 'settings' | 'currencyRates' | 'moneyTracker' | 'scorecard' | 'ipTracker';
 
 interface CoderVibesDB extends DBSchema {
   settings: {
@@ -16,6 +16,10 @@ interface CoderVibesDB extends DBSchema {
     value: any;
   };
   scorecard: {
+    key: string;
+    value: any;
+  };
+  ipTracker: {
     key: string;
     value: any;
   };
@@ -41,8 +45,8 @@ class IndexedDBService {
 
     this.initPromise = (async () => {
       try {
-        this.db = await openDB<CoderVibesDB>('codervibes', 2, {
-          upgrade(db) {
+        this.db = await openDB<CoderVibesDB>('codervibes', 3, {
+          upgrade(db, oldVersion, newVersion) {
             // Create object stores
             if (!db.objectStoreNames.contains('settings')) {
               db.createObjectStore('settings');
@@ -55,6 +59,9 @@ class IndexedDBService {
             }
             if (!db.objectStoreNames.contains('scorecard')) {
               db.createObjectStore('scorecard');
+            }
+            if (!db.objectStoreNames.contains('ipTracker')) {
+              db.createObjectStore('ipTracker');
             }
           },
         });

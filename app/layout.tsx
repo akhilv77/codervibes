@@ -9,6 +9,7 @@ import { RootPageShell } from "@/components/layout/root-page-shell";
 import { MiniMusicPlayer } from "@/components/ui/mini-music-player";
 import { MusicProvider } from "@/components/providers/music-provider";
 import { TimerProvider } from "@/components/providers/timer-provider";
+import { Toaster as SonnerToaster } from 'sonner';
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -59,6 +60,7 @@ export default function RootLayout({
             </TimerProvider>
           </MusicProvider>
           <Toaster />
+          <SonnerToaster />
         </ThemeProvider>
       </body>
     </html>
