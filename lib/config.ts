@@ -1,4 +1,4 @@
-import { Trophy, Wallet, type LucideIcon, DollarSign, BadgeDollarSignIcon, Globe, Calculator, LineChart, Code } from "lucide-react";
+import { Trophy, Wallet, type LucideIcon, DollarSign, BadgeDollarSignIcon, Globe, Calculator, LineChart, Code, FileJson } from "lucide-react";
 
 export interface AppConfig {
   id: string;
@@ -49,7 +49,7 @@ export const apps: AppConfig[] = [
   {
     id: "ip-tracker",
     name: "IP Tracker",
-    description: "Track and analyze IP addresses with detailed information",
+    description: "Track and analyze IP addresses with details",
     href: "/ip-tracker",
     icon: Globe,
     features: [
@@ -72,4 +72,17 @@ export const apps: AppConfig[] = [
       "Copy matches to clipboard"
     ]
   },
+  {
+    id: "json-formatter",
+    name: "JSON Formatter",
+    description: "Beautify, minify, and validate JSON with ease",
+    href: "/json-formatter",
+    icon: FileJson,
+    features: [
+      "JSON beautification",
+      "Minification",
+      "Validation",
+      "History tracking"
+    ]
+  }
 ]; 

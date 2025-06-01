@@ -15,7 +15,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 export default function HomePage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
+  const itemsPerPage = 10;
 
   const filteredApps = apps.filter(app =>
     app.name.toLowerCase().includes(searchQuery.toLowerCase()) ||

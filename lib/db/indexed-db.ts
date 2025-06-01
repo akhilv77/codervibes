@@ -1,6 +1,6 @@
 import { openDB, DBSchema, IDBPDatabase } from 'idb';
 
-type StoreNames = 'settings' | 'currencyRates' | 'moneyTracker' | 'scorecard' | 'ipTracker' | 'regex';
+export type StoreNames = 'settings' | 'currencyRates' | 'moneyTracker' | 'scorecard' | 'ipTracker' | 'regex' | 'regexTester' | 'jsonFormatter';
 
 interface CoderVibesDB extends DBSchema {
   settings: {
@@ -27,6 +27,14 @@ interface CoderVibesDB extends DBSchema {
     key: string;
     value: any;
   };
+  regexTester: {
+    key: string;
+    value: any;
+  };
+  jsonFormatter: {
+    key: string;
+    value: any;
+  };
 }
 
 class IndexedDBService {
@@ -49,9 +57,9 @@ class IndexedDBService {
 
     this.initPromise = (async () => {
       try {
-        this.db = await openDB<CoderVibesDB>('codervibes', 4, {
+        this.db = await openDB<CoderVibesDB>('codervibes', 5, {
           upgrade(db, oldVersion, newVersion) {
-            // Create object stores
+            // Create stores if they don't exist
             if (!db.objectStoreNames.contains('settings')) {
               db.createObjectStore('settings');
             }
@@ -69,6 +77,12 @@ class IndexedDBService {
             }
             if (!db.objectStoreNames.contains('regex')) {
               db.createObjectStore('regex');
+            }
+            if (!db.objectStoreNames.contains('regexTester')) {
+              db.createObjectStore('regexTester');
+            }
+            if (!db.objectStoreNames.contains('jsonFormatter')) {
+              db.createObjectStore('jsonFormatter');
             }
           },
         });
