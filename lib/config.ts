@@ -1,4 +1,4 @@
-import { Trophy, Wallet, type LucideIcon, DollarSign, BadgeDollarSignIcon, Globe, Calculator, LineChart, Code, FileJson, Key, Link, QrCode, Palette, Binary } from "lucide-react";
+import { Trophy, Wallet, type LucideIcon, DollarSign, BadgeDollarSignIcon, Globe, Calculator, LineChart, Code, FileJson, Key, Link, QrCode, Palette, Binary, FileCode } from "lucide-react";
 
 export interface AppConfig {
   id: string;
@@ -161,6 +161,19 @@ export const apps: AppConfig[] = [
       'Text to Binary conversion',
       'Text to Hexadecimal conversion',
       'Text to ASCII conversion',
+      'Copy to clipboard',
+      'History tracking'
+    ]
+  },
+  {
+    id: 'yaml-converter',
+    name: 'YAML ⇄ JSON Converter',
+    description: 'Convert between YAML and JSON formats with ease',
+    href: '/yaml-converter',
+    icon: FileCode,
+    features: [
+      'YAML to JSON conversion',
+      'JSON to YAML conversion',
       'Copy to clipboard',
       'History tracking'
     ]
