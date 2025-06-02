@@ -1,4 +1,4 @@
-import { Trophy, Wallet, type LucideIcon, DollarSign, BadgeDollarSignIcon, Globe, Calculator, LineChart, Code, FileJson, Key, Link, QrCode, Palette, Binary, FileCode, Table } from "lucide-react";
+import { Trophy, Wallet, type LucideIcon, DollarSign, BadgeDollarSignIcon, Globe, Calculator, LineChart, Code, FileJson, Key, Link, QrCode, Palette, Binary, FileCode, Table, FileText, Type } from "lucide-react";
 
 export interface AppConfig {
   id: string;
@@ -190,5 +190,19 @@ export const apps: AppConfig[] = [
       'Copy to clipboard',
       'History tracking'
     ]
-  }
+  },
+  {
+    id: 'xml-formatter',
+    name: 'XML Formatter & Viewer',
+    description: 'Format, validate, and minify XML with ease',
+    href: '/xml-formatter',
+    icon: FileCode,
+    features: [
+      'XML formatting',
+      'XML validation',
+      'XML minification',
+      'Copy to clipboard',
+      'History tracking',
+    ],
+  },
 ]; 

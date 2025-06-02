@@ -1,6 +1,6 @@
 import { openDB, DBSchema, IDBPDatabase } from 'idb';
 
-export type StoreNames = 'settings' | 'currencyRates' | 'moneyTracker' | 'scorecard' | 'ipTracker' | 'regex' | 'regexTester' | 'jsonFormatter' | 'jwtDecoder' | 'urlEncoder' | 'htmlEncoder' | 'qrCode' | 'colorConverter' | 'textConverter' | 'yamlConverter' | 'csvConverter';
+export type StoreNames = 'settings' | 'currencyRates' | 'moneyTracker' | 'scorecard' | 'ipTracker' | 'regex' | 'regexTester' | 'jsonFormatter' | 'jwtDecoder' | 'urlEncoder' | 'htmlEncoder' | 'qrCode' | 'colorConverter' | 'textConverter' | 'yamlConverter' | 'csvConverter' | 'xmlFormatter';
 
 interface CoderVibesDB extends DBSchema {
   settings: {
@@ -67,6 +67,10 @@ interface CoderVibesDB extends DBSchema {
     key: string;
     value: any;
   };
+  xmlFormatter: {
+    key: string;
+    value: any;
+  };
 }
 
 class IndexedDBService {
@@ -89,7 +93,7 @@ class IndexedDBService {
 
     this.initPromise = (async () => {
       try {
-        this.db = await openDB<CoderVibesDB>('codervibes', 13, {
+        this.db = await openDB<CoderVibesDB>('codervibes', 14, {
           upgrade(db, oldVersion, newVersion) {
             // Create stores if they don't exist
             if (!db.objectStoreNames.contains('settings')) {
@@ -139,6 +143,9 @@ class IndexedDBService {
             }
             if (!db.objectStoreNames.contains('csvConverter')) {
               db.createObjectStore('csvConverter');
+            }
+            if (!db.objectStoreNames.contains('xmlFormatter')) {
+              db.createObjectStore('xmlFormatter');
             }
           },
         });
