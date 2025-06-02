@@ -1,4 +1,4 @@
-import { Trophy, Wallet, type LucideIcon, DollarSign, BadgeDollarSignIcon, Globe, Calculator, LineChart, Code, FileJson, Key, Link, QrCode, Palette, Binary, FileCode, Table, FileText, Type, Eye, GitCompare, Lock } from "lucide-react";
+import { Trophy, Wallet, type LucideIcon, DollarSign, BadgeDollarSignIcon, Globe, Calculator, LineChart, Code, FileJson, Key, Link, QrCode, Palette, Binary, FileCode, Table, FileText, Type, Eye, GitCompare, Lock, Hash } from "lucide-react";
 
 export interface AppConfig {
   id: string;
@@ -258,5 +258,19 @@ export const apps: AppConfig[] = [
       "Password strength indicator",
       "Copy to clipboard"
     ],
+  },
+  {
+    id: "uuid-generator",
+    name: "UUID Generator",
+    description: "Generate unique identifiers (UUIDs/GUIDs) in different versions",
+    href: "/uuid-generator",
+    icon: Hash,
+    features: [
+      "Multiple UUID versions (v1, v4, v5)",
+      "Time-based UUIDs",
+      "Random UUIDs",
+      "Namespace-based UUIDs",
+      "Copy to clipboard"
+    ]
   },
 ]; 
