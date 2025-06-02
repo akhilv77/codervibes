@@ -1,4 +1,4 @@
-import { Trophy, Wallet, type LucideIcon, DollarSign, BadgeDollarSignIcon, Globe, Calculator, LineChart, Code, FileJson, Key, Link, QrCode } from "lucide-react";
+import { Trophy, Wallet, type LucideIcon, DollarSign, BadgeDollarSignIcon, Globe, Calculator, LineChart, Code, FileJson, Key, Link, QrCode, Palette } from "lucide-react";
 
 export interface AppConfig {
   id: string;
@@ -134,6 +134,20 @@ export const apps: AppConfig[] = [
       'QR code generation',
       'Image upload scanning',
       'Camera scanning',
+      'History tracking'
+    ]
+  },
+  {
+    id: 'color-converter',
+    name: 'Color Converter',
+    description: 'Convert colors between HEX, RGB, and HSL formats',
+    href: '/color-converter',
+    icon: Palette,
+    features: [
+      'HEX to RGB/HSL conversion',
+      'RGB to HEX/HSL conversion',
+      'HSL to HEX/RGB conversion',
+      'Color preview',
       'History tracking'
     ]
   }
