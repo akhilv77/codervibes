@@ -313,4 +313,16 @@ export const apps: AppConfig[] = [
       "Copy to clipboard"
     ],
   },
+  {
+    id: "case-converter",
+    name: "Case Converter",
+    description: "Convert text between different case formats",
+    href: "/case-converter",
+    icon: Type,
+    features: [
+      "Multiple case formats",
+      "Real-time conversion",
+      "Copy to clipboard"
+    ],
+  },
 ]; 
