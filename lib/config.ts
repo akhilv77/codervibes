@@ -1,4 +1,4 @@
-import { Trophy, Wallet, type LucideIcon, DollarSign, BadgeDollarSignIcon, Globe, Calculator, LineChart, Code, FileJson, Key } from "lucide-react";
+import { Trophy, Wallet, type LucideIcon, DollarSign, BadgeDollarSignIcon, Globe, Calculator, LineChart, Code, FileJson, Key, Link } from "lucide-react";
 
 export interface AppConfig {
   id: string;
@@ -96,6 +96,19 @@ export const apps: AppConfig[] = [
       'Signature Verification',
       'Token Expiry Check',
       'Algorithm Warnings'
+    ]
+  },
+  {
+    id: 'url-encoder',
+    name: 'URL Encoder & Decoder',
+    description: 'Encode and decode URLs with ease',
+    href: '/url-encoder',
+    icon: Link,
+    features: [
+      'URL encoding',
+      'URL decoding',
+      'Copy to clipboard',
+      'History tracking'
     ]
   }
 ]; 
