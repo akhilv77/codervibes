@@ -273,4 +273,17 @@ export const apps: AppConfig[] = [
       "Copy to clipboard"
     ]
   },
+  {
+    id: "hash-generator",
+    name: "Hash Generator",
+    description: "Generate cryptographic hashes using various algorithms",
+    href: "/hash-generator",
+    icon: Hash,
+    features: [
+      "Multiple hash algorithms (MD5, SHA1, SHA256, SHA512)",
+      "Real-time hash generation",
+      "Copy to clipboard",
+      "History tracking"
+    ]
+  },
 ]; 
