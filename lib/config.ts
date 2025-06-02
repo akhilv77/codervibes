@@ -1,4 +1,4 @@
-import { Trophy, Wallet, type LucideIcon, DollarSign, BadgeDollarSignIcon, Globe, Calculator, LineChart, Code, FileJson, Key, Link, QrCode, Palette, Binary, FileCode, Table, FileText, Type, Eye, GitCompare, Lock, Hash } from "lucide-react";
+import { Trophy, Wallet, type LucideIcon, DollarSign, BadgeDollarSignIcon, Globe, Calculator, LineChart, Code, FileJson, Key, Link, QrCode, Palette, Binary, FileCode, Table, FileText, Type, Eye, GitCompare, Lock, Hash, Scissors } from "lucide-react";
 
 export interface AppConfig {
   id: string;
@@ -285,5 +285,19 @@ export const apps: AppConfig[] = [
       "Copy to clipboard",
       "History tracking"
     ]
+  },
+  {
+    id: "minifier",
+    name: "Code Minifier/Beautifier",
+    description: "Minify and beautify HTML, CSS, and JavaScript code",
+    href: "/minifier",
+    icon: Scissors,
+    features: [
+      "HTML minification and beautification",
+      "CSS minification and beautification",
+      "JavaScript minification and beautification",
+      "Copy to clipboard",
+      "History tracking"
+    ],
   },
 ]; 
