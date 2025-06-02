@@ -11,6 +11,19 @@ export interface AppConfig {
 
 export const apps: AppConfig[] = [
   {
+    id: "html-preview",
+    name: "HTML Previewer",
+    description: "Preview and test your HTML code in real-time",
+    href: "/html-preview",
+    icon: Eye,
+    features: [
+      "Live HTML preview",
+      "Copy to clipboard",
+      "Clear functionality",
+      "Preview history",
+    ],
+  },
+  {
     id: "scorecard",
     name: "Scorecard",
     description: "Track scores and manage games for your players ",

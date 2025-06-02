@@ -1,13 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { useMarkdownPreviewerStore } from '@/lib/markdown-previewer-store';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Copy, RefreshCw, FileText, Eye, Check } from 'lucide-react';
+import { Loader2, Copy, RefreshCw, FileText, Eye, Check, Maximize2, Minimize2 } from 'lucide-react';
 import { toast } from 'sonner';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -22,6 +22,8 @@ export default function MarkdownPreviewerPage() {
     const [output, setOutput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [copied, setCopied] = useState<string | null>(null);
+    const [isFullscreen, setIsFullscreen] = useState(false);
+    const previewCardRef = useRef<HTMLDivElement>(null);
     const { history, addToHistory, clearHistory, loadHistory } = useMarkdownPreviewerStore();
 
     useEffect(() => {
@@ -61,6 +63,29 @@ export default function MarkdownPreviewerPage() {
         clearHistory();
         toast.success('History cleared');
     };
+
+    const toggleFullscreen = () => {
+        if (!isFullscreen) {
+            if (previewCardRef.current?.requestFullscreen) {
+                previewCardRef.current.requestFullscreen();
+            }
+        } else {
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            }
+        }
+    };
+
+    useEffect(() => {
+        const handleFullscreenChange = () => {
+            setIsFullscreen(!!document.fullscreenElement);
+        };
+
+        document.addEventListener('fullscreenchange', handleFullscreenChange);
+        return () => {
+            document.removeEventListener('fullscreenchange', handleFullscreenChange);
+        };
+    }, []);
 
     return (
         <div className="container mx-auto px-4 py-4 sm:py-8 max-w-screen-xl">
@@ -125,7 +150,7 @@ export default function MarkdownPreviewerPage() {
                         </CardContent>
                     </Card>
 
-                    <Card>
+                    <Card ref={previewCardRef} className={isFullscreen ? "fixed inset-0 z-50 m-0 flex flex-col" : ""}>
                         <CardHeader className="p-4 sm:p-6">
                             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                                 <div>
@@ -137,11 +162,24 @@ export default function MarkdownPreviewerPage() {
                                         Live preview of your markdown
                                     </CardDescription>
                                 </div>
+                                <Button
+                                    variant="outline"
+                                    size="icon"
+                                    onClick={toggleFullscreen}
+                                    className="ml-auto"
+                                >
+                                    {isFullscreen ? (
+                                        <Minimize2 className="h-4 w-4" />
+                                    ) : (
+                                        <Maximize2 className="h-4 w-4" />
+                                    )}
+                                </Button>
                             </div>
                         </CardHeader>
-                        <CardContent className="p-4 sm:p-6">
+                        <CardContent className={`p-4 sm:p-6 ${isFullscreen ? "flex-1 overflow-auto" : ""}`}>
                             <div className="relative">
-                                <div className="prose prose-sm dark:prose-invert max-w-none min-h-[400px] p-4 rounded-md border">
+                                <div className={`prose prose-sm dark:prose-invert max-w-none p-4 rounded-md border ${isFullscreen ? "min-h-0" : "min-h-[400px]"
+                                    }`}>
                                     <ReactMarkdown
                                         remarkPlugins={[remarkGfm]}
                                         components={{
