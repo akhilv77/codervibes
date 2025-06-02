@@ -1,4 +1,4 @@
-import { Trophy, Wallet, type LucideIcon, DollarSign, BadgeDollarSignIcon, Globe, Calculator, LineChart, Code, FileJson, Key, Link, QrCode, Palette } from "lucide-react";
+import { Trophy, Wallet, type LucideIcon, DollarSign, BadgeDollarSignIcon, Globe, Calculator, LineChart, Code, FileJson, Key, Link, QrCode, Palette, Binary } from "lucide-react";
 
 export interface AppConfig {
   id: string;
@@ -148,6 +148,20 @@ export const apps: AppConfig[] = [
       'RGB to HEX/HSL conversion',
       'HSL to HEX/RGB conversion',
       'Color preview',
+      'History tracking'
+    ]
+  },
+  {
+    id: 'text-converter',
+    name: 'Text Converter',
+    description: 'Convert text to Binary, Hexadecimal, and ASCII formats',
+    href: '/text-converter',
+    icon: Binary,
+    features: [
+      'Text to Binary conversion',
+      'Text to Hexadecimal conversion',
+      'Text to ASCII conversion',
+      'Copy to clipboard',
       'History tracking'
     ]
   }
