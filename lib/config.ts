@@ -300,4 +300,17 @@ export const apps: AppConfig[] = [
       "History tracking"
     ],
   },
+  {
+    id: "lorem-ipsum",
+    name: "Lorem Ipsum Generator",
+    description: "Generate placeholder text for your designs and layouts",
+    href: "/lorem-ipsum",
+    icon: Type,
+    features: [
+      "Customizable paragraphs",
+      "Adjustable word count",
+      "Sentence control",
+      "Copy to clipboard"
+    ],
+  },
 ]; 
