@@ -110,5 +110,18 @@ export const apps: AppConfig[] = [
       'Copy to clipboard',
       'History tracking'
     ]
+  },
+  {
+    id: 'html-encoder',
+    name: 'HTML Entity Encoder & Decoder',
+    description: 'Encode and decode HTML entities with ease',
+    href: '/html-encoder',
+    icon: Code,
+    features: [
+      'HTML entity encoding',
+      'HTML entity decoding',
+      'Copy to clipboard',
+      'History tracking'
+    ]
   }
 ]; 

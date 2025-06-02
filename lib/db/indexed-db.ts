@@ -1,6 +1,6 @@
 import { openDB, DBSchema, IDBPDatabase } from 'idb';
 
-export type StoreNames = 'settings' | 'currencyRates' | 'moneyTracker' | 'scorecard' | 'ipTracker' | 'regex' | 'regexTester' | 'jsonFormatter' | 'jwtDecoder' | 'urlEncoder';
+export type StoreNames = 'settings' | 'currencyRates' | 'moneyTracker' | 'scorecard' | 'ipTracker' | 'regex' | 'regexTester' | 'jsonFormatter' | 'jwtDecoder' | 'urlEncoder' | 'htmlEncoder';
 
 interface CoderVibesDB extends DBSchema {
   settings: {
@@ -43,6 +43,10 @@ interface CoderVibesDB extends DBSchema {
     key: string;
     value: any;
   };
+  htmlEncoder: {
+    key: string;
+    value: any;
+  };
 }
 
 class IndexedDBService {
@@ -65,7 +69,7 @@ class IndexedDBService {
 
     this.initPromise = (async () => {
       try {
-        this.db = await openDB<CoderVibesDB>('codervibes', 7, {
+        this.db = await openDB<CoderVibesDB>('codervibes', 8, {
           upgrade(db, oldVersion, newVersion) {
             // Create stores if they don't exist
             if (!db.objectStoreNames.contains('settings')) {
@@ -97,6 +101,9 @@ class IndexedDBService {
             }
             if (!db.objectStoreNames.contains('urlEncoder')) {
               db.createObjectStore('urlEncoder');
+            }
+            if (!db.objectStoreNames.contains('htmlEncoder')) {
+              db.createObjectStore('htmlEncoder');
             }
           },
         });
