@@ -13,6 +13,9 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import { Components } from 'react-markdown';
+import { CSSProperties } from 'react';
+import { SyntaxHighlighterProps } from 'react-syntax-highlighter';
 
 export default function MarkdownPreviewerPage() {
     const [input, setInput] = useState('');
@@ -142,9 +145,10 @@ export default function MarkdownPreviewerPage() {
                                     <ReactMarkdown
                                         remarkPlugins={[remarkGfm]}
                                         components={{
-                                            code({ node, inline, className, children, ...props }) {
+                                            code: ({ className, children, ...props }) => {
                                                 const match = /language-(\w+)/.exec(className || '');
-                                                return !inline && match ? (
+                                                const isInline = !match;
+                                                return !isInline ? (
                                                     <SyntaxHighlighter
                                                         style={vscDarkPlus}
                                                         language={match[1]}
@@ -153,7 +157,7 @@ export default function MarkdownPreviewerPage() {
                                                             margin: '1em 0',
                                                             borderRadius: '0.375rem',
                                                         }}
-                                                        {...props}
+                                                        {...(props as SyntaxHighlighterProps)}
                                                     >
                                                         {String(children).replace(/\n$/, '')}
                                                     </SyntaxHighlighter>
@@ -319,9 +323,10 @@ export default function MarkdownPreviewerPage() {
                                                                 <ReactMarkdown
                                                                     remarkPlugins={[remarkGfm]}
                                                                     components={{
-                                                                        code({ node, inline, className, children, ...props }) {
+                                                                        code: ({ className, children, ...props }) => {
                                                                             const match = /language-(\w+)/.exec(className || '');
-                                                                            return !inline && match ? (
+                                                                            const isInline = !match;
+                                                                            return !isInline ? (
                                                                                 <SyntaxHighlighter
                                                                                     style={vscDarkPlus}
                                                                                     language={match[1]}
@@ -330,7 +335,7 @@ export default function MarkdownPreviewerPage() {
                                                                                         margin: '1em 0',
                                                                                         borderRadius: '0.375rem',
                                                                                     }}
-                                                                                    {...props}
+                                                                                    {...(props as SyntaxHighlighterProps)}
                                                                                 >
                                                                                     {String(children).replace(/\n$/, '')}
                                                                                 </SyntaxHighlighter>
