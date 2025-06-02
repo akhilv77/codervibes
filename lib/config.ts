@@ -1,4 +1,4 @@
-import { Trophy, Wallet, type LucideIcon, DollarSign, BadgeDollarSignIcon, Globe, Calculator, LineChart, Code, FileJson, Key, Link, QrCode, Palette, Binary, FileCode } from "lucide-react";
+import { Trophy, Wallet, type LucideIcon, DollarSign, BadgeDollarSignIcon, Globe, Calculator, LineChart, Code, FileJson, Key, Link, QrCode, Palette, Binary, FileCode, Table } from "lucide-react";
 
 export interface AppConfig {
   id: string;
@@ -174,6 +174,19 @@ export const apps: AppConfig[] = [
     features: [
       'YAML to JSON conversion',
       'JSON to YAML conversion',
+      'Copy to clipboard',
+      'History tracking'
+    ]
+  },
+  {
+    id: 'csv-converter',
+    name: 'CSV ⇄ JSON Converter',
+    description: 'Convert between CSV and JSON formats with ease',
+    href: '/csv-converter',
+    icon: Table,
+    features: [
+      'CSV to JSON conversion',
+      'JSON to CSV conversion',
       'Copy to clipboard',
       'History tracking'
     ]
