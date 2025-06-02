@@ -7,322 +7,320 @@ export interface AppConfig {
   href: string;
   icon: LucideIcon;
   features: string[];
+  tags: string[];
 }
 
 export const apps: AppConfig[] = [
   {
     id: "html-preview",
-    name: "HTML Previewer",
-    description: "Preview and test your HTML code in real-time",
+    name: "HTML Preview",
+    description: "Real-time HTML code preview and testing environment",
     href: "/html-preview",
     icon: Eye,
     features: [
       "Live HTML preview",
       "Copy to clipboard",
-      "Clear functionality",
-      "Preview history",
+      "Preview history"
     ],
+    tags: ["html", "web", "development", "preview", "testing", "frontend"]
   },
   {
     id: "scorecard",
-    name: "Scorecard",
-    description: "Track scores and manage games for your players ",
+    name: "Score Tracker",
+    description: "Professional score tracking and game management system",
     href: "/scorecard",
     icon: Trophy,
     features: [
       "Player management",
       "Game history",
-      "Score tracking"
-    ]
+      "Score analytics"
+    ],
+    tags: ["sports", "gaming", "tracking", "analytics", "management", "scores"]
   },
   {
     id: "money-tracker",
-    name: "Money Tracker",
-    description: "Split expenses and track balances with Others",
+    name: "Expense Manager",
+    description: "Advanced expense tracking and balance management system",
     href: "/money-tracker",
     icon: Wallet,
     features: [
       "Group expense tracking",
-      "Member management",
       "Balance calculation",
-    ]
+      "Expense analytics"
+    ],
+    tags: ["finance", "expenses", "money", "tracking", "budget", "management"]
   },
   {
     id: "currency-tracker",
-    name: "Currency Tracker",
-    description: "Track and convert currencies with daily updates",
+    name: "Currency Converter",
+    description: "Real-time currency conversion and tracking platform",
     href: "/currency-tracker",
     icon: BadgeDollarSignIcon,
     features: [
-      "Real-time currency conversion",
-      "Daily rate updates",
-      "Support for 170+ currencies"
-    ]
+      "Real-time conversion",
+      "170+ currencies",
+      "Historical rates"
+    ],
+    tags: ["currency", "finance", "conversion", "exchange", "rates", "money"]
   },
   {
     id: "ip-tracker",
-    name: "IP Tracker",
-    description: "Track and analyze IP addresses with details",
+    name: "IP Analyzer",
+    description: "Comprehensive IP address analysis and tracking tool",
     href: "/ip-tracker",
     icon: Globe,
     features: [
       "IP geolocation",
-      "Network information",
-      "Interactive map view",
-      "Browser & device details"
-    ]
+      "Network analysis",
+      "Interactive mapping"
+    ],
+    tags: ["network", "ip", "geolocation", "security", "analysis", "tracking"]
   },
   {
     id: "regex-tester",
-    name: "Regex Tester",
-    description: "Test and debug regular expressions in real-time",
+    name: "Regex Validator",
+    description: "Professional regular expression testing and debugging tool",
     href: "/regex-tester",
     icon: Code,
     features: [
-      "Real-time pattern testing",
-      "Multiple regex flags",
-      "Capture group support",
-      "Copy matches to clipboard"
-    ]
+      "Pattern testing",
+      "Flag management",
+      "Match extraction"
+    ],
+    tags: ["regex", "development", "testing", "pattern", "validation", "debug"]
   },
   {
     id: "json-formatter",
-    name: "JSON Formatter",
-    description: "Beautify, minify, and validate JSON with ease",
+    name: "JSON Editor",
+    description: "Advanced JSON formatting and validation platform",
     href: "/json-formatter",
     icon: FileJson,
     features: [
-      "JSON beautification",
-      "Minification",
+      "Format & minify",
       "Validation",
       "History tracking"
-    ]
+    ],
+    tags: ["json", "development", "formatting", "validation", "data", "editor"]
   },
   {
     id: 'jwt-decoder',
-    name: 'JWT Decoder',
-    description: 'Decode and inspect JSON Web Tokens',
+    name: 'JWT Inspector',
+    description: 'Professional JWT token analysis and verification tool',
     href: '/jwt-decoder',
     icon: Key,
     features: [
-      'Pretty JSON View',
-      'Signature Verification',
-      'Token Expiry Check',
-      'Algorithm Warnings'
-    ]
+      'Token decoding',
+      'Signature verification',
+      'Expiry analysis'
+    ],
+    tags: ["jwt", "security", "authentication", "token", "verification", "debug"]
   },
   {
     id: 'url-encoder',
-    name: 'URL Encoder & Decoder',
-    description: 'Encode and decode URLs with ease',
+    name: 'URL Processor',
+    description: 'Advanced URL encoding and decoding utility',
     href: '/url-encoder',
     icon: Link,
     features: [
       'URL encoding',
       'URL decoding',
-      'Copy to clipboard',
       'History tracking'
-    ]
+    ],
+    tags: ["url", "encoding", "web", "development", "utility", "conversion"]
   },
   {
     id: 'html-encoder',
-    name: 'HTML Entity Encoder & Decoder',
-    description: 'Encode and decode HTML entities with ease',
+    name: 'HTML Processor',
+    description: 'Professional HTML entity encoding and decoding tool',
     href: '/html-encoder',
     icon: Code,
     features: [
-      'HTML entity encoding',
-      'HTML entity decoding',
-      'Copy to clipboard',
+      'Entity encoding',
+      'Entity decoding',
       'History tracking'
-    ]
+    ],
+    tags: ["html", "encoding", "web", "development", "entities", "conversion"]
   },
   {
     id: 'qr-code',
-    name: 'QR Code Generator & Reader',
-    description: 'Generate QR codes and scan them from images or camera',
+    name: 'QR Code Studio',
+    description: 'Comprehensive QR code generation and scanning platform',
     href: '/qr-code',
     icon: QrCode,
     features: [
-      'QR code generation',
-      'Image upload scanning',
-      'Camera scanning',
-      'History tracking'
-    ]
+      'Code generation',
+      'Image scanning',
+      'Camera scanning'
+    ],
+    tags: ["qr", "barcode", "scanning", "generation", "mobile", "utility"]
   },
   {
     id: 'color-converter',
-    name: 'Color Converter',
-    description: 'Convert colors between HEX, RGB, and HSL formats',
+    name: 'Color Studio',
+    description: 'Professional color format conversion and management tool',
     href: '/color-converter',
     icon: Palette,
     features: [
-      'HEX to RGB/HSL conversion',
-      'RGB to HEX/HSL conversion',
-      'HSL to HEX/RGB conversion',
+      'Format conversion',
       'Color preview',
       'History tracking'
-    ]
+    ],
+    tags: ["color", "design", "conversion", "hex", "rgb", "hsl"]
   },
   {
     id: 'text-converter',
-    name: 'Text Converter',
-    description: 'Convert text to Binary, Hexadecimal, and ASCII formats',
+    name: 'Text Transformer',
+    description: 'Advanced text format conversion and encoding tool',
     href: '/text-converter',
     icon: Binary,
     features: [
-      'Text to Binary conversion',
-      'Text to Hexadecimal conversion',
-      'Text to ASCII conversion',
-      'Copy to clipboard',
+      'Format conversion',
+      'Encoding options',
       'History tracking'
-    ]
+    ],
+    tags: ["text", "conversion", "encoding", "binary", "hex", "ascii"]
   },
   {
     id: 'yaml-converter',
-    name: 'YAML ⇄ JSON Converter',
-    description: 'Convert between YAML and JSON formats with ease',
+    name: 'YAML Converter',
+    description: 'Professional YAML and JSON format conversion tool',
     href: '/yaml-converter',
     icon: FileCode,
     features: [
-      'YAML to JSON conversion',
-      'JSON to YAML conversion',
-      'Copy to clipboard',
+      'Format conversion',
+      'Validation',
       'History tracking'
-    ]
+    ],
+    tags: ["yaml", "json", "conversion", "development", "data", "format"]
   },
   {
     id: 'csv-converter',
-    name: 'CSV ⇄ JSON Converter',
-    description: 'Convert between CSV and JSON formats with ease',
+    name: 'CSV Converter',
+    description: 'Advanced CSV and JSON format conversion platform',
     href: '/csv-converter',
     icon: Table,
     features: [
-      'CSV to JSON conversion',
-      'JSON to CSV conversion',
-      'Copy to clipboard',
+      'Format conversion',
+      'Data validation',
       'History tracking'
-    ]
+    ],
+    tags: ["csv", "json", "conversion", "data", "spreadsheet", "format"]
   },
   {
     id: 'xml-formatter',
-    name: 'XML Formatter & Viewer',
-    description: 'Format, validate, and minify XML with ease',
+    name: 'XML Editor',
+    description: 'Professional XML formatting and validation tool',
     href: '/xml-formatter',
     icon: FileCode,
     features: [
-      'XML formatting',
-      'XML validation',
-      'XML minification',
-      'Copy to clipboard',
-      'History tracking',
+      'Format & minify',
+      'Validation',
+      'History tracking'
     ],
+    tags: ["xml", "formatting", "development", "validation", "data", "editor"]
   },
   {
     id: 'markdown-previewer',
-    name: 'Markdown Previewer',
-    description: 'Preview and test your markdown in real-time with syntax highlighting',
+    name: 'Markdown Editor',
+    description: 'Advanced markdown editing and preview platform',
     href: '/markdown-previewer',
     icon: FileText,
     features: [
-      'Live markdown preview',
+      'Live preview',
       'Syntax highlighting',
-      'GitHub Flavored Markdown support',
-      'Copy to clipboard',
-      'Preview history',
+      'History tracking'
     ],
+    tags: ["markdown", "writing", "preview", "documentation", "editor", "format"]
   },
   {
     id: "diff-checker",
-    name: "Diff Checker",
-    description: "Compare and find differences between texts and JSON",
+    name: "Diff Analyzer",
+    description: "Professional text and JSON difference analysis tool",
     href: "/diff-checker",
     icon: GitCompare,
     features: [
-      "Text and JSON comparison",
-      "Side-by-side diff view",
-      "Fullscreen preview",
-      "History tracking",
-      "Copy to clipboard"
+      "Side-by-side comparison",
+      "Format support",
+      "History tracking"
     ],
+    tags: ["diff", "comparison", "text", "json", "analysis", "version"]
   },
   {
     id: "password-generator",
-    name: "Password Generator",
-    description: "Generate strong, secure passwords with customizable settings",
+    name: "Password Studio",
+    description: "Advanced password generation and management tool",
     href: "/password-generator",
     icon: Lock,
     features: [
-      "Customizable password length",
-      "Character type selection",
-      "Password strength indicator",
-      "Copy to clipboard"
+      "Custom generation",
+      "Strength analysis",
+      "History tracking"
     ],
+    tags: ["password", "security", "generator", "management", "crypto", "utility"]
   },
   {
     id: "uuid-generator",
-    name: "UUID Generator",
-    description: "Generate unique identifiers (UUIDs/GUIDs) in different versions",
+    name: "UUID Studio",
+    description: "Professional UUID generation and management platform",
     href: "/uuid-generator",
     icon: Hash,
     features: [
-      "Multiple UUID versions (v1, v4, v5)",
-      "Time-based UUIDs",
-      "Random UUIDs",
-      "Namespace-based UUIDs",
-      "Copy to clipboard"
-    ]
+      "Multiple versions",
+      "Custom generation",
+      "History tracking"
+    ],
+    tags: ["uuid", "guid", "generator", "development", "identifier", "unique"]
   },
   {
     id: "hash-generator",
     name: "Hash Generator",
-    description: "Generate cryptographic hashes using various algorithms",
+    description: "Advanced cryptographic hash generation platform",
     href: "/hash-generator",
     icon: Hash,
     features: [
-      "Multiple hash algorithms (MD5, SHA1, SHA256, SHA512)",
-      "Real-time hash generation",
-      "Copy to clipboard",
+      "Multiple algorithms",
+      "Real-time generation",
       "History tracking"
-    ]
+    ],
+    tags: ["hash", "crypto", "security", "generator", "md5", "sha"]
   },
   {
     id: "minifier",
-    name: "Code Minifier/Beautifier",
-    description: "Minify and beautify HTML, CSS, and JavaScript code",
+    name: "Code Optimizer",
+    description: "Professional code minification and beautification tool",
     href: "/minifier",
     icon: Scissors,
     features: [
-      "HTML minification and beautification",
-      "CSS minification and beautification",
-      "JavaScript minification and beautification",
-      "Copy to clipboard",
+      "Multi-format support",
+      "Optimization",
       "History tracking"
     ],
+    tags: ["minify", "optimization", "development", "code", "beautify", "format"]
   },
   {
     id: "lorem-ipsum",
-    name: "Lorem Ipsum Generator",
-    description: "Generate placeholder text for your designs and layouts",
+    name: "Text Generator",
+    description: "Professional placeholder text generation platform",
     href: "/lorem-ipsum",
     icon: Type,
     features: [
-      "Customizable paragraphs",
-      "Adjustable word count",
-      "Sentence control",
-      "Copy to clipboard"
+      "Custom generation",
+      "Format control",
+      "History tracking"
     ],
+    tags: ["lorem", "text", "placeholder", "generator", "design", "content"]
   },
   {
     id: "case-converter",
-    name: "Case Converter",
-    description: "Convert text between different case formats",
+    name: "Case Transformer",
+    description: "Advanced text case conversion and formatting tool",
     href: "/case-converter",
     icon: Type,
     features: [
-      "Multiple case formats",
+      "Multiple formats",
       "Real-time conversion",
-      "Copy to clipboard"
+      "History tracking"
     ],
+    tags: ["case", "text", "conversion", "format", "utility", "transformation"]
   },
 ]; 
