@@ -1,49 +1,33 @@
 import { create } from 'zustand';
-import { db } from './db/indexed-db';
+import { persist } from 'zustand/middleware';
 
-interface CaseConverterHistory {
-    input: string;
-    output: string;
-    type: 'camel' | 'pascal' | 'snake' | 'kebab' | 'title' | 'sentence' | 'lower' | 'upper';
-    timestamp: string;
+interface CaseConverterState {
+  inputText: string;
+  convertedText: string;
+  selectedCase: string;
+  setInputText: (text: string) => void;
+  setConvertedText: (text: string) => void;
+  setSelectedCase: (caseType: string) => void;
+  reset: () => void;
 }
 
-interface CaseConverterStore {
-    history: CaseConverterHistory[];
-    addToHistory: (item: CaseConverterHistory) => Promise<void>;
-    clearHistory: () => Promise<void>;
-    loadHistory: () => Promise<void>;
-}
+const initialState = {
+  inputText: '',
+  convertedText: '',
+  selectedCase: 'camelCase',
+};
 
-export const useCaseConverterStore = create<CaseConverterStore>((set) => ({
-    history: [],
-
-    addToHistory: async (item: CaseConverterHistory) => {
-        try {
-            await db.addToHistory('caseConverter', item);
-            const history = await db.getHistory('caseConverter');
-            set({ history });
-        } catch (error) {
-            console.error('Error adding to history:', error);
-        }
-    },
-
-    clearHistory: async () => {
-        try {
-            await db.clearHistory('caseConverter');
-            set({ history: [] });
-        } catch (error) {
-            console.error('Error clearing history:', error);
-        }
-    },
-
-    loadHistory: async () => {
-        try {
-            const history = await db.getHistory('caseConverter');
-            set({ history });
-        } catch (error) {
-            console.error('Error loading history:', error);
-            set({ history: [] });
-        }
-    },
-})); 
+export const useCaseConverterStore = create<CaseConverterState>()(
+  persist(
+    (set) => ({
+      ...initialState,
+      setInputText: (inputText) => set({ inputText }),
+      setConvertedText: (convertedText) => set({ convertedText }),
+      setSelectedCase: (selectedCase) => set({ selectedCase }),
+      reset: () => set(initialState),
+    }),
+    {
+      name: 'case-converter-storage',
+    }
+  )
+); 

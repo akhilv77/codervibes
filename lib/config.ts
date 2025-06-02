@@ -1,4 +1,4 @@
-import { Trophy, Wallet, type LucideIcon, DollarSign, BadgeDollarSignIcon, Globe, Calculator, LineChart, Code, FileJson, Key, Link, QrCode, Palette, Binary, FileCode, Table, FileText, Type, Eye, GitCompare, Lock, Hash, Scissors, AlignLeft } from "lucide-react";
+import { Trophy, Wallet, type LucideIcon, DollarSign, BadgeDollarSignIcon, Globe, Calculator, LineChart, Code, FileJson, Key, Link, QrCode, Palette, Binary, FileCode, Table, FileText, Type, Eye, GitCompare, Lock, Hash, Scissors } from "lucide-react";
 
 export interface AppConfig {
   id: string;
@@ -303,28 +303,26 @@ export const apps: AppConfig[] = [
   {
     id: "lorem-ipsum",
     name: "Lorem Ipsum Generator",
-    description: "Generate Lorem Ipsum placeholder text in different formats",
+    description: "Generate placeholder text for your designs and layouts",
     href: "/lorem-ipsum",
-    icon: AlignLeft,
+    icon: Type,
     features: [
-      "Generate paragraphs",
-      "Generate words",
-      "Generate characters",
-      "Copy to clipboard",
-      "History tracking"
+      "Customizable paragraphs",
+      "Adjustable word count",
+      "Sentence control",
+      "Copy to clipboard"
     ],
   },
   {
     id: "case-converter",
     name: "Case Converter",
-    description: "Convert text between different case styles (camelCase, snake_case, etc.)",
+    description: "Convert text between different case formats",
     href: "/case-converter",
     icon: Type,
     features: [
-      "Multiple case styles (camelCase, snake_case, etc.)",
+      "Multiple case formats",
       "Real-time conversion",
-      "Copy to clipboard",
-      "History tracking"
-    ]
+      "Copy to clipboard"
+    ],
   },
 ]; 

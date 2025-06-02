@@ -15,7 +15,7 @@ interface PasswordGeneratorStore {
     loadSettings: () => Promise<void>;
 }
 
-const SETTINGS_KEY = 'password-settings';
+const SETTINGS_KEY = 'settings';
 
 const DEFAULT_SETTINGS: PasswordSettings = {
     length: 16,
@@ -43,7 +43,7 @@ export const usePasswordGeneratorStore = create<PasswordGeneratorStore>((set, ge
     },
     loadSettings: async () => {
         try {
-            const settings = await db.get('passwordGenerator', SETTINGS_KEY);
+            const settings = await db.get<PasswordSettings>('passwordGenerator', SETTINGS_KEY);
             if (settings) {
                 set({ settings });
             } else {
