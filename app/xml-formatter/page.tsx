@@ -1,13 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { useXMLFormatterStore } from '@/lib/xml-formatter-store';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Copy, Trash2, Check, AlertCircle } from 'lucide-react';
+import { Loader2, Copy, Trash2, Check, AlertCircle, FileCode, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function XMLFormatterPage() {
@@ -15,7 +15,7 @@ export default function XMLFormatterPage() {
     const [output, setOutput] = useState('');
     const [isValid, setIsValid] = useState<boolean | null>(null);
     const [isLoading, setIsLoading] = useState(false);
-    const [copied, setCopied] = useState(false);
+    const [copied, setCopied] = useState<string | null>(null);
     const { history, addToHistory, clearHistory, loadHistory } = useXMLFormatterStore();
 
     useEffect(() => {
@@ -118,11 +118,11 @@ export default function XMLFormatterPage() {
         }
     };
 
-    const copyToClipboard = (text: string) => {
+    const copyToClipboard = (text: string, type: string) => {
         navigator.clipboard.writeText(text);
-        setCopied(true);
+        setCopied(type);
         toast.success('Text copied to clipboard');
-        setTimeout(() => setCopied(false), 2000);
+        setTimeout(() => setCopied(null), 2000);
     };
 
     const handleClearHistory = () => {
@@ -131,154 +131,231 @@ export default function XMLFormatterPage() {
     };
 
     return (
-        <div className="container mx-auto p-4 space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Input XML</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <Textarea
-                            value={input}
-                            onChange={(e) => setInput(e.target.value)}
-                            placeholder="Paste your XML here..."
-                            className="min-h-[300px] font-mono"
-                        />
-                        <div className="flex gap-2 mt-4">
-                            <Button
-                                onClick={handleFormat}
-                                disabled={isLoading}
-                                className="flex-1"
-                            >
-                                {isLoading ? (
-                                    <>
-                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                        Formatting...
-                                    </>
-                                ) : (
-                                    'Format XML'
+        <div className="container mx-auto px-4 py-4 sm:py-8 max-w-screen-xl">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 sm:mb-8">
+                <div>
+                    <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">XML Formatter & Viewer</h1>
+                    <p className="text-muted-foreground mt-1 text-sm sm:text-base">
+                        Format, validate, and minify XML with ease
+                    </p>
+                </div>
+            </div>
+
+            <div className="grid gap-4 sm:gap-6">
+                <div className="grid gap-4 sm:gap-6 md:grid-cols-2">
+                    <Card>
+                        <CardHeader className="p-4 sm:p-6">
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                                <div>
+                                    <CardTitle className="text-lg sm:text-xl flex items-center gap-2">
+                                        <FileCode className="h-4 w-4 sm:h-5 sm:w-5" />
+                                        Input
+                                    </CardTitle>
+                                    <CardDescription className="text-xs sm:text-sm mt-1">
+                                        Enter XML to format or minify
+                                    </CardDescription>
+                                </div>
+                                <Badge variant="secondary" className="text-xs">
+                                    <FileCode className="w-3 h-3 mr-1" />
+                                    XML Format
+                                </Badge>
+                            </div>
+                        </CardHeader>
+                        <CardContent className="p-4 sm:p-6">
+                            <div className="space-y-4">
+                                <div className="space-y-2">
+                                    <Textarea
+                                        value={input}
+                                        onChange={(e) => setInput(e.target.value)}
+                                        placeholder="Paste your XML here..."
+                                        className="min-h-[200px] text-xs sm:text-sm font-mono"
+                                    />
+                                </div>
+
+                                <div className="flex gap-2">
+                                    <Button
+                                        onClick={handleFormat}
+                                        disabled={isLoading}
+                                        className="flex-1"
+                                    >
+                                        {isLoading ? (
+                                            <>
+                                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                                Formatting...
+                                            </>
+                                        ) : (
+                                            'Format XML'
+                                        )}
+                                    </Button>
+                                    <Button
+                                        onClick={handleMinify}
+                                        disabled={isLoading}
+                                        variant="outline"
+                                        className="flex-1"
+                                    >
+                                        {isLoading ? (
+                                            <>
+                                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                                Minifying...
+                                            </>
+                                        ) : (
+                                            'Minify XML'
+                                        )}
+                                    </Button>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    <Card>
+                        <CardHeader className="p-4 sm:p-6">
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                                <div>
+                                    <CardTitle className="text-lg sm:text-xl flex items-center gap-2">
+                                        <FileCode className="h-4 w-4 sm:h-5 sm:w-5" />
+                                        Output
+                                    </CardTitle>
+                                    <CardDescription className="text-xs sm:text-sm mt-1">
+                                        Formatted or minified XML
+                                    </CardDescription>
+                                </div>
+                                {isValid !== null && (
+                                    <Badge variant={isValid ? "default" : "destructive"} className="text-xs">
+                                        {isValid ? (
+                                            <>
+                                                <Check className="w-3 h-3 mr-1" />
+                                                Valid XML
+                                            </>
+                                        ) : (
+                                            <>
+                                                <AlertCircle className="w-3 h-3 mr-1" />
+                                                Invalid XML
+                                            </>
+                                        )}
+                                    </Badge>
                                 )}
-                            </Button>
-                            <Button
-                                onClick={handleMinify}
-                                disabled={isLoading}
-                                variant="outline"
-                                className="flex-1"
-                            >
-                                {isLoading ? (
-                                    <>
-                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                        Minifying...
-                                    </>
-                                ) : (
-                                    'Minify XML'
+                            </div>
+                        </CardHeader>
+                        <CardContent className="p-4 sm:p-6">
+                            <div className="relative">
+                                <Textarea
+                                    value={output}
+                                    readOnly
+                                    className="min-h-[200px] text-xs sm:text-sm font-mono"
+                                />
+                                {output && (
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => copyToClipboard(output, 'output')}
+                                        className="absolute right-2 top-2 h-7 w-7 p-0"
+                                    >
+                                        {copied === 'output' ? (
+                                            <Check className="h-3 w-3 text-green-500" />
+                                        ) : (
+                                            <Copy className="h-3 w-3" />
+                                        )}
+                                    </Button>
                                 )}
-                            </Button>
-                        </div>
-                    </CardContent>
-                </Card>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </div>
 
                 <Card>
-                    <CardHeader>
-                        <CardTitle>Formatted Output</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="relative">
-                            <Textarea
-                                value={output}
-                                readOnly
-                                className="min-h-[300px] font-mono"
-                            />
-                            {output && (
+                    <CardHeader className="p-4 sm:p-6">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                            <div>
+                                <CardTitle className="text-lg sm:text-xl flex items-center gap-2">
+                                    <FileCode className="h-4 w-4 sm:h-5 sm:w-5" />
+                                    History
+                                </CardTitle>
+                                <CardDescription className="text-xs sm:text-sm mt-1">
+                                    Your recent formatting operations
+                                </CardDescription>
+                            </div>
+                            {history.length > 0 && (
                                 <Button
-                                    size="sm"
                                     variant="ghost"
-                                    className="absolute top-2 right-2"
-                                    onClick={() => copyToClipboard(output)}
+                                    size="icon"
+                                    onClick={handleClearHistory}
+                                    className="h-7 w-7 sm:h-8 sm:w-8"
                                 >
-                                    {copied ? (
-                                        <Check className="h-4 w-4" />
-                                    ) : (
-                                        <Copy className="h-4 w-4" />
-                                    )}
+                                    <RefreshCw className="h-3 w-3 sm:h-4 sm:w-4" />
                                 </Button>
                             )}
                         </div>
-                        {isValid !== null && (
-                            <div className="mt-2 flex items-center gap-2">
-                                {isValid ? (
-                                    <>
-                                        <Check className="h-4 w-4 text-green-500" />
-                                        <span className="text-sm text-green-500">Valid XML</span>
-                                    </>
-                                ) : (
-                                    <>
-                                        <AlertCircle className="h-4 w-4 text-red-500" />
-                                        <span className="text-sm text-red-500">Invalid XML</span>
-                                    </>
-                                )}
-                            </div>
-                        )}
+                    </CardHeader>
+                    <CardContent className="p-4 sm:p-6">
+                        <ScrollArea className="h-[300px] sm:h-[400px]">
+                            {history.length === 0 ? (
+                                <div className="text-center text-muted-foreground py-8">
+                                    No formatting history yet
+                                </div>
+                            ) : (
+                                <div className="space-y-4 pr-4">
+                                    {history.map((item, index) => (
+                                        <Card key={index} className="overflow-hidden">
+                                            <CardContent className="p-4">
+                                                <div className="flex items-center justify-between mb-3">
+                                                    <Badge variant="outline" className="text-xs">
+                                                        {item.type === 'format' ? 'Formatted' : 'Minified'}
+                                                    </Badge>
+                                                    <span className="text-[10px] sm:text-xs text-muted-foreground">
+                                                        {new Date(item.timestamp).toLocaleString()}
+                                                    </span>
+                                                </div>
+                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                                    <div>
+                                                        <p className="text-xs sm:text-sm font-medium mb-2">Input:</p>
+                                                        <div className="relative">
+                                                            <pre className="text-xs bg-muted p-3 rounded-md overflow-x-auto whitespace-pre-wrap">
+                                                                {item.from}
+                                                            </pre>
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="sm"
+                                                                onClick={() => copyToClipboard(item.from, `from-${index}`)}
+                                                                className="absolute right-2 top-2 h-7 w-7 p-0"
+                                                            >
+                                                                {copied === `from-${index}` ? (
+                                                                    <Check className="h-3 w-3 text-green-500" />
+                                                                ) : (
+                                                                    <Copy className="h-3 w-3" />
+                                                                )}
+                                                            </Button>
+                                                        </div>
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-xs sm:text-sm font-medium mb-2">Output:</p>
+                                                        <div className="relative">
+                                                            <pre className="text-xs bg-muted p-3 rounded-md overflow-x-auto whitespace-pre-wrap">
+                                                                {item.to}
+                                                            </pre>
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="sm"
+                                                                onClick={() => copyToClipboard(item.to, `to-${index}`)}
+                                                                className="absolute right-2 top-2 h-7 w-7 p-0"
+                                                            >
+                                                                {copied === `to-${index}` ? (
+                                                                    <Check className="h-3 w-3 text-green-500" />
+                                                                ) : (
+                                                                    <Copy className="h-3 w-3" />
+                                                                )}
+                                                            </Button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </CardContent>
+                                        </Card>
+                                    ))}
+                                </div>
+                            )}
+                        </ScrollArea>
                     </CardContent>
                 </Card>
             </div>
-
-            <Card>
-                <CardHeader className="flex flex-row items-center justify-between">
-                    <CardTitle>History</CardTitle>
-                    {history.length > 0 && (
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={handleClearHistory}
-                            className="text-red-500 hover:text-red-700"
-                        >
-                            <Trash2 className="h-4 w-4 mr-2" />
-                            Clear History
-                        </Button>
-                    )}
-                </CardHeader>
-                <CardContent>
-                    <ScrollArea className="h-[300px]">
-                        {history.length === 0 ? (
-                            <div className="text-center text-muted-foreground py-8">
-                                No formatting history yet
-                            </div>
-                        ) : (
-                            <div className="space-y-4">
-                                {history.map((item, index) => (
-                                    <Card key={index}>
-                                        <CardContent className="p-4">
-                                            <div className="flex items-center justify-between mb-2">
-                                                <Badge variant="outline">
-                                                    {item.type === 'format' ? 'Formatted' : 'Minified'}
-                                                </Badge>
-                                                <span className="text-sm text-muted-foreground">
-                                                    {new Date(item.timestamp).toLocaleString()}
-                                                </span>
-                                            </div>
-                                            <div className="grid grid-cols-2 gap-4">
-                                                <div>
-                                                    <p className="text-sm font-medium mb-1">Input:</p>
-                                                    <pre className="text-xs bg-muted p-2 rounded overflow-x-auto">
-                                                        {item.from}
-                                                    </pre>
-                                                </div>
-                                                <div>
-                                                    <p className="text-sm font-medium mb-1">Output:</p>
-                                                    <pre className="text-xs bg-muted p-2 rounded overflow-x-auto">
-                                                        {item.to}
-                                                    </pre>
-                                                </div>
-                                            </div>
-                                        </CardContent>
-                                    </Card>
-                                ))}
-                            </div>
-                        )}
-                    </ScrollArea>
-                </CardContent>
-            </Card>
         </div>
     );
 } 
