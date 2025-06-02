@@ -1,6 +1,6 @@
 import { openDB, DBSchema, IDBPDatabase } from 'idb';
 
-export type StoreNames = 'settings' | 'currencyRates' | 'moneyTracker' | 'scorecard' | 'ipTracker' | 'regex' | 'regexTester' | 'jsonFormatter' | 'jwtDecoder' | 'urlEncoder' | 'htmlEncoder' | 'qrCode' | 'colorConverter' | 'textConverter' | 'yamlConverter' | 'csvConverter' | 'xmlFormatter' | 'markdownPreviewer' | 'htmlPreviewer' | 'diffChecker' | 'passwordGenerator' | 'hashGenerator' | 'minifier' | 'lorem-ipsum';
+export type StoreNames = 'settings' | 'currencyRates' | 'moneyTracker' | 'scorecard' | 'ipTracker' | 'regex' | 'regexTester' | 'jsonFormatter' | 'jwtDecoder' | 'urlEncoder' | 'htmlEncoder' | 'qrCode' | 'colorConverter' | 'textConverter' | 'yamlConverter' | 'csvConverter' | 'xmlFormatter' | 'markdownPreviewer' | 'htmlPreviewer' | 'diffChecker' | 'passwordGenerator' | 'hashGenerator' | 'minifier' | 'lorem-ipsum' | 'caseConverter';
 
 interface CoderVibesDB extends DBSchema {
   settings: {
@@ -96,6 +96,10 @@ interface CoderVibesDB extends DBSchema {
     value: any;
   };
   'lorem-ipsum': {
+    key: string;
+    value: any;
+  };
+  caseConverter: {
     key: string;
     value: any;
   };
@@ -195,6 +199,9 @@ export class IndexedDBService {
           }
           if (!db.objectStoreNames.contains('lorem-ipsum')) {
             db.createObjectStore('lorem-ipsum');
+          }
+          if (!db.objectStoreNames.contains('caseConverter')) {
+            db.createObjectStore('caseConverter');
           }
         },
       });

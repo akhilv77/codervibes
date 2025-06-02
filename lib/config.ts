@@ -314,4 +314,17 @@ export const apps: AppConfig[] = [
       "History tracking"
     ],
   },
+  {
+    id: "case-converter",
+    name: "Case Converter",
+    description: "Convert text between different case styles (camelCase, snake_case, etc.)",
+    href: "/case-converter",
+    icon: Type,
+    features: [
+      "Multiple case styles (camelCase, snake_case, etc.)",
+      "Real-time conversion",
+      "Copy to clipboard",
+      "History tracking"
+    ]
+  },
 ]; 
