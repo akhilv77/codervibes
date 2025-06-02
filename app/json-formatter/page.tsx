@@ -141,42 +141,42 @@ export default function JSONFormatterPage() {
   const renderJSONNode = (node: JSONNode, level: number = 0) => {
     const isExpanded = expandedPaths.has(node.path);
     const hasChildren = node.children && node.children.length > 0;
-    const indent = level * 20;
+    const indent = level * 16;
 
     return (
-      <div key={node.path} className="font-mono text-sm">
-        <div className="flex items-center gap-1 py-1 hover:bg-accent/50 rounded px-2">
-          <div style={{ marginLeft: `${indent}px` }} className="flex items-center gap-1">
+      <div key={node.path} className="font-mono text-xs sm:text-sm">
+        <div className="flex items-center gap-1 py-0.5 sm:py-1 hover:bg-accent/50 rounded px-1 sm:px-2">
+          <div style={{ marginLeft: `${indent}px` }} className="flex items-center gap-1 min-w-0">
             {hasChildren && (
               <button
                 onClick={() => toggleNode(node.path)}
-                className="p-1 hover:bg-accent rounded"
+                className="p-0.5 sm:p-1 hover:bg-accent rounded"
               >
                 {isExpanded ? (
-                  <ChevronDown className="h-4 w-4" />
+                  <ChevronDown className="h-3 w-3 sm:h-4 sm:w-4" />
                 ) : (
-                  <ChevronRight className="h-4 w-4" />
+                  <ChevronRight className="h-3 w-3 sm:h-4 sm:w-4" />
                 )}
               </button>
             )}
-            <span className="text-blue-500">{node.key}</span>
-            <span className="text-gray-500">:</span>
+            <span className="text-blue-500 truncate">{node.key}</span>
+            <span className="text-gray-500 flex-shrink-0">:</span>
             {!hasChildren && (
-              <span className={`${node.type === 'string' ? 'text-green-500' :
-                  node.type === 'number' ? 'text-orange-500' :
-                    node.type === 'boolean' ? 'text-purple-500' :
-                      'text-gray-500'
+              <span className={`truncate ${node.type === 'string' ? 'text-green-500' :
+                node.type === 'number' ? 'text-orange-500' :
+                  node.type === 'boolean' ? 'text-purple-500' :
+                    'text-gray-500'
                 }`}>
                 {typeof node.value === 'string' ? `"${node.value}"` : String(node.value)}
               </span>
             )}
           </div>
-          <div className="ml-auto flex gap-2">
+          <div className="ml-auto flex gap-1 sm:gap-2 flex-shrink-0">
             <Button
               variant="ghost"
               size="sm"
               onClick={() => copyNodeValue(node)}
-              className="h-6 px-2"
+              className="h-5 w-5 sm:h-6 sm:w-6 p-0"
             >
               <Copy className="h-3 w-3" />
             </Button>
@@ -184,7 +184,7 @@ export default function JSONFormatterPage() {
               variant="ghost"
               size="sm"
               onClick={() => copyNodePath(node)}
-              className="h-6 px-2"
+              className="h-5 w-5 sm:h-6 sm:w-6 p-0"
             >
               <FileJson className="h-3 w-3" />
             </Button>
@@ -201,28 +201,28 @@ export default function JSONFormatterPage() {
 
   return (
     <JSONFormatterPageShell>
-      <div className="container px-4 py-6 sm:py-8">
-        <div className="grid gap-4 sm:gap-6">
+      <div className="container px-2 sm:px-4 py-4 sm:py-6">
+        <div className="grid gap-3 sm:gap-6">
           <div>
-            <h2 className="text-xl sm:text-2xl font-semibold mb-2 sm:mb-4">JSON Formatter & Parser</h2>
-            <p className="text-sm sm:text-base text-muted-foreground mb-4 sm:mb-6">
+            <h2 className="text-lg sm:text-2xl font-semibold mb-1 sm:mb-4">JSON Formatter & Parser</h2>
+            <p className="text-xs sm:text-base text-muted-foreground mb-3 sm:mb-6">
               Format, parse, and explore your JSON data with ease. Copy any field value or path with a single click.
             </p>
           </div>
 
           <Tabs defaultValue="formatter" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="formatter">Formatter</TabsTrigger>
-              <TabsTrigger value="parser">Parser</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-2 h-9 sm:h-10">
+              <TabsTrigger value="formatter" className="text-sm sm:text-base">Formatter</TabsTrigger>
+              <TabsTrigger value="parser" className="text-sm sm:text-base">Parser</TabsTrigger>
             </TabsList>
 
             <TabsContent value="formatter">
-              <div className="grid gap-4 sm:gap-6 lg:grid-cols-2">
+              <div className="grid gap-3 sm:gap-6 lg:grid-cols-2">
                 <Card className="w-full">
-                  <CardHeader className="p-4 sm:p-6">
+                  <CardHeader className="p-3 sm:p-6">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                       <div className="space-y-1">
-                        <CardTitle className="text-lg sm:text-xl font-semibold flex items-center gap-2">
+                        <CardTitle className="text-base sm:text-xl font-semibold flex items-center gap-2">
                           <FileJson className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                           JSON Input
                         </CardTitle>
@@ -231,21 +231,21 @@ export default function JSONFormatterPage() {
                       <Badge variant="outline" className="text-xs w-fit">Real-time Processing</Badge>
                     </div>
                   </CardHeader>
-                  <CardContent className="p-4 sm:p-6">
+                  <CardContent className="p-3 sm:p-6">
                     <Textarea
                       placeholder="Paste your JSON here..."
                       value={input}
                       onChange={(e) => setInput(e.target.value)}
-                      className="min-h-[150px] sm:min-h-[200px] font-mono text-xs sm:text-sm"
+                      className="min-h-[120px] sm:min-h-[200px] font-mono text-xs sm:text-sm"
                     />
-                    <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-2">
-                      <Button onClick={handleFormatJSON} className="w-full h-9 sm:h-10">
+                    <div className="mt-3 sm:mt-4 grid grid-cols-1 sm:grid-cols-3 gap-2">
+                      <Button onClick={handleFormatJSON} className="w-full h-8 sm:h-10 text-sm sm:text-base">
                         Format JSON
                       </Button>
-                      <Button onClick={minifyJSON} variant="outline" className="w-full h-9 sm:h-10">
+                      <Button onClick={minifyJSON} variant="outline" className="w-full h-8 sm:h-10 text-sm sm:text-base">
                         Minify JSON
                       </Button>
-                      <Button onClick={validateJSON} variant="outline" className="w-full h-9 sm:h-10">
+                      <Button onClick={validateJSON} variant="outline" className="w-full h-8 sm:h-10 text-sm sm:text-base">
                         Validate JSON
                       </Button>
                     </div>
@@ -253,10 +253,10 @@ export default function JSONFormatterPage() {
                 </Card>
 
                 <Card className="w-full">
-                  <CardHeader className="p-4 sm:p-6">
+                  <CardHeader className="p-3 sm:p-6">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                       <div className="space-y-1">
-                        <CardTitle className="text-lg sm:text-xl font-semibold flex items-center gap-2">
+                        <CardTitle className="text-base sm:text-xl font-semibold flex items-center gap-2">
                           <FileJson className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                           Output
                         </CardTitle>
@@ -270,27 +270,27 @@ export default function JSONFormatterPage() {
                           variant="ghost"
                           size="icon"
                           onClick={copyToClipboard}
-                          className="h-8 w-8"
+                          className="h-7 w-7 sm:h-8 sm:w-8"
                         >
                           {copied ? (
-                            <Check className="h-4 w-4 text-green-500" />
+                            <Check className="h-3 w-3 sm:h-4 sm:w-4 text-green-500" />
                           ) : (
-                            <Copy className="h-4 w-4" />
+                            <Copy className="h-3 w-3 sm:h-4 sm:w-4" />
                           )}
                         </Button>
                       )}
                     </div>
                   </CardHeader>
-                  <CardContent className="p-4 sm:p-6">
+                  <CardContent className="p-3 sm:p-6">
                     <div className="relative">
                       <Textarea
                         value={output}
                         readOnly
-                        className="min-h-[150px] sm:min-h-[200px] font-mono text-xs sm:text-sm bg-muted/50"
+                        className="min-h-[120px] sm:min-h-[200px] font-mono text-xs sm:text-sm bg-muted/50"
                       />
                       {isValid !== null && (
                         <div className="absolute top-2 right-2">
-                          <Badge variant={isValid ? "default" : "destructive"}>
+                          <Badge variant={isValid ? "default" : "destructive"} className="text-xs">
                             {isValid ? 'Valid' : 'Invalid'}
                           </Badge>
                         </div>
@@ -303,10 +303,10 @@ export default function JSONFormatterPage() {
 
             <TabsContent value="parser">
               <Card className="w-full">
-                <CardHeader className="p-4 sm:p-6">
+                <CardHeader className="p-3 sm:p-6">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                     <div className="space-y-1">
-                      <CardTitle className="text-lg sm:text-xl font-semibold flex items-center gap-2">
+                      <CardTitle className="text-base sm:text-xl font-semibold flex items-center gap-2">
                         <FileJson className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                         JSON Parser
                       </CardTitle>
@@ -316,19 +316,19 @@ export default function JSONFormatterPage() {
                     </div>
                   </div>
                 </CardHeader>
-                <CardContent className="p-4 sm:p-6">
-                  <div className="grid gap-4">
+                <CardContent className="p-3 sm:p-6">
+                  <div className="grid gap-3 sm:gap-4">
                     <Textarea
                       placeholder="Paste your JSON here to parse..."
                       value={input}
                       onChange={(e) => setInput(e.target.value)}
                       className="min-h-[100px] font-mono text-xs sm:text-sm"
                     />
-                    <Button onClick={handleFormatJSON} className="w-full">
+                    <Button onClick={handleFormatJSON} className="w-full h-8 sm:h-10 text-sm sm:text-base">
                       Parse JSON
                     </Button>
                     {parsedNodes.length > 0 && (
-                      <ScrollArea className="h-[400px] rounded-md border p-4">
+                      <ScrollArea className="h-[300px] sm:h-[400px] rounded-md border p-2 sm:p-4">
                         {parsedNodes.map(node => renderJSONNode(node))}
                       </ScrollArea>
                     )}
@@ -339,10 +339,10 @@ export default function JSONFormatterPage() {
           </Tabs>
 
           <Card className="w-full">
-            <CardHeader className="p-4 sm:p-6">
+            <CardHeader className="p-3 sm:p-6">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                 <div className="space-y-1">
-                  <CardTitle className="text-lg sm:text-xl font-semibold flex items-center gap-2">
+                  <CardTitle className="text-base sm:text-xl font-semibold flex items-center gap-2">
                     <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                     Recent JSON
                   </CardTitle>
@@ -354,38 +354,49 @@ export default function JSONFormatterPage() {
                     variant="ghost"
                     size="icon"
                     onClick={clearHistory}
-                    className="h-8 w-8"
+                    className="h-7 w-7 sm:h-8 sm:w-8"
                   >
-                    <Trash2 className="h-4 w-4" />
+                    <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
                   </Button>
                 </div>
               </div>
             </CardHeader>
-            <CardContent className="p-4 sm:p-6">
+            <CardContent className="p-3 sm:p-6">
               <div className="space-y-2">
                 {history.length === 0 ? (
                   <p className="text-xs sm:text-sm text-muted-foreground text-center py-4">
                     No recent JSON entries
                   </p>
                 ) : (
-                  history.map((item, index) => (
-                    <div
-                      key={index}
-                      className="p-2 sm:p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors cursor-pointer group"
-                      onClick={() => handleHistoryClick(item.json)}
-                    >
-                      <div className="flex items-start justify-between gap-2 sm:gap-4">
-                        <div className="flex-1 min-w-0">
-                          <p className="text-xs sm:text-sm font-mono truncate">
-                            {item.json.length > 100 ? `${item.json.slice(0, 100)}...` : item.json}
-                          </p>
-                          <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">
-                            {new Date(item.timestamp).toLocaleString()}
-                          </p>
+                  <ScrollArea className="h-[200px] sm:h-[300px]">
+                    <div className="space-y-2 pr-4">
+                      {history.map((item, index) => (
+                        <div
+                          key={index}
+                          className="p-2 sm:p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors cursor-pointer group"
+                          onClick={() => handleHistoryClick(item.json)}
+                        >
+                          <div className="flex flex-col gap-1">
+                            <div className="flex items-start justify-between gap-2">
+                              <div className="flex-1 min-w-0">
+                                <p className="text-xs sm:text-sm font-mono break-all line-clamp-2">
+                                  {item.json}
+                                </p>
+                              </div>
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <p className="text-[10px] sm:text-xs text-muted-foreground">
+                                {new Date(item.timestamp).toLocaleString()}
+                              </p>
+                              <Badge variant="outline" className="text-[10px] sm:text-xs">
+                                {item.json.length > 1000 ? 'Large' : 'Small'}
+                              </Badge>
+                            </div>
+                          </div>
                         </div>
-                      </div>
+                      ))}
                     </div>
-                  ))
+                  </ScrollArea>
                 )}
               </div>
             </CardContent>
