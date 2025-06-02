@@ -1,6 +1,6 @@
 import { openDB, DBSchema, IDBPDatabase } from 'idb';
 
-export type StoreNames = 'settings' | 'currencyRates' | 'moneyTracker' | 'scorecard' | 'ipTracker' | 'regex' | 'regexTester' | 'jsonFormatter' | 'jwtDecoder' | 'urlEncoder' | 'htmlEncoder' | 'qrCode' | 'colorConverter' | 'textConverter' | 'yamlConverter' | 'csvConverter' | 'xmlFormatter' | 'markdownPreviewer' | 'htmlPreviewer' | 'diffChecker' | 'passwordGenerator' | 'hashGenerator' | 'minifier';
+export type StoreNames = 'settings' | 'currencyRates' | 'moneyTracker' | 'scorecard' | 'ipTracker' | 'regex' | 'regexTester' | 'jsonFormatter' | 'jwtDecoder' | 'urlEncoder' | 'htmlEncoder' | 'qrCode' | 'colorConverter' | 'textConverter' | 'yamlConverter' | 'csvConverter' | 'xmlFormatter' | 'markdownPreviewer' | 'htmlPreviewer' | 'diffChecker' | 'passwordGenerator' | 'hashGenerator' | 'minifier' | 'lorem-ipsum';
 
 interface CoderVibesDB extends DBSchema {
   settings: {
@@ -21,7 +21,7 @@ interface CoderVibesDB extends DBSchema {
   };
   ipTracker: {
     key: string;
-    value: string[];
+    value: any;
   };
   regex: {
     key: string;
@@ -95,165 +95,166 @@ interface CoderVibesDB extends DBSchema {
     key: string;
     value: any;
   };
+  'lorem-ipsum': {
+    key: string;
+    value: any;
+  };
 }
 
-class IndexedDBService {
+export class IndexedDBService {
   private db: IDBPDatabase<CoderVibesDB> | null = null;
   private isInitialized = false;
-  private initPromise: Promise<void> | null = null;
+  private readonly DB_NAME = 'codervibes';
+  private readonly DB_VERSION = 1;
 
-  async init() {
-    if (typeof window === 'undefined') {
-      return;
-    }
-
-    if (this.isInitialized) {
-      return;
-    }
-
-    if (this.initPromise) {
-      return this.initPromise;
-    }
-
-    this.initPromise = (async () => {
-      try {
-        this.db = await openDB<CoderVibesDB>('codervibes', 20, {
-          upgrade(db, oldVersion, newVersion) {
-            // Create stores if they don't exist
-            if (!db.objectStoreNames.contains('settings')) {
-              db.createObjectStore('settings');
-            }
-            if (!db.objectStoreNames.contains('currencyRates')) {
-              db.createObjectStore('currencyRates');
-            }
-            if (!db.objectStoreNames.contains('moneyTracker')) {
-              db.createObjectStore('moneyTracker');
-            }
-            if (!db.objectStoreNames.contains('scorecard')) {
-              db.createObjectStore('scorecard');
-            }
-            if (!db.objectStoreNames.contains('ipTracker')) {
-              db.createObjectStore('ipTracker');
-            }
-            if (!db.objectStoreNames.contains('regex')) {
-              db.createObjectStore('regex');
-            }
-            if (!db.objectStoreNames.contains('regexTester')) {
-              db.createObjectStore('regexTester');
-            }
-            if (!db.objectStoreNames.contains('jsonFormatter')) {
-              db.createObjectStore('jsonFormatter');
-            }
-            if (!db.objectStoreNames.contains('jwtDecoder')) {
-              db.createObjectStore('jwtDecoder');
-            }
-            if (!db.objectStoreNames.contains('urlEncoder')) {
-              db.createObjectStore('urlEncoder');
-            }
-            if (!db.objectStoreNames.contains('htmlEncoder')) {
-              db.createObjectStore('htmlEncoder');
-            }
-            if (!db.objectStoreNames.contains('qrCode')) {
-              db.createObjectStore('qrCode');
-            }
-            if (!db.objectStoreNames.contains('colorConverter')) {
-              db.createObjectStore('colorConverter');
-            }
-            if (!db.objectStoreNames.contains('textConverter')) {
-              db.createObjectStore('textConverter');
-            }
-            if (!db.objectStoreNames.contains('yamlConverter')) {
-              db.createObjectStore('yamlConverter');
-            }
-            if (!db.objectStoreNames.contains('csvConverter')) {
-              db.createObjectStore('csvConverter');
-            }
-            if (!db.objectStoreNames.contains('xmlFormatter')) {
-              db.createObjectStore('xmlFormatter');
-            }
-            if (!db.objectStoreNames.contains('markdownPreviewer')) {
-              db.createObjectStore('markdownPreviewer');
-            }
-            if (!db.objectStoreNames.contains('htmlPreviewer')) {
-              db.createObjectStore('htmlPreviewer');
-            }
-            if (!db.objectStoreNames.contains('diffChecker')) {
-              db.createObjectStore('diffChecker');
-            }
-            if (!db.objectStoreNames.contains('passwordGenerator')) {
-              db.createObjectStore('passwordGenerator');
-            }
-            if (!db.objectStoreNames.contains('hashGenerator')) {
-              db.createObjectStore('hashGenerator');
-            }
-            if (!db.objectStoreNames.contains('minifier')) {
-              db.createObjectStore('minifier');
-            }
-          },
-        });
-        this.isInitialized = true;
-      } catch (error) {
-        console.error('Error initializing IndexedDB:', error);
-        this.initPromise = null;
-        throw error;
-      }
-    })();
-
-    return this.initPromise;
+  constructor() {
+    this.initDB();
   }
 
-  async get<T>(storeName: StoreNames, key: string): Promise<T | undefined> {
-    if (typeof window === 'undefined') return undefined;
-    if (!this.db) {
-      await this.init();
+  private async initDB() {
+    if (this.isInitialized) return;
+
+    try {
+      // First, try to delete the old database if it exists
+      try {
+        await indexedDB.deleteDatabase('codervibes-db');
+      } catch (error) {
+        console.log('No old database to delete');
+      }
+
+      this.db = await openDB<CoderVibesDB>(this.DB_NAME, this.DB_VERSION, {
+        upgrade(db) {
+          if (!db.objectStoreNames.contains('settings')) {
+            db.createObjectStore('settings');
+          }
+          if (!db.objectStoreNames.contains('currencyRates')) {
+            db.createObjectStore('currencyRates');
+          }
+          if (!db.objectStoreNames.contains('moneyTracker')) {
+            db.createObjectStore('moneyTracker');
+          }
+          if (!db.objectStoreNames.contains('scorecard')) {
+            db.createObjectStore('scorecard');
+          }
+          if (!db.objectStoreNames.contains('ipTracker')) {
+            db.createObjectStore('ipTracker');
+          }
+          if (!db.objectStoreNames.contains('regex')) {
+            db.createObjectStore('regex');
+          }
+          if (!db.objectStoreNames.contains('regexTester')) {
+            db.createObjectStore('regexTester');
+          }
+          if (!db.objectStoreNames.contains('jsonFormatter')) {
+            db.createObjectStore('jsonFormatter');
+          }
+          if (!db.objectStoreNames.contains('jwtDecoder')) {
+            db.createObjectStore('jwtDecoder');
+          }
+          if (!db.objectStoreNames.contains('urlEncoder')) {
+            db.createObjectStore('urlEncoder');
+          }
+          if (!db.objectStoreNames.contains('htmlEncoder')) {
+            db.createObjectStore('htmlEncoder');
+          }
+          if (!db.objectStoreNames.contains('qrCode')) {
+            db.createObjectStore('qrCode');
+          }
+          if (!db.objectStoreNames.contains('colorConverter')) {
+            db.createObjectStore('colorConverter');
+          }
+          if (!db.objectStoreNames.contains('textConverter')) {
+            db.createObjectStore('textConverter');
+          }
+          if (!db.objectStoreNames.contains('yamlConverter')) {
+            db.createObjectStore('yamlConverter');
+          }
+          if (!db.objectStoreNames.contains('csvConverter')) {
+            db.createObjectStore('csvConverter');
+          }
+          if (!db.objectStoreNames.contains('xmlFormatter')) {
+            db.createObjectStore('xmlFormatter');
+          }
+          if (!db.objectStoreNames.contains('markdownPreviewer')) {
+            db.createObjectStore('markdownPreviewer');
+          }
+          if (!db.objectStoreNames.contains('htmlPreviewer')) {
+            db.createObjectStore('htmlPreviewer');
+          }
+          if (!db.objectStoreNames.contains('diffChecker')) {
+            db.createObjectStore('diffChecker');
+          }
+          if (!db.objectStoreNames.contains('passwordGenerator')) {
+            db.createObjectStore('passwordGenerator');
+          }
+          if (!db.objectStoreNames.contains('hashGenerator')) {
+            db.createObjectStore('hashGenerator');
+          }
+          if (!db.objectStoreNames.contains('minifier')) {
+            db.createObjectStore('minifier');
+          }
+          if (!db.objectStoreNames.contains('lorem-ipsum')) {
+            db.createObjectStore('lorem-ipsum');
+          }
+        },
+      });
+      this.isInitialized = true;
+    } catch (error) {
+      console.error('Error initializing IndexedDB:', error);
     }
-    if (!this.db) return undefined;
+  }
+
+  async get(storeName: StoreNames, key: string): Promise<any> {
+    if (!this.db) {
+      throw new Error('Database not initialized');
+    }
     return this.db.get(storeName, key);
   }
 
-  async set<T>(storeName: StoreNames, key: string, value: T): Promise<void> {
-    if (typeof window === 'undefined') return;
+  async set(storeName: StoreNames, key: string, value: any): Promise<void> {
     if (!this.db) {
-      await this.init();
+      throw new Error('Database not initialized');
     }
-    if (!this.db) return;
     await this.db.put(storeName, value, key);
   }
 
   async delete(storeName: StoreNames, key: string): Promise<void> {
-    if (typeof window === 'undefined') return;
     if (!this.db) {
-      await this.init();
+      throw new Error('Database not initialized');
     }
-    if (!this.db) return;
     await this.db.delete(storeName, key);
   }
 
-  async clear(storeName: StoreNames): Promise<void> {
-    if (typeof window === 'undefined') return;
+  async getAll(storeName: StoreNames): Promise<any[]> {
     if (!this.db) {
-      await this.init();
+      throw new Error('Database not initialized');
     }
-    if (!this.db) return;
-    await this.db.clear(storeName);
-  }
-
-  async getAll<T>(storeName: StoreNames): Promise<T[]> {
-    if (typeof window === 'undefined') return [];
-    if (!this.db) {
-      await this.init();
-    }
-    if (!this.db) return [];
     return this.db.getAll(storeName);
   }
+
+  async addToHistory(storeName: StoreNames, item: any): Promise<void> {
+    if (!this.db) {
+      throw new Error('Database not initialized');
+    }
+    const history = await this.getHistory(storeName);
+    const newHistory = [item, ...history].slice(0, 10); // Keep only last 10 items
+    await this.db.put(storeName, newHistory, 'history');
+  }
+
+  async getHistory(storeName: StoreNames): Promise<any[]> {
+    if (!this.db) {
+      throw new Error('Database not initialized');
+    }
+    const history = await this.db.get(storeName, 'history');
+    return history || [];
+  }
+
+  async clearHistory(storeName: StoreNames): Promise<void> {
+    if (!this.db) {
+      throw new Error('Database not initialized');
+    }
+    await this.db.put(storeName, [], 'history');
+  }
 }
 
-// Create a singleton instance
-const db = new IndexedDBService();
-
-// Initialize the database when the module is imported
-if (typeof window !== 'undefined') {
-  db.init().catch(console.error);
-}
-
-export { db }; 
+export const db = new IndexedDBService(); 

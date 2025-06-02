@@ -1,4 +1,4 @@
-import { Trophy, Wallet, type LucideIcon, DollarSign, BadgeDollarSignIcon, Globe, Calculator, LineChart, Code, FileJson, Key, Link, QrCode, Palette, Binary, FileCode, Table, FileText, Type, Eye, GitCompare, Lock, Hash, Scissors } from "lucide-react";
+import { Trophy, Wallet, type LucideIcon, DollarSign, BadgeDollarSignIcon, Globe, Calculator, LineChart, Code, FileJson, Key, Link, QrCode, Palette, Binary, FileCode, Table, FileText, Type, Eye, GitCompare, Lock, Hash, Scissors, AlignLeft } from "lucide-react";
 
 export interface AppConfig {
   id: string;
@@ -296,6 +296,20 @@ export const apps: AppConfig[] = [
       "HTML minification and beautification",
       "CSS minification and beautification",
       "JavaScript minification and beautification",
+      "Copy to clipboard",
+      "History tracking"
+    ],
+  },
+  {
+    id: "lorem-ipsum",
+    name: "Lorem Ipsum Generator",
+    description: "Generate Lorem Ipsum placeholder text in different formats",
+    href: "/lorem-ipsum",
+    icon: AlignLeft,
+    features: [
+      "Generate paragraphs",
+      "Generate words",
+      "Generate characters",
       "Copy to clipboard",
       "History tracking"
     ],
