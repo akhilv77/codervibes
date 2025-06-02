@@ -7,15 +7,13 @@ import { Textarea } from '@/components/ui/textarea';
 import { useMarkdownPreviewerStore } from '@/lib/markdown-previewer-store';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Copy, RefreshCw, FileText, Eye, Check, Maximize2, Minimize2 } from 'lucide-react';
+import { Loader2, Copy, RefreshCw, FileText, Eye, Check, Maximize2, Minimize2, Code2 } from 'lucide-react';
 import { toast } from 'sonner';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
-import { Components } from 'react-markdown';
-import { CSSProperties } from 'react';
-import { SyntaxHighlighterProps } from 'react-syntax-highlighter';
+import type { Components } from 'react-markdown';
+import { formatDistanceToNow } from 'date-fns';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 export default function MarkdownPreviewerPage() {
     const [input, setInput] = useState('');
@@ -86,6 +84,91 @@ export default function MarkdownPreviewerPage() {
             document.removeEventListener('fullscreenchange', handleFullscreenChange);
         };
     }, []);
+
+    const components: Components = {
+        code({ className, children, ...props }) {
+            const match = /language-(\w+)/.exec(className || "");
+            return match ? (
+                <div className="relative">
+                    <div className="absolute right-2 top-2">
+                        <Badge variant="secondary" className="text-xs">
+                            {match[1]}
+                        </Badge>
+                    </div>
+                    <pre className="p-4 rounded-lg bg-muted overflow-x-auto">
+                        <code className={`language-${match[1]}`} {...props}>
+                            {String(children).replace(/\n$/, "")}
+                        </code>
+                    </pre>
+                </div>
+            ) : (
+                <code className="bg-muted px-1.5 py-0.5 rounded text-sm font-mono" {...props}>
+                    {children}
+                </code>
+            );
+        },
+        p: ({ children }) => <p className="mb-4">{children}</p>,
+        h1: ({ children }) => <h1 className="text-3xl font-bold mb-4 mt-6">{children}</h1>,
+        h2: ({ children }) => <h2 className="text-2xl font-bold mb-3 mt-5">{children}</h2>,
+        h3: ({ children }) => <h3 className="text-xl font-bold mb-3 mt-4">{children}</h3>,
+        h4: ({ children }) => <h4 className="text-lg font-bold mb-2 mt-4">{children}</h4>,
+        h5: ({ children }) => <h5 className="text-base font-bold mb-2 mt-3">{children}</h5>,
+        h6: ({ children }) => <h6 className="text-sm font-bold mb-2 mt-3">{children}</h6>,
+        ul: ({ children }) => <ul className="list-disc pl-6 mb-4 space-y-1">{children}</ul>,
+        ol: ({ children }) => <ol className="list-decimal pl-6 mb-4 space-y-1">{children}</ol>,
+        li: ({ children }) => <li className="mb-1">{children}</li>,
+        blockquote: ({ children }) => (
+            <blockquote className="border-l-4 border-muted-foreground pl-4 italic my-4">
+                {children}
+            </blockquote>
+        ),
+        table: ({ children }) => (
+            <div className="overflow-x-auto my-4">
+                <table className="min-w-full divide-y divide-border">
+                    {children}
+                </table>
+            </div>
+        ),
+        thead: ({ children }) => (
+            <thead className="bg-muted">
+                {children}
+            </thead>
+        ),
+        tbody: ({ children }) => (
+            <tbody className="divide-y divide-border">
+                {children}
+            </tbody>
+        ),
+        tr: ({ children }) => <tr>{children}</tr>,
+        th: ({ children }) => (
+            <th className="px-4 py-2 text-left font-medium">
+                {children}
+            </th>
+        ),
+        td: ({ children }) => (
+            <td className="px-4 py-2">
+                {children}
+            </td>
+        ),
+        hr: () => <hr className="my-6 border-border" />,
+        a: ({ href, children }) => (
+            <a
+                href={href}
+                className="text-primary underline underline-offset-4 hover:text-primary/80"
+                target="_blank"
+                rel="noopener noreferrer"
+            >
+                {children}
+            </a>
+        ),
+        img: ({ src, alt }) => (
+            <img
+                src={src}
+                alt={alt}
+                className="rounded-lg my-4 max-w-full h-auto"
+            />
+        ),
+    };
 
     return (
         <div className="container mx-auto px-4 py-4 sm:py-8 max-w-screen-xl">
@@ -182,91 +265,7 @@ export default function MarkdownPreviewerPage() {
                                     }`}>
                                     <ReactMarkdown
                                         remarkPlugins={[remarkGfm]}
-                                        components={{
-                                            code: ({ className, children, ...props }) => {
-                                                const match = /language-(\w+)/.exec(className || '');
-                                                const isInline = !match;
-                                                return !isInline ? (
-                                                    <SyntaxHighlighter
-                                                        style={vscDarkPlus}
-                                                        language={match[1]}
-                                                        PreTag="div"
-                                                        customStyle={{
-                                                            margin: '1em 0',
-                                                            borderRadius: '0.375rem',
-                                                        }}
-                                                        {...(props as SyntaxHighlighterProps)}
-                                                    >
-                                                        {String(children).replace(/\n$/, '')}
-                                                    </SyntaxHighlighter>
-                                                ) : (
-                                                    <code className="bg-muted px-1.5 py-0.5 rounded text-sm font-mono">
-                                                        {children}
-                                                    </code>
-                                                );
-                                            },
-                                            p: ({ children }) => <p className="mb-4">{children}</p>,
-                                            h1: ({ children }) => <h1 className="text-3xl font-bold mb-4 mt-6">{children}</h1>,
-                                            h2: ({ children }) => <h2 className="text-2xl font-bold mb-3 mt-5">{children}</h2>,
-                                            h3: ({ children }) => <h3 className="text-xl font-bold mb-3 mt-4">{children}</h3>,
-                                            h4: ({ children }) => <h4 className="text-lg font-bold mb-2 mt-4">{children}</h4>,
-                                            h5: ({ children }) => <h5 className="text-base font-bold mb-2 mt-3">{children}</h5>,
-                                            h6: ({ children }) => <h6 className="text-sm font-bold mb-2 mt-3">{children}</h6>,
-                                            ul: ({ children }) => <ul className="list-disc pl-6 mb-4 space-y-1">{children}</ul>,
-                                            ol: ({ children }) => <ol className="list-decimal pl-6 mb-4 space-y-1">{children}</ol>,
-                                            li: ({ children }) => <li className="mb-1">{children}</li>,
-                                            blockquote: ({ children }) => (
-                                                <blockquote className="border-l-4 border-muted-foreground pl-4 italic my-4">
-                                                    {children}
-                                                </blockquote>
-                                            ),
-                                            table: ({ children }) => (
-                                                <div className="overflow-x-auto my-4">
-                                                    <table className="min-w-full divide-y divide-border">
-                                                        {children}
-                                                    </table>
-                                                </div>
-                                            ),
-                                            thead: ({ children }) => (
-                                                <thead className="bg-muted">
-                                                    {children}
-                                                </thead>
-                                            ),
-                                            tbody: ({ children }) => (
-                                                <tbody className="divide-y divide-border">
-                                                    {children}
-                                                </tbody>
-                                            ),
-                                            tr: ({ children }) => <tr>{children}</tr>,
-                                            th: ({ children }) => (
-                                                <th className="px-4 py-2 text-left font-medium">
-                                                    {children}
-                                                </th>
-                                            ),
-                                            td: ({ children }) => (
-                                                <td className="px-4 py-2">
-                                                    {children}
-                                                </td>
-                                            ),
-                                            hr: () => <hr className="my-6 border-border" />,
-                                            a: ({ href, children }) => (
-                                                <a
-                                                    href={href}
-                                                    className="text-primary underline underline-offset-4 hover:text-primary/80"
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                >
-                                                    {children}
-                                                </a>
-                                            ),
-                                            img: ({ src, alt }) => (
-                                                <img
-                                                    src={src}
-                                                    alt={alt}
-                                                    className="rounded-lg my-4 max-w-full h-auto"
-                                                />
-                                            ),
-                                        }}
+                                        components={components}
                                     >
                                         {output}
                                     </ReactMarkdown>
@@ -330,7 +329,7 @@ export default function MarkdownPreviewerPage() {
                                                         Preview
                                                     </Badge>
                                                     <span className="text-[10px] sm:text-xs text-muted-foreground">
-                                                        {new Date(item.timestamp).toLocaleString()}
+                                                        {formatDistanceToNow(new Date(item.timestamp))}
                                                     </span>
                                                 </div>
                                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -360,91 +359,7 @@ export default function MarkdownPreviewerPage() {
                                                             <div className="prose prose-sm dark:prose-invert max-w-none p-3 rounded-md border bg-muted">
                                                                 <ReactMarkdown
                                                                     remarkPlugins={[remarkGfm]}
-                                                                    components={{
-                                                                        code: ({ className, children, ...props }) => {
-                                                                            const match = /language-(\w+)/.exec(className || '');
-                                                                            const isInline = !match;
-                                                                            return !isInline ? (
-                                                                                <SyntaxHighlighter
-                                                                                    style={vscDarkPlus}
-                                                                                    language={match[1]}
-                                                                                    PreTag="div"
-                                                                                    customStyle={{
-                                                                                        margin: '1em 0',
-                                                                                        borderRadius: '0.375rem',
-                                                                                    }}
-                                                                                    {...(props as SyntaxHighlighterProps)}
-                                                                                >
-                                                                                    {String(children).replace(/\n$/, '')}
-                                                                                </SyntaxHighlighter>
-                                                                            ) : (
-                                                                                <code className="bg-muted px-1.5 py-0.5 rounded text-sm font-mono">
-                                                                                    {children}
-                                                                                </code>
-                                                                            );
-                                                                        },
-                                                                        p: ({ children }) => <p className="mb-4">{children}</p>,
-                                                                        h1: ({ children }) => <h1 className="text-3xl font-bold mb-4 mt-6">{children}</h1>,
-                                                                        h2: ({ children }) => <h2 className="text-2xl font-bold mb-3 mt-5">{children}</h2>,
-                                                                        h3: ({ children }) => <h3 className="text-xl font-bold mb-3 mt-4">{children}</h3>,
-                                                                        h4: ({ children }) => <h4 className="text-lg font-bold mb-2 mt-4">{children}</h4>,
-                                                                        h5: ({ children }) => <h5 className="text-base font-bold mb-2 mt-3">{children}</h5>,
-                                                                        h6: ({ children }) => <h6 className="text-sm font-bold mb-2 mt-3">{children}</h6>,
-                                                                        ul: ({ children }) => <ul className="list-disc pl-6 mb-4 space-y-1">{children}</ul>,
-                                                                        ol: ({ children }) => <ol className="list-decimal pl-6 mb-4 space-y-1">{children}</ol>,
-                                                                        li: ({ children }) => <li className="mb-1">{children}</li>,
-                                                                        blockquote: ({ children }) => (
-                                                                            <blockquote className="border-l-4 border-muted-foreground pl-4 italic my-4">
-                                                                                {children}
-                                                                            </blockquote>
-                                                                        ),
-                                                                        table: ({ children }) => (
-                                                                            <div className="overflow-x-auto my-4">
-                                                                                <table className="min-w-full divide-y divide-border">
-                                                                                    {children}
-                                                                                </table>
-                                                                            </div>
-                                                                        ),
-                                                                        thead: ({ children }) => (
-                                                                            <thead className="bg-muted">
-                                                                                {children}
-                                                                            </thead>
-                                                                        ),
-                                                                        tbody: ({ children }) => (
-                                                                            <tbody className="divide-y divide-border">
-                                                                                {children}
-                                                                            </tbody>
-                                                                        ),
-                                                                        tr: ({ children }) => <tr>{children}</tr>,
-                                                                        th: ({ children }) => (
-                                                                            <th className="px-4 py-2 text-left font-medium">
-                                                                                {children}
-                                                                            </th>
-                                                                        ),
-                                                                        td: ({ children }) => (
-                                                                            <td className="px-4 py-2">
-                                                                                {children}
-                                                                            </td>
-                                                                        ),
-                                                                        hr: () => <hr className="my-6 border-border" />,
-                                                                        a: ({ href, children }) => (
-                                                                            <a
-                                                                                href={href}
-                                                                                className="text-primary underline underline-offset-4 hover:text-primary/80"
-                                                                                target="_blank"
-                                                                                rel="noopener noreferrer"
-                                                                            >
-                                                                                {children}
-                                                                            </a>
-                                                                        ),
-                                                                        img: ({ src, alt }) => (
-                                                                            <img
-                                                                                src={src}
-                                                                                alt={alt}
-                                                                                className="rounded-lg my-4 max-w-full h-auto"
-                                                                            />
-                                                                        ),
-                                                                    }}
+                                                                    components={components}
                                                                 >
                                                                     {item.to}
                                                                 </ReactMarkdown>
