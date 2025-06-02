@@ -1,4 +1,4 @@
-import { Trophy, Wallet, type LucideIcon, DollarSign, BadgeDollarSignIcon, Globe, Calculator, LineChart, Code, FileJson, Key, Link, QrCode, Palette, Binary, FileCode, Table, FileText, Type, Eye } from "lucide-react";
+import { Trophy, Wallet, type LucideIcon, DollarSign, BadgeDollarSignIcon, Globe, Calculator, LineChart, Code, FileJson, Key, Link, QrCode, Palette, Binary, FileCode, Table, FileText, Type, Eye, GitCompare } from "lucide-react";
 
 export interface AppConfig {
   id: string;
@@ -230,6 +230,20 @@ export const apps: AppConfig[] = [
       'GitHub Flavored Markdown support',
       'Copy to clipboard',
       'Preview history',
+    ],
+  },
+  {
+    id: "diff-checker",
+    name: "Diff Checker",
+    description: "Compare and find differences between texts and JSON",
+    href: "/diff-checker",
+    icon: GitCompare,
+    features: [
+      "Text and JSON comparison",
+      "Side-by-side diff view",
+      "Fullscreen preview",
+      "History tracking",
+      "Copy to clipboard"
     ],
   },
 ]; 
