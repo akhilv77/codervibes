@@ -1,4 +1,4 @@
-import { Trophy, Wallet, type LucideIcon, DollarSign, BadgeDollarSignIcon, Globe, Calculator, LineChart, Code, FileJson, Key, Link, QrCode, Palette, Binary, FileCode, Table, FileText, Type } from "lucide-react";
+import { Trophy, Wallet, type LucideIcon, DollarSign, BadgeDollarSignIcon, Globe, Calculator, LineChart, Code, FileJson, Key, Link, QrCode, Palette, Binary, FileCode, Table, FileText, Type, Eye } from "lucide-react";
 
 export interface AppConfig {
   id: string;
@@ -203,6 +203,20 @@ export const apps: AppConfig[] = [
       'XML minification',
       'Copy to clipboard',
       'History tracking',
+    ],
+  },
+  {
+    id: 'markdown-previewer',
+    name: 'Markdown Previewer',
+    description: 'Preview and test your markdown in real-time with syntax highlighting',
+    href: '/markdown-previewer',
+    icon: FileText,
+    features: [
+      'Live markdown preview',
+      'Syntax highlighting',
+      'GitHub Flavored Markdown support',
+      'Copy to clipboard',
+      'Preview history',
     ],
   },
 ]; 
