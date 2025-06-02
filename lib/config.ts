@@ -1,4 +1,4 @@
-import { Trophy, Wallet, type LucideIcon, DollarSign, BadgeDollarSignIcon, Globe, Calculator, LineChart, Code, FileJson, Key, Link } from "lucide-react";
+import { Trophy, Wallet, type LucideIcon, DollarSign, BadgeDollarSignIcon, Globe, Calculator, LineChart, Code, FileJson, Key, Link, QrCode } from "lucide-react";
 
 export interface AppConfig {
   id: string;
@@ -121,6 +121,19 @@ export const apps: AppConfig[] = [
       'HTML entity encoding',
       'HTML entity decoding',
       'Copy to clipboard',
+      'History tracking'
+    ]
+  },
+  {
+    id: 'qr-code',
+    name: 'QR Code Generator & Reader',
+    description: 'Generate QR codes and scan them from images or camera',
+    href: '/qr-code',
+    icon: QrCode,
+    features: [
+      'QR code generation',
+      'Image upload scanning',
+      'Camera scanning',
       'History tracking'
     ]
   }
