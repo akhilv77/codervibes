@@ -1,4 +1,4 @@
-import { Trophy, Wallet, type LucideIcon, DollarSign, BadgeDollarSignIcon, Globe, Calculator, LineChart, Code, FileJson, Key, Link, QrCode, Palette, Binary, FileCode, Table, FileText, Type, Eye, GitCompare } from "lucide-react";
+import { Trophy, Wallet, type LucideIcon, DollarSign, BadgeDollarSignIcon, Globe, Calculator, LineChart, Code, FileJson, Key, Link, QrCode, Palette, Binary, FileCode, Table, FileText, Type, Eye, GitCompare, Lock } from "lucide-react";
 
 export interface AppConfig {
   id: string;
@@ -243,6 +243,19 @@ export const apps: AppConfig[] = [
       "Side-by-side diff view",
       "Fullscreen preview",
       "History tracking",
+      "Copy to clipboard"
+    ],
+  },
+  {
+    id: "password-generator",
+    name: "Password Generator",
+    description: "Generate strong, secure passwords with customizable settings",
+    href: "/password-generator",
+    icon: Lock,
+    features: [
+      "Customizable password length",
+      "Character type selection",
+      "Password strength indicator",
       "Copy to clipboard"
     ],
   },
