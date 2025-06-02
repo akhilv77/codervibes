@@ -7,7 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useMarkdownPreviewerStore } from '@/lib/markdown-previewer-store';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Copy, RefreshCw, FileText, Eye, Check, Maximize2, Minimize2, Code2 } from 'lucide-react';
+import { Loader2, Copy, RefreshCw, FileText, Eye, Check, Maximize2, Minimize2, Code2, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -308,7 +308,7 @@ export default function MarkdownPreviewerPage() {
                                     onClick={handleClearHistory}
                                     className="h-7 w-7 sm:h-8 sm:w-8"
                                 >
-                                    <RefreshCw className="h-3 w-3 sm:h-4 sm:w-4" />
+                                    <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
                                 </Button>
                             )}
                         </div>

@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { FileText, RefreshCw, Check, Copy, Binary, Hash } from "lucide-react";
+import { FileText, RefreshCw, Check, Copy, Binary, Hash, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { useTextConverterStore } from "@/lib/text-converter-store";
 
@@ -229,7 +229,7 @@ export default function TextConverterPage() {
                                         onClick={handleClearHistory}
                                         className="h-7 w-7 sm:h-8 sm:w-8"
                                     >
-                                        <RefreshCw className="h-3 w-3 sm:h-4 sm:w-4" />
+                                        <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
                                     </Button>
                                 )}
                             </div>

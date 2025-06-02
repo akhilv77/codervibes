@@ -188,12 +188,12 @@ export default function HTMLPreviewer() {
                                 </CardDescription>
                             </div>
                             <Button
-                                variant="outline"
+                                variant="ghost"
                                 size="icon"
                                 onClick={clearHistory}
-                                className="sm:ml-auto hover:bg-destructive hover:text-destructive-foreground transition-colors"
+                                className="h-7 w-7 sm:h-8 sm:w-8"
                             >
-                                <Trash2 className="h-4 w-4" />
+                                <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
                             </Button>
                         </div>
                     </CardHeader>

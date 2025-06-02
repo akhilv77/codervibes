@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Hash, Copy, Check, RefreshCw, FileText, AlertCircle } from "lucide-react";
+import { Hash, Copy, Check, RefreshCw, FileText, AlertCircle, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { useHashGeneratorStore } from "@/lib/hash-generator-store";
 import { createHash } from 'crypto';
@@ -280,7 +280,7 @@ export default function HashGeneratorPage() {
                                         onClick={handleClearHistory}
                                         className="h-7 w-7 sm:h-8 sm:w-8 hover:bg-muted"
                                     >
-                                        <RefreshCw className="h-3 w-3 sm:h-4 sm:w-4" />
+                                        <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
                                     </Button>
                                 )}
                             </div>
