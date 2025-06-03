@@ -1,7 +1,7 @@
 'use client';
 
 import Link from "next/link";
-import { Settings, Search, ChevronLeft, ChevronRight, X, Filter } from "lucide-react";
+import { Settings, Search, ChevronLeft, ChevronRight, X, Filter, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { apps } from "@/lib/config";
@@ -20,12 +20,15 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useSettingsStore } from "@/lib/codervibes-store";
 
 export default function HomePage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
+  const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
   const itemsPerPage = 12;
+  const { toggleFavoriteApp, isAppFavorite } = useSettingsStore();
 
   // Get all unique tags and group them by category
   const tagCategories = useMemo(() => {
@@ -41,7 +44,7 @@ export default function HomePage() {
     return categories;
   }, []);
 
-  // Filter apps based on search query and selected tags
+  // Filter apps based on search query, selected tags, and favorites
   const filteredApps = useMemo(() => {
     return apps.filter(app => {
       const matchesSearch = searchQuery === '' ||
@@ -53,9 +56,18 @@ export default function HomePage() {
       const matchesTags = selectedTags.length === 0 ||
         selectedTags.every(tag => app.tags.includes(tag));
 
-      return matchesSearch && matchesTags;
+      const matchesFavorites = !showFavoritesOnly || isAppFavorite(app.id);
+
+      return matchesSearch && matchesTags && matchesFavorites;
+    }).sort((a, b) => {
+      // Sort favorites first
+      const aIsFavorite = isAppFavorite(a.id);
+      const bIsFavorite = isAppFavorite(b.id);
+      if (aIsFavorite && !bIsFavorite) return -1;
+      if (!aIsFavorite && bIsFavorite) return 1;
+      return 0;
     });
-  }, [searchQuery, selectedTags]);
+  }, [searchQuery, selectedTags, showFavoritesOnly, isAppFavorite]);
 
   const totalPages = Math.ceil(filteredApps.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
@@ -99,7 +111,7 @@ export default function HomePage() {
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
                   <Input
                     type="text"
-                    placeholder="Search tools by name, description, features, or tags..."
+                    placeholder="Search tools..."
                     value={searchQuery}
                     onChange={(e) => {
                       setSearchQuery(e.target.value);
@@ -114,6 +126,42 @@ export default function HomePage() {
                     ))}
                   </datalist>
                 </div>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant={showFavoritesOnly ? "default" : "outline"}
+                      className="flex items-center gap-2"
+                    >
+                      <Star className={`h-4 w-4 sm:h-5 sm:w-5 ${showFavoritesOnly ? 'fill-current' : ''}`} />
+                      <span className="hidden sm:inline">Filter by Favorites</span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-56">
+                    <DropdownMenuLabel>Favorites</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      className={cn(
+                        "cursor-pointer",
+                        showFavoritesOnly && "bg-primary/10 text-primary"
+                      )}
+                      onClick={() => {
+                        setShowFavoritesOnly(!showFavoritesOnly);
+                        setCurrentPage(1);
+                      }}
+                    >
+                      Show Favorites Only
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      className="cursor-pointer"
+                      onClick={() => {
+                        setShowFavoritesOnly(false);
+                        setCurrentPage(1);
+                      }}
+                    >
+                      Show All
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="outline" className="flex items-center gap-2">
@@ -149,7 +197,7 @@ export default function HomePage() {
               </div>
 
               {/* Active Filters */}
-              {(selectedTags.length > 0 || searchQuery) && (
+              {(selectedTags.length > 0 || searchQuery || showFavoritesOnly) && (
                 <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
                   <span className="text-xs sm:text-sm text-muted-foreground">Active filters:</span>
                   <div className="flex flex-wrap gap-1.5 sm:gap-2">
@@ -171,6 +219,16 @@ export default function HomePage() {
                         onClick={() => setSearchQuery('')}
                       >
                         Search: {searchQuery}
+                        <X className="ml-1 h-3 w-3 flex-shrink-0" />
+                      </Badge>
+                    )}
+                    {showFavoritesOnly && (
+                      <Badge
+                        variant="secondary"
+                        className="cursor-pointer hover:bg-destructive/10 hover:text-destructive text-xs sm:text-sm max-w-[200px] truncate"
+                        onClick={() => setShowFavoritesOnly(false)}
+                      >
+                        Favorites Only
                         <X className="ml-1 h-3 w-3 flex-shrink-0" />
                       </Badge>
                     )}
@@ -222,6 +280,21 @@ export default function HomePage() {
                               {app.description}
                             </CardDescription>
                           </div>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className={cn(
+                              "h-8 w-8 sm:h-9 sm:w-9 transition-opacity",
+                              isAppFavorite(app.id) ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+                            )}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              toggleFavoriteApp(app.id);
+                            }}
+                          >
+                            <Star className={`h-4 w-4 sm:h-5 sm:w-5 ${isAppFavorite(app.id) ? 'fill-current text-yellow-500' : ''}`} />
+                          </Button>
                         </div>
                       </CardHeader>
                       <CardContent className="pb-3 sm:pb-4">
