@@ -121,7 +121,7 @@ class IndexedDBService {
   private db: IDBPDatabase<CoderVibesDB> | null = null;
   private isInitialized = false;
   private initPromise: Promise<void> | null = null;
-  private readonly DB_VERSION = 23; // Update to match the existing version
+  private readonly DB_VERSION = 1; // Start with version 1
 
   async init() {
     if (typeof window === 'undefined') {
@@ -138,32 +138,31 @@ class IndexedDBService {
 
     this.initPromise = (async () => {
       try {
-        // Delete the database if it exists to ensure clean state
-        await this.deleteDatabase();
-
-        // Create a new database with all stores
+        // Open the database with version handling
         this.db = await openDB<CoderVibesDB>('codervibes', this.DB_VERSION, {
           upgrade: (db: IDBPDatabase<CoderVibesDB>, oldVersion: number, newVersion: number) => {
+            console.log(`Upgrading database from version ${oldVersion} to ${newVersion}`);
             createStores(db);
+          },
+          blocked: () => {
+            console.warn('Database is blocked by another connection');
+          },
+          blocking: () => {
+            console.warn('Database is being blocked by another connection');
           },
         });
 
         this.isInitialized = true;
+        console.log('IndexedDB initialized successfully');
       } catch (error) {
         console.error('Error initializing IndexedDB:', error);
+        this.isInitialized = false;
+        this.initPromise = null;
         throw error;
       }
     })();
 
     return this.initPromise;
-  }
-
-  private async deleteDatabase(): Promise<void> {
-    return new Promise((resolve, reject) => {
-      const request = indexedDB.deleteDatabase('codervibes');
-      request.onerror = () => reject(request.error);
-      request.onsuccess = () => resolve();
-    });
   }
 
   async get<T>(storeName: StoreNames, key: string): Promise<T | undefined> {
@@ -172,7 +171,12 @@ class IndexedDBService {
       await this.init();
     }
     if (!this.db) return undefined;
-    return this.db.get(storeName, key);
+    try {
+      return await this.db.get(storeName, key);
+    } catch (error) {
+      console.error(`Error getting data from ${storeName}:`, error);
+      return undefined;
+    }
   }
 
   async set<T>(storeName: StoreNames, key: string, value: T): Promise<void> {
@@ -181,7 +185,12 @@ class IndexedDBService {
       await this.init();
     }
     if (!this.db) return;
-    await this.db.put(storeName, value, key);
+    try {
+      await this.db.put(storeName, value, key);
+    } catch (error) {
+      console.error(`Error setting data in ${storeName}:`, error);
+      throw error;
+    }
   }
 
   async delete(storeName: StoreNames, key: string): Promise<void> {
