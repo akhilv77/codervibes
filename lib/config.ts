@@ -1,4 +1,4 @@
-import { Trophy, Wallet, type LucideIcon, DollarSign, BadgeDollarSignIcon, Globe, Calculator, LineChart, Code, FileJson, Key, Link, QrCode, Palette, Binary, FileCode, Table, FileText, Type, Eye, GitCompare, Lock, Hash, Scissors } from "lucide-react";
+import { Trophy, Wallet, type LucideIcon, DollarSign, BadgeDollarSignIcon, Globe, Calculator, LineChart, Code, FileJson, Key, Link, QrCode, Palette, Binary, FileCode, Table, FileText, Type, Eye, GitCompare, Lock, Hash, Scissors, Clock } from "lucide-react";
 
 export interface AppConfig {
   id: string;
@@ -335,5 +335,19 @@ export const apps: AppConfig[] = [
       "History tracking"
     ],
     tags: ["case", "text", "conversion", "format", "utility", "transformation"]
+  },
+  {
+    id: "timestamp-converter",
+    name: "Timestamp Converter",
+    description: "Convert between Unix timestamps and human-readable dates",
+    href: "/timestamp-converter",
+    icon: Clock,
+    features: [
+      "Unix timestamp conversion",
+      "Multiple date formats",
+      "Time zone support",
+      "Current time display"
+    ],
+    tags: ["timestamp", "date", "time", "conversion", "utility", "development"]
   },
 ]; 

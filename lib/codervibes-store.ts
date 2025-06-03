@@ -8,6 +8,25 @@ interface Settings {
   preferredSound: string;
   preferredVolume: number;
   autoPlaySound: boolean;
+  urlEncoder: {
+    history: UrlHistory[];
+  };
+  timeConversion: {
+    history: TimestampHistory[];
+  };
+}
+
+interface UrlHistory {
+  original: string;
+  encoded: string;
+  timestamp: number;
+}
+
+interface TimestampHistory {
+  timestamp: number;
+  date: string;
+  format: string;
+  timezone: string;
 }
 
 interface SettingsState {
@@ -27,6 +46,12 @@ const defaultSettings: Settings = {
   preferredSound: 'rain',
   preferredVolume: 0.5,
   autoPlaySound: false,
+  urlEncoder: {
+    history: []
+  },
+  timeConversion: {
+    history: []
+  }
 };
 
 // Helper function to validate volume

@@ -1,6 +1,6 @@
 import { openDB, DBSchema, IDBPDatabase } from 'idb';
 
-export type StoreNames = 'settings' | 'currencyRates' | 'moneyTracker' | 'scorecard' | 'ipTracker' | 'regex' | 'regexTester' | 'jsonFormatter' | 'jwtDecoder' | 'urlEncoder' | 'htmlEncoder' | 'qrCode' | 'colorConverter' | 'textConverter' | 'yamlConverter' | 'csvConverter' | 'xmlFormatter' | 'markdownPreviewer' | 'htmlPreviewer' | 'diffChecker' | 'passwordGenerator' | 'hashGenerator' | 'minifier' | 'stringEscaper';
+export type StoreNames = 'settings' | 'currencyRates' | 'moneyTracker' | 'scorecard' | 'ipTracker' | 'regex' | 'regexTester' | 'jsonFormatter' | 'jwtDecoder' | 'urlEncoder' | 'htmlEncoder' | 'qrCode' | 'colorConverter' | 'textConverter' | 'yamlConverter' | 'csvConverter' | 'xmlFormatter' | 'markdownPreviewer' | 'htmlPreviewer' | 'diffChecker' | 'passwordGenerator' | 'hashGenerator' | 'minifier' | 'stringEscaper' | 'timeConversion';
 
 interface CoderVibesDB extends DBSchema {
   settings: {
@@ -99,6 +99,10 @@ interface CoderVibesDB extends DBSchema {
     key: string;
     value: any;
   };
+  timeConversion: {
+    key: string;
+    value: any;
+  };
 }
 
 function createStores(db: IDBPDatabase<CoderVibesDB>) {
@@ -107,7 +111,8 @@ function createStores(db: IDBPDatabase<CoderVibesDB>) {
     'regex', 'regexTester', 'jsonFormatter', 'jwtDecoder', 'urlEncoder',
     'htmlEncoder', 'qrCode', 'colorConverter', 'textConverter', 'yamlConverter',
     'csvConverter', 'xmlFormatter', 'markdownPreviewer', 'htmlPreviewer',
-    'diffChecker', 'passwordGenerator', 'hashGenerator', 'minifier', 'stringEscaper'
+    'diffChecker', 'passwordGenerator', 'hashGenerator', 'minifier', 'stringEscaper',
+    'timeConversion'
   ];
 
   storeNames.forEach(storeName => {
@@ -121,7 +126,7 @@ class IndexedDBService {
   private db: IDBPDatabase<CoderVibesDB> | null = null;
   private isInitialized = false;
   private initPromise: Promise<void> | null = null;
-  private readonly DB_VERSION = 23; // Keep the existing version number
+  private readonly DB_VERSION = 24; // Increased version number for timeConversion store
 
   async init() {
     if (typeof window === 'undefined') {
