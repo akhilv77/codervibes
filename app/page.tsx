@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { apps } from "@/lib/config";
 import { RootPageShell } from "@/components/layout/root-page-shell";
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
@@ -28,7 +28,12 @@ export default function HomePage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
   const itemsPerPage = 12;
-  const { toggleFavoriteApp, isAppFavorite } = useSettingsStore();
+  const { toggleFavoriteApp, isAppFavorite, initialize } = useSettingsStore();
+
+  // Initialize settings when component mounts
+  useEffect(() => {
+    initialize();
+  }, [initialize]);
 
   // Get all unique tags and group them by category
   const tagCategories = useMemo(() => {
