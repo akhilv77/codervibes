@@ -1,7 +1,7 @@
 'use client';
 
 import Link from "next/link";
-import { Settings, Search, ChevronLeft, ChevronRight, X } from "lucide-react";
+import { Settings, Search, ChevronLeft, ChevronRight, X, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { apps } from "@/lib/config";
@@ -11,6 +11,15 @@ import { Input } from '@/components/ui/input';
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export default function HomePage() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -18,23 +27,30 @@ export default function HomePage() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 12;
 
-  // Get all unique tags
-  const allTags = useMemo(() => {
-    const tags = new Set<string>();
-    apps.forEach(app => app.tags.forEach(tag => tags.add(tag)));
-    return Array.from(tags).sort();
+  // Get all unique tags and group them by category
+  const tagCategories = useMemo(() => {
+    const categories: { [key: string]: string[] } = {
+      'Development': ['development', 'code', 'format', 'editor', 'debug', 'testing'],
+      'Data': ['data', 'json', 'csv', 'yaml', 'xml'],
+      'Design': ['design', 'color', 'preview', 'format'],
+      'Security': ['security', 'password', 'crypto', 'hash', 'jwt'],
+      'Utility': ['utility', 'conversion', 'generator', 'tracking', 'management'],
+      'Web': ['web', 'html', 'url', 'encoding'],
+    };
+
+    return categories;
   }, []);
 
   // Filter apps based on search query and selected tags
   const filteredApps = useMemo(() => {
     return apps.filter(app => {
-      const matchesSearch = searchQuery === '' || 
+      const matchesSearch = searchQuery === '' ||
         app.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         app.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
         app.features.some(feature => feature.toLowerCase().includes(searchQuery.toLowerCase())) ||
         app.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
 
-      const matchesTags = selectedTags.length === 0 || 
+      const matchesTags = selectedTags.length === 0 ||
         selectedTags.every(tag => app.tags.includes(tag));
 
       return matchesSearch && matchesTags;
@@ -52,8 +68,8 @@ export default function HomePage() {
   };
 
   const toggleTag = (tag: string) => {
-    setSelectedTags(prev => 
-      prev.includes(tag) 
+    setSelectedTags(prev =>
+      prev.includes(tag)
         ? prev.filter(t => t !== tag)
         : [...prev, tag]
     );
@@ -75,27 +91,61 @@ export default function HomePage() {
             <p className="text-muted-foreground mb-4 sm:mb-6 text-base sm:text-lg">
               Your one-stop destination for powerful utility tools. Whether you&apos;re a developer, designer, content creator, or just looking to boost your productivity, we&apos;ve got you covered.
             </p>
-            
+
             {/* Search and Filter Section */}
             <div className="space-y-3 sm:space-y-4 mb-4 sm:mb-6">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
-                <Input
-                  type="text"
-                  placeholder="Search tools by name, description, features, or tags..."
-                  value={searchQuery}
-                  onChange={(e) => {
-                    setSearchQuery(e.target.value);
-                    setCurrentPage(1);
-                  }}
-                  className="pl-10 w-full text-sm sm:text-base"
-                  list="search-suggestions"
-                />
-                <datalist id="search-suggestions">
-                  {apps.map(app => (
-                    <option key={app.id} value={app.name} />
-                  ))}
-                </datalist>
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
+                  <Input
+                    type="text"
+                    placeholder="Search tools by name, description, features, or tags..."
+                    value={searchQuery}
+                    onChange={(e) => {
+                      setSearchQuery(e.target.value);
+                      setCurrentPage(1);
+                    }}
+                    className="pl-10 w-full text-sm sm:text-base"
+                    list="search-suggestions"
+                  />
+                  <datalist id="search-suggestions">
+                    {apps.map(app => (
+                      <option key={app.id} value={app.name} />
+                    ))}
+                  </datalist>
+                </div>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" className="flex items-center gap-2">
+                      <Filter className="h-4 w-4" />
+                      <span className="hidden sm:inline">Filter by Category</span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-56 max-h-[300px] sm:max-h-[500px] overflow-y-auto">
+                    <DropdownMenuLabel className="sticky top-0 bg-background z-10 border-b">Categories</DropdownMenuLabel>
+                    <DropdownMenuSeparator className="sticky top-8 bg-background z-10" />
+                    {Object.entries(tagCategories).map(([category, tags]) => (
+                      <DropdownMenuGroup key={category}>
+                        <DropdownMenuLabel className="text-xs font-semibold text-muted-foreground sticky top-9 bg-background z-10">
+                          {category}
+                        </DropdownMenuLabel>
+                        {tags.map(tag => (
+                          <DropdownMenuItem
+                            key={tag}
+                            className={cn(
+                              "text-xs cursor-pointer",
+                              selectedTags.includes(tag) && "bg-primary/10 text-primary"
+                            )}
+                            onClick={() => toggleTag(tag)}
+                          >
+                            {tag}
+                          </DropdownMenuItem>
+                        ))}
+                        <DropdownMenuSeparator />
+                      </DropdownMenuGroup>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
 
               {/* Active Filters */}
@@ -104,7 +154,7 @@ export default function HomePage() {
                   <span className="text-xs sm:text-sm text-muted-foreground">Active filters:</span>
                   <div className="flex flex-wrap gap-1.5 sm:gap-2">
                     {selectedTags.map(tag => (
-                      <Badge 
+                      <Badge
                         key={tag}
                         variant="secondary"
                         className="cursor-pointer hover:bg-destructive/10 hover:text-destructive text-xs sm:text-sm max-w-[200px] truncate"
@@ -115,7 +165,7 @@ export default function HomePage() {
                       </Badge>
                     ))}
                     {searchQuery && (
-                      <Badge 
+                      <Badge
                         variant="secondary"
                         className="cursor-pointer hover:bg-destructive/10 hover:text-destructive text-xs sm:text-sm max-w-[200px] truncate"
                         onClick={() => setSearchQuery('')}
@@ -125,8 +175,8 @@ export default function HomePage() {
                       </Badge>
                     )}
                   </div>
-                  <Button 
-                    variant="ghost" 
+                  <Button
+                    variant="ghost"
                     size="sm"
                     onClick={clearFilters}
                     className="h-6 px-2 text-xs"
@@ -135,30 +185,6 @@ export default function HomePage() {
                   </Button>
                 </div>
               )}
-
-              {/* Tag Filter Scroll Area */}
-              <div className="relative">
-                <ScrollArea className="w-full max-w-screen-xl flex-wrap">
-                  <div className="flex gap-1.5 sm:gap-2 pb-2 pr-4">
-                    {allTags.map(tag => (
-                      <Badge
-                        key={tag}
-                        variant={selectedTags.includes(tag) ? "default" : "outline"}
-                        className={cn(
-                          "cursor-pointer transition-colors text-xs sm:text-sm whitespace-nowrap",
-                          selectedTags.includes(tag) 
-                            ? "bg-primary text-primary-foreground hover:bg-primary/90"
-                            : "hover:bg-muted"
-                        )}
-                        onClick={() => toggleTag(tag)}
-                      >
-                        {tag}
-                      </Badge>
-                    ))}
-                  </div>
-                  <ScrollBar orientation="horizontal" className="hidden" />
-                </ScrollArea>
-              </div>
             </div>
 
             {/* Results Count */}
