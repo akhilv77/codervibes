@@ -21,18 +21,25 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useSettingsStore } from "@/lib/codervibes-store";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function HomePage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const itemsPerPage = 12;
-  const { toggleFavoriteApp, isAppFavorite, initialize } = useSettingsStore();
+  const { toggleFavoriteApp, isAppFavorite, initialize, settings } = useSettingsStore();
 
   // Initialize settings when component mounts
   useEffect(() => {
-    initialize();
+    const init = async () => {
+      setIsLoading(true);
+      await initialize();
+      setIsLoading(false);
+    };
+    init();
   }, [initialize]);
 
   // Get all unique tags and group them by category
@@ -45,13 +52,15 @@ export default function HomePage() {
       'Utility': ['utility', 'conversion', 'generator', 'tracking', 'management'],
       'Web': ['web', 'html', 'url', 'encoding'],
     };
-
     return categories;
   }, []);
 
-  // Filter apps based on search query, selected tags, and favorites
+  // Filter and sort apps based on search query, selected tags, and favorites
   const filteredApps = useMemo(() => {
-    return apps.filter(app => {
+    if (isLoading) return [];
+
+    // First filter based on search and tags
+    const filtered = apps.filter(app => {
       const matchesSearch = searchQuery === '' ||
         app.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         app.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -64,15 +73,18 @@ export default function HomePage() {
       const matchesFavorites = !showFavoritesOnly || isAppFavorite(app.id);
 
       return matchesSearch && matchesTags && matchesFavorites;
-    }).sort((a, b) => {
-      // Sort favorites first
-      const aIsFavorite = isAppFavorite(a.id);
-      const bIsFavorite = isAppFavorite(b.id);
-      if (aIsFavorite && !bIsFavorite) return -1;
-      if (!aIsFavorite && bIsFavorite) return 1;
-      return 0;
     });
-  }, [searchQuery, selectedTags, showFavoritesOnly, isAppFavorite]);
+
+    // Split into favorites and non-favorites
+    const favorites = filtered.filter(app => isAppFavorite(app.id))
+      .sort((a, b) => a.name.localeCompare(b.name));
+
+    const nonFavorites = filtered.filter(app => !isAppFavorite(app.id))
+      .sort((a, b) => a.name.localeCompare(b.name));
+
+    // Combine with favorites first
+    return [...favorites, ...nonFavorites];
+  }, [searchQuery, selectedTags, showFavoritesOnly, isAppFavorite, isLoading]);
 
   const totalPages = Math.ceil(filteredApps.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
@@ -252,10 +264,42 @@ export default function HomePage() {
 
             {/* Results Count */}
             <div className="mb-3 sm:mb-4 text-xs sm:text-sm text-muted-foreground">
-              {filteredApps.length} {filteredApps.length === 1 ? 'tool' : 'tools'} found
+              {isLoading ? (
+                <Skeleton className="h-4 w-24" />
+              ) : (
+                `${filteredApps.length} ${filteredApps.length === 1 ? 'tool' : 'tools'} found`
+              )}
             </div>
 
-            {filteredApps.length === 0 ? (
+            {isLoading ? (
+              <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+                {Array.from({ length: 6 }).map((_, index) => (
+                  <Card key={index} className="group hover:shadow-lg transition-all duration-200 border-2">
+                    <CardHeader className="pb-2 sm:pb-3">
+                      <div className="flex justify-between items-start">
+                        <div className="space-y-1 sm:space-y-1.5">
+                          <div className="flex items-center gap-2">
+                            <Skeleton className="h-4 w-4 sm:h-5 sm:w-5" />
+                            <Skeleton className="h-4 w-32 sm:h-5 sm:w-40" />
+                          </div>
+                          <Skeleton className="h-3 w-48 sm:h-4 sm:w-56" />
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="pb-3 sm:pb-4">
+                      <div className="space-y-1.5 sm:space-y-2">
+                        <Skeleton className="h-3 w-20 sm:h-4 sm:w-24" />
+                        <div className="space-y-1 sm:space-y-1.5">
+                          {Array.from({ length: 3 }).map((_, i) => (
+                            <Skeleton key={i} className="h-3 w-full sm:h-4" />
+                          ))}
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : filteredApps.length === 0 ? (
               <div className="text-center py-8 sm:py-12">
                 <h2 className="text-lg sm:text-xl font-semibold mb-2">
                   {searchQuery || selectedTags.length > 0 ? 'No Matching Tools Found' : 'No Tools Available'}

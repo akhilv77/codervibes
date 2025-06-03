@@ -123,9 +123,15 @@ export const useSettingsStore = create<SettingsState>()((set, get) => ({
   initialize: async () => {
     try {
       await db.init();
-      // Always set default settings first to ensure the store exists
-      await db.set('settings', 'settings', defaultSettings);
-      set({ settings: defaultSettings });
+      const existingSettings = await db.get<Settings>('settings', 'settings');
+      if (existingSettings) {
+        // If we have existing settings, use them
+        set({ settings: existingSettings });
+      } else {
+        // Only set default settings if no settings exist
+        await db.set('settings', 'settings', defaultSettings);
+        set({ settings: defaultSettings });
+      }
     } catch (error) {
       console.error('Error initializing settings:', error);
       set({ settings: defaultSettings });

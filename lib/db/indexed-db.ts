@@ -121,7 +121,7 @@ class IndexedDBService {
   private db: IDBPDatabase<CoderVibesDB> | null = null;
   private isInitialized = false;
   private initPromise: Promise<void> | null = null;
-  private readonly DB_VERSION = 1; // Start with version 1
+  private readonly DB_VERSION = 23; // Keep the existing version number
 
   async init() {
     if (typeof window === 'undefined') {
@@ -142,6 +142,7 @@ class IndexedDBService {
         this.db = await openDB<CoderVibesDB>('codervibes', this.DB_VERSION, {
           upgrade: (db: IDBPDatabase<CoderVibesDB>, oldVersion: number, newVersion: number) => {
             console.log(`Upgrading database from version ${oldVersion} to ${newVersion}`);
+            // Only create stores if they don't exist
             createStores(db);
           },
           blocked: () => {
