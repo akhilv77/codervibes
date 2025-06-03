@@ -1,5 +1,4 @@
 import { create } from 'zustand';
-import { createJSONStorage, persist } from 'zustand/middleware';
 import { db } from '@/lib/db/indexed-db';
 
 interface Settings {
@@ -22,46 +21,63 @@ const defaultSettings: Settings = {
   autoPlaySound: false,
 };
 
-export const useSettingsStore = create<SettingsStore>()(
-  persist(
-    (set) => ({
-      settings: defaultSettings,
-      setSettings: async (newSettings) => {
-        const currentSettings = await db.get('settings', 'settings') || defaultSettings;
-        const updatedSettings = { ...currentSettings, ...newSettings } as Settings;
-        await db.set('settings', 'settings', updatedSettings);
-        set({ settings: updatedSettings });
-      },
-      initialize: async () => {
-        try {
-          const settings = await db.get('settings', 'settings');
-          if (settings) {
-            set({ settings: settings as Settings });
-          } else {
-            // Initialize with default settings if none exist
-            await db.set('settings', 'settings', defaultSettings);
-            set({ settings: defaultSettings });
-          }
-        } catch (error) {
-          console.error('Error initializing settings:', error);
-          set({ settings: defaultSettings });
+// Helper function to validate volume
+const validateVolume = (volume: number): number => {
+  if (typeof volume !== 'number' || !isFinite(volume)) {
+    return defaultSettings.preferredVolume;
+  }
+  return Math.max(0, Math.min(1, volume));
+};
+
+export const useSettingsStore = create<SettingsStore>()((set) => ({
+  settings: defaultSettings,
+  setSettings: async (newSettings) => {
+    try {
+      const currentSettings = await db.get<Settings>('settings', 'settings') || defaultSettings;
+      const updatedSettings = { 
+        ...currentSettings, 
+        ...newSettings,
+        // Validate volume if it's being updated
+        preferredVolume: newSettings.preferredVolume !== undefined 
+          ? validateVolume(newSettings.preferredVolume)
+          : currentSettings.preferredVolume
+      };
+      await db.set('settings', 'settings', updatedSettings);
+      set({ settings: updatedSettings });
+    } catch (error) {
+      console.error('Error updating settings:', error);
+      // Fallback to local state update if DB operation fails
+      set((state) => ({
+        settings: { 
+          ...state.settings, 
+          ...newSettings,
+          // Validate volume if it's being updated
+          preferredVolume: newSettings.preferredVolume !== undefined 
+            ? validateVolume(newSettings.preferredVolume)
+            : state.settings.preferredVolume
         }
-      },
-    }),
-    {
-      name: 'settings-storage',
-      storage: createJSONStorage(() => ({
-        getItem: async (name) => {
-          const value = await db.get('settings', name);
-          return value ? JSON.stringify(value) : null;
-        },
-        setItem: async (name, value) => {
-          await db.set('settings', name, JSON.parse(value));
-        },
-        removeItem: async (name) => {
-          await db.delete('settings', name);
-        },
-      })),
+      }));
     }
-  )
-); 
+  },
+  initialize: async () => {
+    try {
+      const settings = await db.get<Settings>('settings', 'settings');
+      if (settings) {
+        // Validate volume when initializing
+        set({ 
+          settings: {
+            ...settings,
+            preferredVolume: validateVolume(settings.preferredVolume)
+          }
+        });
+      } else {
+        // Initialize with default settings if none exist
+        await db.set('settings', 'settings', defaultSettings);
+        set({ settings: defaultSettings });
+      }
+    } catch (error) {
+      console.error('Error initializing settings:', error);
+      set({ settings: defaultSettings });
+    }
+  },
+})); 

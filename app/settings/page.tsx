@@ -1,6 +1,5 @@
 "use client";
 
-import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
 import { Moon, Sun, Monitor, AlertTriangle, Info, Volume2 } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -36,6 +35,7 @@ import {
   Checkbox,
 } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+import { useTheme } from "@/components/theme-provider";
 
 export default function SettingsPage() {
   const { theme, setTheme } = useTheme();
@@ -45,24 +45,18 @@ export default function SettingsPage() {
   const { toast } = useToast();
   const { settings, setSettings, initialize } = useSettingsStore();
 
+  // Initialize settings on mount
   useEffect(() => {
     setMounted(true);
     initialize();
-  }, []);
-
-  useEffect(() => {
-    if (mounted && settings.theme) {
-      setTheme(settings.theme);
-    }
-  }, [mounted, settings.theme, setTheme]);
+  }, [initialize]);
 
   if (!mounted) {
     return null;
   }
 
   const handleThemeChange = async (newTheme: 'light' | 'dark' | 'system') => {
-    setTheme(newTheme);
-    await setSettings({ theme: newTheme });
+    await setTheme(newTheme);
   };
 
   const handleReset = () => {

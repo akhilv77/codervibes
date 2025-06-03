@@ -3,26 +3,36 @@
 import { useTheme } from 'next-themes';
 import { Button } from '@/components/ui/button';
 import { Sun, Moon, Monitor } from 'lucide-react';
-import { useSettingsStore } from '@/lib/stores/settings-store';
+import { useSettingsStore } from '@/lib/codervibes-store';
 import { useEffect } from 'react';
 
 export function ThemeToggle() {
     const { theme, setTheme } = useTheme();
-    const { settings, setSettings, initialize } = useSettingsStore();
+    const { theme: storedTheme, setTheme: setStoredTheme, initialize } = useSettingsStore();
 
+    // Initialize settings from IndexedDB on mount
     useEffect(() => {
         initialize();
     }, [initialize]);
 
+    // Sync theme from IndexedDB to UI
     useEffect(() => {
-        if (settings.theme) {
-            setTheme(settings.theme);
+        if (storedTheme && storedTheme !== theme) {
+            setTheme(storedTheme);
         }
-    }, [settings.theme, setTheme]);
+    }, [storedTheme, theme, setTheme]);
 
     const handleThemeChange = async (newTheme: 'light' | 'dark' | 'system') => {
-        setTheme(newTheme);
-        await setSettings({ theme: newTheme });
+        try {
+            // Update IndexedDB first
+            await setStoredTheme(newTheme);
+            // Then update UI
+            setTheme(newTheme);
+        } catch (error) {
+            console.error('Error updating theme:', error);
+            // Fallback to just UI update if IndexedDB fails
+            setTheme(newTheme);
+        }
     };
 
     return (

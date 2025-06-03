@@ -108,7 +108,11 @@ export function MiniMusicPlayer() {
   // Handle audio playback
   useEffect(() => {
     if (audioRef.current) {
-      audioRef.current.volume = settings.preferredVolume;
+      // Validate volume before setting it
+      const validVolume = typeof settings.preferredVolume === 'number' && isFinite(settings.preferredVolume)
+        ? Math.max(0, Math.min(1, settings.preferredVolume))
+        : 0.5;
+      audioRef.current.volume = validVolume;
       if (isPlaying) {
         audioRef.current.play();
       } else {
@@ -132,8 +136,12 @@ export function MiniMusicPlayer() {
     setIsLoading(true);
     audioRef.current = new Audio(sound.url);
     audioRef.current.loop = true;
-    audioRef.current.volume = settings.preferredVolume;
-    
+    // Validate volume before setting it
+    const validVolume = typeof settings.preferredVolume === 'number' && isFinite(settings.preferredVolume)
+      ? Math.max(0, Math.min(1, settings.preferredVolume))
+      : 0.5;
+    audioRef.current.volume = validVolume;
+
     // Add event listener for when audio ends to ensure looping
     audioRef.current.addEventListener('ended', () => {
       audioRef.current!.currentTime = 0;
@@ -248,7 +256,7 @@ export function MiniMusicPlayer() {
           <div className="flex items-center gap-1 sm:gap-2 relative z-10">
             {!isLoading && currentSound && (
               <>
-                <motion.span 
+                <motion.span
                   className="text-lg sm:text-xl"
                   animate={isPlaying ? {
                     scale: [1, 1.2, 1],
@@ -286,9 +294,8 @@ export function MiniMusicPlayer() {
             initial={{ opacity: 0, y: dialogPosition === 'bottom' ? 20 : -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: dialogPosition === 'bottom' ? 20 : -20 }}
-            className={`absolute ${
-              dialogPosition === 'bottom' ? 'top-12' : 'bottom-12'
-            } right-0 w-[280px] sm:w-80 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-3 sm:p-4 space-y-3 sm:space-y-4 z-[101]`}
+            className={`absolute ${dialogPosition === 'bottom' ? 'top-12' : 'bottom-12'
+              } right-0 w-[280px] sm:w-80 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-3 sm:p-4 space-y-3 sm:space-y-4 z-[101]`}
           >
             <div className="space-y-3 sm:space-y-4">
               <div className="space-y-2">
