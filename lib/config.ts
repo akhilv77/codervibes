@@ -12,6 +12,19 @@ export interface AppConfig {
 
 export const apps: AppConfig[] = [
   {
+    id: "string-escaper",
+    name: "String Escaper",
+    description: "Escape strings for JavaScript, JSON, HTML, and SQL",
+    href: "/string-escaper",
+    icon: Code,
+    features: [
+      "Multiple formats",
+      "Real-time escaping",
+      "History tracking"
+    ],
+    tags: ["string", "escape", "development", "security", "format", "utility"]
+  },
+  {
     id: "html-preview",
     name: "HTML Preview",
     description: "Real-time HTML code preview and testing environment",
