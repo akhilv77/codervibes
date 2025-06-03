@@ -5,13 +5,18 @@ interface Settings {
   theme: 'light' | 'dark' | 'system';
   fontSize: 'small' | 'medium' | 'large';
   favoriteApps: string[];
+  preferredSound: string;
+  preferredVolume: number;
+  autoPlaySound: boolean;
 }
 
-interface SettingsState extends Settings {
+interface SettingsState {
+  settings: Settings;
   setTheme: (theme: 'light' | 'dark' | 'system') => Promise<void>;
   setFontSize: (size: 'small' | 'medium' | 'large') => Promise<void>;
   toggleFavoriteApp: (appId: string) => Promise<void>;
   isAppFavorite: (appId: string) => boolean;
+  setSettings: (settings: Partial<Settings>) => Promise<void>;
   initialize: () => Promise<void>;
 }
 
@@ -19,24 +24,48 @@ const defaultSettings: Settings = {
   theme: 'system',
   fontSize: 'medium',
   favoriteApps: [],
+  preferredSound: 'rain',
+  preferredVolume: 0.5,
+  autoPlaySound: false,
+};
+
+// Helper function to validate volume
+const validateVolume = (volume: number): number => {
+  if (typeof volume !== 'number' || !isFinite(volume)) {
+    return defaultSettings.preferredVolume;
+  }
+  return Math.max(0, Math.min(1, volume));
 };
 
 export const useSettingsStore = create<SettingsState>()((set, get) => ({
-  ...defaultSettings,
+  settings: defaultSettings,
   setTheme: async (theme) => {
-    const currentSettings = await db.get<Settings>('settings', 'settings') || defaultSettings;
-    const updatedSettings = { ...currentSettings, theme };
-    await db.set('settings', 'settings', updatedSettings);
-    set({ theme });
+    try {
+      await db.init();
+      const currentSettings = await db.get<Settings>('settings', 'settings') || defaultSettings;
+      const updatedSettings = { ...currentSettings, theme };
+      await db.set('settings', 'settings', updatedSettings);
+      set({ settings: updatedSettings });
+    } catch (error) {
+      console.error('Error setting theme:', error);
+      set((state) => ({ settings: { ...state.settings, theme } }));
+    }
   },
   setFontSize: async (fontSize) => {
-    const currentSettings = await db.get<Settings>('settings', 'settings') || defaultSettings;
-    const updatedSettings = { ...currentSettings, fontSize };
-    await db.set('settings', 'settings', updatedSettings);
-    set({ fontSize });
+    try {
+      await db.init();
+      const currentSettings = await db.get<Settings>('settings', 'settings') || defaultSettings;
+      const updatedSettings = { ...currentSettings, fontSize };
+      await db.set('settings', 'settings', updatedSettings);
+      set({ settings: updatedSettings });
+    } catch (error) {
+      console.error('Error setting font size:', error);
+      set((state) => ({ settings: { ...state.settings, fontSize } }));
+    }
   },
   toggleFavoriteApp: async (appId) => {
     try {
+      await db.init();
       const currentSettings = await db.get<Settings>('settings', 'settings') || defaultSettings;
       const currentFavorites = currentSettings.favoriteApps || [];
       const favoriteApps = currentFavorites.includes(appId)
@@ -45,39 +74,61 @@ export const useSettingsStore = create<SettingsState>()((set, get) => ({
       
       const updatedSettings = { ...currentSettings, favoriteApps };
       await db.set('settings', 'settings', updatedSettings);
-      set({ favoriteApps });
+      set({ settings: updatedSettings });
     } catch (error) {
       console.error('Error toggling favorite:', error);
       // Fallback to local state update if DB operation fails
-      const currentFavorites = get().favoriteApps || [];
-      const favoriteApps = currentFavorites.includes(appId)
-        ? currentFavorites.filter((id: string) => id !== appId)
-        : [...currentFavorites, appId];
-      set({ favoriteApps });
+      set((state) => {
+        const currentFavorites = state.settings.favoriteApps || [];
+        const favoriteApps = currentFavorites.includes(appId)
+          ? currentFavorites.filter((id: string) => id !== appId)
+          : [...currentFavorites, appId];
+        return { settings: { ...state.settings, favoriteApps } };
+      });
     }
   },
   isAppFavorite: (appId) => {
-    const favoriteApps = get().favoriteApps || [];
+    const favoriteApps = get().settings.favoriteApps || [];
     return favoriteApps.includes(appId);
+  },
+  setSettings: async (newSettings) => {
+    try {
+      await db.init();
+      const currentSettings = await db.get<Settings>('settings', 'settings') || defaultSettings;
+      const updatedSettings = { 
+        ...currentSettings, 
+        ...newSettings,
+        // Validate volume if it's being updated
+        preferredVolume: newSettings.preferredVolume !== undefined 
+          ? validateVolume(newSettings.preferredVolume)
+          : currentSettings.preferredVolume
+      };
+      await db.set('settings', 'settings', updatedSettings);
+      set({ settings: updatedSettings });
+    } catch (error) {
+      console.error('Error updating settings:', error);
+      // Fallback to local state update if DB operation fails
+      set((state) => ({
+        settings: { 
+          ...state.settings, 
+          ...newSettings,
+          // Validate volume if it's being updated
+          preferredVolume: newSettings.preferredVolume !== undefined 
+            ? validateVolume(newSettings.preferredVolume)
+            : state.settings.preferredVolume
+        }
+      }));
+    }
   },
   initialize: async () => {
     try {
-      const settings = await db.get<Settings>('settings', 'settings');
-      if (settings) {
-        // Ensure favoriteApps exists
-        const updatedSettings = {
-          ...settings,
-          favoriteApps: settings.favoriteApps || [],
-        };
-        set(updatedSettings);
-      } else {
-        // Initialize with default settings if none exist
-        await db.set('settings', 'settings', defaultSettings);
-        set(defaultSettings);
-      }
+      await db.init();
+      // Always set default settings first to ensure the store exists
+      await db.set('settings', 'settings', defaultSettings);
+      set({ settings: defaultSettings });
     } catch (error) {
       console.error('Error initializing settings:', error);
-      set(defaultSettings);
+      set({ settings: defaultSettings });
     }
   },
 })); 

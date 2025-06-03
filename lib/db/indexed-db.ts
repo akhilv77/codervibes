@@ -138,22 +138,15 @@ class IndexedDBService {
 
     this.initPromise = (async () => {
       try {
-        // First try to open the existing database
-        try {
-          this.db = await openDB<CoderVibesDB>('codervibes', this.DB_VERSION);
-        } catch (error) {
-          // If there's a version error, delete the database and recreate it
-          if (error instanceof Error && error.name === 'VersionError') {
-            await this.deleteDatabase();
-            this.db = await openDB<CoderVibesDB>('codervibes', this.DB_VERSION, {
-              upgrade: (db: IDBPDatabase<CoderVibesDB>, oldVersion: number, newVersion: number) => {
-                createStores(db);
-              },
-            });
-          } else {
-            throw error;
-          }
-        }
+        // Delete the database if it exists to ensure clean state
+        await this.deleteDatabase();
+
+        // Create a new database with all stores
+        this.db = await openDB<CoderVibesDB>('codervibes', this.DB_VERSION, {
+          upgrade: (db: IDBPDatabase<CoderVibesDB>, oldVersion: number, newVersion: number) => {
+            createStores(db);
+          },
+        });
 
         this.isInitialized = true;
       } catch (error) {

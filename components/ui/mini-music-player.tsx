@@ -47,17 +47,23 @@ export function MiniMusicPlayer() {
   const [showSettings, setShowSettings] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [dialogPosition, setDialogPosition] = useState<'top' | 'bottom'>('bottom');
-  const { settings, setSettings } = useSettingsStore();
+  const { settings, setSettings, initialize } = useSettingsStore();
   const playerRef = useRef<HTMLDivElement>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const { isPlaying, setIsPlaying, currentSound, setCurrentSound } = useMusic();
 
+  // Initialize settings store
+  useEffect(() => {
+    initialize();
+  }, [initialize]);
+
   // Set default sound if none is selected
   useEffect(() => {
-    if (!currentSound) {
-      setCurrentSound('rain');
+    if (!currentSound && settings?.preferredSound) {
+      const defaultSound = (settings.preferredSound as SoundKey) || 'rain';
+      setCurrentSound(defaultSound);
     }
-  }, [currentSound, setCurrentSound]);
+  }, [currentSound, setCurrentSound, settings?.preferredSound]);
 
   // Update dialog position based on available space
   useEffect(() => {
@@ -100,14 +106,14 @@ export function MiniMusicPlayer() {
 
   // Load saved preferences
   useEffect(() => {
-    if (settings.autoPlaySound) {
+    if (settings?.autoPlaySound) {
       setIsPlaying(true);
     }
-  }, [settings.autoPlaySound]);
+  }, [settings?.autoPlaySound]);
 
   // Handle audio playback
   useEffect(() => {
-    if (audioRef.current) {
+    if (audioRef.current && settings?.preferredVolume !== undefined) {
       // Validate volume before setting it
       const validVolume = typeof settings.preferredVolume === 'number' && isFinite(settings.preferredVolume)
         ? Math.max(0, Math.min(1, settings.preferredVolume))
@@ -119,7 +125,7 @@ export function MiniMusicPlayer() {
         audioRef.current.pause();
       }
     }
-  }, [isPlaying, settings.preferredVolume, audioRef]);
+  }, [isPlaying, settings?.preferredVolume, audioRef]);
 
   // Create new audio when sound changes
   useEffect(() => {
@@ -127,9 +133,10 @@ export function MiniMusicPlayer() {
       audioRef.current.pause();
     }
 
-    const sound = AMBIENT_SOUNDS[currentSound as SoundKey];
+    const soundKey = (currentSound || settings?.preferredSound || 'rain') as SoundKey;
+    const sound = AMBIENT_SOUNDS[soundKey];
     if (!sound) {
-      console.error('Invalid sound selected:', currentSound);
+      console.error('Invalid sound selected:', soundKey);
       return;
     }
 
@@ -137,7 +144,7 @@ export function MiniMusicPlayer() {
     audioRef.current = new Audio(sound.url);
     audioRef.current.loop = true;
     // Validate volume before setting it
-    const validVolume = typeof settings.preferredVolume === 'number' && isFinite(settings.preferredVolume)
+    const validVolume = typeof settings?.preferredVolume === 'number' && isFinite(settings.preferredVolume)
       ? Math.max(0, Math.min(1, settings.preferredVolume))
       : 0.5;
     audioRef.current.volume = validVolume;
@@ -168,20 +175,27 @@ export function MiniMusicPlayer() {
         setIsLoading(false);
       });
     };
-  }, [currentSound]);
+  }, [currentSound, settings?.preferredSound, settings?.preferredVolume]);
 
   const handleVolumeChange = (value: number[]) => {
     const newVolume = value[0];
     setSettings({ preferredVolume: newVolume });
   };
 
-  const handleSoundSelect = async (sound: { name: string; url: string }) => {
+  const handleSoundSelect = async (soundKey: SoundKey) => {
     if (audioRef.current) {
       audioRef.current.pause();
       setIsPlaying(false);
     }
 
-    setCurrentSound(sound.name);
+    const sound = AMBIENT_SOUNDS[soundKey];
+    if (!sound) {
+      console.error('Invalid sound selected:', soundKey);
+      return;
+    }
+
+    setCurrentSound(soundKey);
+    setSettings({ preferredSound: soundKey });
     audioRef.current = new Audio(sound.url);
     audioRef.current.loop = true;
 
@@ -268,10 +282,10 @@ export function MiniMusicPlayer() {
                     ease: "easeInOut",
                   }}
                 >
-                  {AMBIENT_SOUNDS[currentSound as SoundKey]?.icon}
+                  {AMBIENT_SOUNDS[currentSound]?.icon}
                 </motion.span>
                 <span className="text-xs sm:text-sm font-medium whitespace-nowrap">
-                  {AMBIENT_SOUNDS[currentSound as SoundKey]?.name}
+                  {AMBIENT_SOUNDS[currentSound]?.name}
                 </span>
               </>
             )}
@@ -294,8 +308,7 @@ export function MiniMusicPlayer() {
             initial={{ opacity: 0, y: dialogPosition === 'bottom' ? 20 : -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: dialogPosition === 'bottom' ? 20 : -20 }}
-            className={`absolute ${dialogPosition === 'bottom' ? 'top-12' : 'bottom-12'
-              } right-0 w-[280px] sm:w-80 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-3 sm:p-4 space-y-3 sm:space-y-4 z-[101]`}
+            className={`absolute ${dialogPosition === 'bottom' ? 'top-12' : 'bottom-12'} right-0 w-[280px] sm:w-80 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-3 sm:p-4 space-y-3 sm:space-y-4 z-[101]`}
           >
             <div className="space-y-3 sm:space-y-4">
               <div className="space-y-2">
@@ -303,10 +316,7 @@ export function MiniMusicPlayer() {
                 <RadioGroup
                   value={currentSound || 'rain'}
                   onValueChange={(value) => {
-                    const sound = AMBIENT_SOUNDS[value as SoundKey];
-                    if (sound) {
-                      handleSoundSelect(sound);
-                    }
+                    handleSoundSelect(value as SoundKey);
                   }}
                   className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4"
                 >
@@ -325,14 +335,14 @@ export function MiniMusicPlayer() {
                 <Label>Volume</Label>
                 <div className="flex items-center gap-3 sm:gap-4">
                   <Slider
-                    value={[settings.preferredVolume]}
+                    value={[settings?.preferredVolume ?? 0.5]}
                     max={1}
                     step={0.1}
                     onValueChange={handleVolumeChange}
                     className="flex-1"
                   />
                   <span className="text-xs sm:text-sm text-muted-foreground w-10 sm:w-12 text-right">
-                    {Math.round(settings.preferredVolume * 100)}%
+                    {Math.round((settings?.preferredVolume ?? 0.5) * 100)}%
                   </span>
                 </div>
               </div>
