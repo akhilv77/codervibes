@@ -1,5 +1,4 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
 
 interface CaseConverterState {
   inputText: string;
@@ -17,17 +16,10 @@ const initialState = {
   selectedCase: 'camelCase',
 };
 
-export const useCaseConverterStore = create<CaseConverterState>()(
-  persist(
-    (set) => ({
-      ...initialState,
-      setInputText: (inputText) => set({ inputText }),
-      setConvertedText: (convertedText) => set({ convertedText }),
-      setSelectedCase: (selectedCase) => set({ selectedCase }),
-      reset: () => set(initialState),
-    }),
-    {
-      name: 'case-converter-storage',
-    }
-  )
-); 
+export const useCaseConverterStore = create<CaseConverterState>()((set) => ({
+  ...initialState,
+  setInputText: (inputText) => set({ inputText }),
+  setConvertedText: (convertedText) => set({ convertedText }),
+  setSelectedCase: (selectedCase) => set({ selectedCase }),
+  reset: () => set(initialState),
+})); 

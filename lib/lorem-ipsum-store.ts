@@ -1,5 +1,4 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
 
 interface LoremIpsumState {
   paragraphs: number;
@@ -23,19 +22,12 @@ const initialState = {
   generatedText: '',
 };
 
-export const useLoremIpsumStore = create<LoremIpsumState>()(
-  persist(
-    (set) => ({
-      ...initialState,
-      setParagraphs: (paragraphs) => set({ paragraphs }),
-      setWords: (words) => set({ words }),
-      setSentences: (sentences) => set({ sentences }),
-      setStartWithLorem: (startWithLorem) => set({ startWithLorem }),
-      setGeneratedText: (generatedText) => set({ generatedText }),
-      reset: () => set(initialState),
-    }),
-    {
-      name: 'lorem-ipsum-storage',
-    }
-  )
-); 
+export const useLoremIpsumStore = create<LoremIpsumState>()((set) => ({
+  ...initialState,
+  setParagraphs: (paragraphs) => set({ paragraphs }),
+  setWords: (words) => set({ words }),
+  setSentences: (sentences) => set({ sentences }),
+  setStartWithLorem: (startWithLorem) => set({ startWithLorem }),
+  setGeneratedText: (generatedText) => set({ generatedText }),
+  reset: () => set(initialState),
+})); 
