@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import * as Diff from 'diff';
+import { useServiceTracking } from '@/hooks/useServiceTracking';
 
 export default function DiffChecker() {
     const [leftInput, setLeftInput] = useState<string>("");
@@ -21,10 +22,12 @@ export default function DiffChecker() {
     const [isFullscreen, setIsFullscreen] = useState(false);
     const previewCardRef = useRef<HTMLDivElement>(null);
     const { history, addToHistory, clearHistory, loadHistory } = useDiffCheckerStore();
+    const { trackServiceUsage } = useServiceTracking();
 
     useEffect(() => {
         loadHistory();
-    }, [loadHistory]);
+        trackServiceUsage('Diff Analyzer', 'page_view');
+    }, [loadHistory, trackServiceUsage]);
 
     const handleCompare = () => {
         try {
@@ -52,6 +55,7 @@ export default function DiffChecker() {
             });
 
             toast.success("Diff comparison completed!");
+            trackServiceUsage('Diff Analyzer', 'diff_checked');
         } catch (error) {
             toast.error("Error comparing texts");
         }
@@ -67,6 +71,7 @@ export default function DiffChecker() {
         setRightInput("");
         setDiffResult([]);
         toast.success("Cleared successfully!");
+        trackServiceUsage('Diff Analyzer', 'history_cleared');
     };
 
     const handleHistoryClick = (item: { left: string; right: string; type: string }) => {

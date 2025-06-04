@@ -14,6 +14,7 @@ import remarkGfm from 'remark-gfm';
 import type { Components } from 'react-markdown';
 import { formatDistanceToNow } from 'date-fns';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useServiceTracking } from '@/hooks/useServiceTracking';
 
 export default function MarkdownPreviewerPage() {
     const [input, setInput] = useState('');
@@ -23,10 +24,12 @@ export default function MarkdownPreviewerPage() {
     const [isFullscreen, setIsFullscreen] = useState(false);
     const previewCardRef = useRef<HTMLDivElement>(null);
     const { history, addToHistory, clearHistory, loadHistory } = useMarkdownPreviewerStore();
+    const { trackServiceUsage } = useServiceTracking();
 
     useEffect(() => {
         loadHistory();
-    }, [loadHistory]);
+        trackServiceUsage('Markdown Editor', 'page_view');
+    }, [loadHistory, trackServiceUsage]);
 
     const handlePreview = () => {
         setIsLoading(true);
@@ -43,6 +46,7 @@ export default function MarkdownPreviewerPage() {
                 to: trimmedInput,
             });
             toast.success('Markdown preview updated');
+            trackServiceUsage('Markdown Editor', 'markdown_previewed');
         } catch (error) {
             toast.error('Failed to update preview');
         } finally {
@@ -60,6 +64,7 @@ export default function MarkdownPreviewerPage() {
     const handleClearHistory = () => {
         clearHistory();
         toast.success('History cleared');
+        trackServiceUsage('Markdown Editor', 'history_cleared');
     };
 
     const toggleFullscreen = () => {

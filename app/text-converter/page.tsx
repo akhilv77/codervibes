@@ -10,6 +10,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { FileText, RefreshCw, Check, Copy, Binary, Hash, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { useTextConverterStore } from "@/lib/text-converter-store";
+import { useServiceTracking } from '@/hooks/useServiceTracking';
 
 export default function TextConverterPage() {
     const [input, setInput] = useState('');
@@ -18,10 +19,12 @@ export default function TextConverterPage() {
     const [asciiOutput, setAsciiOutput] = useState('');
     const [copied, setCopied] = useState<string | null>(null);
     const { history, addToHistory, clearHistory, loadHistory } = useTextConverterStore();
+    const { trackServiceUsage } = useServiceTracking();
 
     useEffect(() => {
         loadHistory();
-    }, [loadHistory]);
+        trackServiceUsage('Text Transformer', 'page_view');
+    }, [loadHistory, trackServiceUsage]);
 
     const textToBinary = (text: string): string => {
         return text.split('').map(char =>
@@ -57,6 +60,7 @@ export default function TextConverterPage() {
 
         addToHistory('Text Conversion', input, `Binary: ${binary}\nHex: ${hex}\nASCII: ${ascii}`);
         toast.success('Text converted successfully');
+        trackServiceUsage('Text Transformer', 'text_converted');
     };
 
     const copyToClipboard = (text: string, type: string) => {
@@ -69,6 +73,7 @@ export default function TextConverterPage() {
     const handleClearHistory = async () => {
         await clearHistory();
         toast.success('History cleared');
+        trackServiceUsage('Text Transformer', 'history_cleared');
     };
 
     const handleClearAll = () => {

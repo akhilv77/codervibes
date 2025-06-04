@@ -11,6 +11,7 @@ import { Hash, Copy, Check, RefreshCw, FileText, AlertCircle, Trash2 } from "luc
 import { toast } from "sonner";
 import { useHashGeneratorStore } from "@/lib/hash-generator-store";
 import { createHash } from 'crypto';
+import { useServiceTracking } from '@/hooks/useServiceTracking';
 
 export default function HashGeneratorPage() {
     const [input, setInput] = useState('');
@@ -18,10 +19,12 @@ export default function HashGeneratorPage() {
     const [selectedAlgorithm, setSelectedAlgorithm] = useState('sha256');
     const [copied, setCopied] = useState<string | null>(null);
     const { history, addToHistory, clearHistory, loadHistory } = useHashGeneratorStore();
+    const { trackServiceUsage } = useServiceTracking();
 
     useEffect(() => {
         loadHistory();
-    }, [loadHistory]);
+        trackServiceUsage('Hash Generator', 'page_view');
+    }, [loadHistory, trackServiceUsage]);
 
     const generateHash = (algorithm: string) => {
         try {
@@ -36,6 +39,7 @@ export default function HashGeneratorPage() {
 
             addToHistory(`${algorithm.toUpperCase()} Hash`, hash);
             toast.success(`${algorithm.toUpperCase()} hash generated successfully`);
+            trackServiceUsage('Hash Generator', 'hash_generated');
         } catch (error) {
             toast.error(`Failed to generate ${algorithm.toUpperCase()} hash`);
         }
@@ -72,6 +76,7 @@ export default function HashGeneratorPage() {
     const handleClearHistory = async () => {
         await clearHistory();
         toast.success('History cleared');
+        trackServiceUsage('Hash Generator', 'history_cleared');
     };
 
     return (

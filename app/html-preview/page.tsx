@@ -9,6 +9,7 @@ import { Copy, RefreshCw, Maximize2, Minimize2, Trash2, Eye, FileText, Code2 } f
 import { useHTMLPreviewerStore } from "@/lib/html-previewer-store";
 import { formatDistanceToNow } from "date-fns";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useServiceTracking } from '@/hooks/useServiceTracking';
 
 export default function HTMLPreviewer() {
     const [html, setHtml] = useState<string>("");
@@ -19,10 +20,12 @@ export default function HTMLPreviewer() {
     const iframeRef = useRef<HTMLIFrameElement>(null);
     const previewCardRef = useRef<HTMLDivElement>(null);
     const { history, addToHistory, clearHistory, loadHistory } = useHTMLPreviewerStore();
+    const { trackServiceUsage } = useServiceTracking();
 
     useEffect(() => {
         loadHistory();
-    }, [loadHistory]);
+        trackServiceUsage('HTML Preview', 'page_view');
+    }, [loadHistory, trackServiceUsage]);
 
     const handlePreview = () => {
         try {
@@ -46,6 +49,7 @@ export default function HTMLPreviewer() {
                 timestamp: new Date().toISOString()
             });
             toast.success("Preview updated successfully!");
+            trackServiceUsage('HTML Preview', 'preview_generated');
         } catch (error) {
             toast.error("Error generating preview");
         }
@@ -63,6 +67,7 @@ export default function HTMLPreviewer() {
         setJs("");
         setPreview("");
         toast.success("Cleared successfully!");
+        trackServiceUsage('HTML Preview', 'history_cleared');
     };
 
     const handleHistoryClick = (item: { html: string; css: string; js: string }) => {

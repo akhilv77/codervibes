@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useLoremIpsumStore } from '@/lib/lorem-ipsum-store';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,6 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Copy, RefreshCw, FileText, Type } from 'lucide-react';
 import { toast } from 'sonner';
+import { useServiceTracking } from '@/hooks/useServiceTracking';
 
 const loremWords = [
     'lorem', 'ipsum', 'dolor', 'sit', 'amet', 'consectetur', 'adipiscing', 'elit',
@@ -40,6 +41,11 @@ export default function LoremIpsumPage() {
     } = useLoremIpsumStore();
 
     const [isGenerating, setIsGenerating] = useState(false);
+    const { trackServiceUsage } = useServiceTracking();
+
+    useEffect(() => {
+        trackServiceUsage('Text Generator', 'page_view');
+    }, []);
 
     const generateRandomWord = () => {
         return loremWords[Math.floor(Math.random() * loremWords.length)];
@@ -74,6 +80,7 @@ export default function LoremIpsumPage() {
 
             setGeneratedText(text);
             toast.success('Lorem Ipsum text generated successfully');
+            trackServiceUsage('Text Generator', 'text_generated');
         } catch (error) {
             toast.error('Error generating Lorem Ipsum text');
         } finally {
@@ -88,6 +95,11 @@ export default function LoremIpsumPage() {
         } catch (error) {
             toast.error('Failed to copy to clipboard');
         }
+    };
+
+    const resetLoremIpsum = () => {
+        reset();
+        trackServiceUsage('Text Generator', 'history_cleared');
     };
 
     return (
@@ -182,7 +194,7 @@ export default function LoremIpsumPage() {
                                     </Button>
                                     <Button
                                         variant="outline"
-                                        onClick={reset}
+                                        onClick={resetLoremIpsum}
                                         className="text-xs sm:text-sm"
                                     >
                                         Reset

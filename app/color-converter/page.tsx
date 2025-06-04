@@ -10,6 +10,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Palette, RefreshCw, FileText, Check, Copy, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { useColorConverterStore } from "@/lib/color-converter-store";
+import { useServiceTracking } from '@/hooks/useServiceTracking';
 
 interface RGB {
     r: number;
@@ -29,10 +30,12 @@ export default function ColorConverterPage() {
     const [hslInput, setHslInput] = useState<HSL>({ h: 0, s: 0, l: 0 });
     const [copied, setCopied] = useState<string | null>(null);
     const { history, addToHistory, clearHistory, loadHistory } = useColorConverterStore();
+    const { trackServiceUsage } = useServiceTracking();
 
     useEffect(() => {
         loadHistory();
-    }, [loadHistory]);
+        trackServiceUsage('Color Studio', 'page_view');
+    }, [loadHistory, trackServiceUsage]);
 
     const hexToRgb = (hex: string): RGB | null => {
         const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
@@ -129,6 +132,7 @@ export default function ColorConverterPage() {
                 setRgbInput(rgb);
                 setHslInput(rgbToHsl(rgb));
                 addToHistory('HEX to RGB/HSL', value, `RGB(${rgb.r}, ${rgb.g}, ${rgb.b}) / HSL(${rgbToHsl(rgb).h}°, ${rgbToHsl(rgb).s}%, ${rgbToHsl(rgb).l}%)`);
+                trackServiceUsage('Color Studio', 'color_converted');
             }
         }
     };
@@ -140,6 +144,7 @@ export default function ColorConverterPage() {
         setHexInput(rgbToHex(newRgb));
         setHslInput(rgbToHsl(newRgb));
         addToHistory('RGB to HEX/HSL', `RGB(${newRgb.r}, ${newRgb.g}, ${newRgb.b})`, `HEX: ${rgbToHex(newRgb)} / HSL(${rgbToHsl(newRgb).h}°, ${rgbToHsl(newRgb).s}%, ${rgbToHsl(newRgb).l}%)`);
+        trackServiceUsage('Color Studio', 'color_converted');
     };
 
     const handleHslChange = (component: keyof HSL, value: string) => {
@@ -150,6 +155,7 @@ export default function ColorConverterPage() {
         setRgbInput(rgb);
         setHexInput(rgbToHex(rgb));
         addToHistory('HSL to HEX/RGB', `HSL(${newHsl.h}°, ${newHsl.s}%, ${newHsl.l}%)`, `HEX: ${rgbToHex(rgb)} / RGB(${rgb.r}, ${rgb.g}, ${rgb.b})`);
+        trackServiceUsage('Color Studio', 'color_converted');
     };
 
     const copyToClipboard = (text: string, type: string) => {
@@ -157,11 +163,13 @@ export default function ColorConverterPage() {
         setCopied(type);
         setTimeout(() => setCopied(null), 2000);
         toast.success('Copied to clipboard');
+        trackServiceUsage('Color Studio', 'clipboard_copy');
     };
 
     const handleClearHistory = async () => {
         await clearHistory();
         toast.success('History cleared');
+        trackServiceUsage('Color Studio', 'history_cleared');
     };
 
     const getContrastColor = (hex: string): string => {

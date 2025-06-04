@@ -19,6 +19,7 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { formatDistanceToNow } from 'date-fns';
 import { cn } from '@/lib/utils';
+import { useServiceTracking } from '@/hooks/useServiceTracking';
 
 const escapeTypes = [
     { id: 'javascript', name: 'JavaScript', description: 'Escape for JavaScript strings' },
@@ -46,11 +47,13 @@ export default function StringEscaperPage() {
 
     const [isEscaping, setIsEscaping] = useState(false);
     const [showHistory, setShowHistory] = useState(true);
+    const { trackServiceUsage } = useServiceTracking();
 
     // Initialize store and load history when component mounts
     useEffect(() => {
         initialize();
-    }, [initialize]);
+        trackServiceUsage('String Escaper', 'page_view');
+    }, [initialize, trackServiceUsage]);
 
     const escapeString = (text: string, type: string): string => {
         if (!text) return '';
@@ -105,6 +108,7 @@ export default function StringEscaperPage() {
                 type: selectedType,
             });
             toast.success('Text escaped successfully');
+            trackServiceUsage('String Escaper', 'string_escaped', `Format: ${selectedType}`);
         } catch (error) {
             toast.error('Error escaping text');
         } finally {
@@ -125,6 +129,16 @@ export default function StringEscaperPage() {
         setInputText(item.inputText);
         setEscapedText(item.escapedText);
         setSelectedType(item.type);
+    };
+
+    const handleFormatChange = (format: string) => {
+        setSelectedType(format);
+        trackServiceUsage('String Escaper', 'format_changed', `Format: ${format}`);
+    };
+
+    const handleClearHistory = () => {
+        clearHistory();
+        trackServiceUsage('String Escaper', 'history_cleared');
     };
 
     return (
@@ -173,7 +187,7 @@ export default function StringEscaperPage() {
                                     <Label htmlFor="escapeType" className="text-[11px] sm:text-sm">Escape Type</Label>
                                     <Select
                                         value={selectedType}
-                                        onValueChange={setSelectedType}
+                                        onValueChange={handleFormatChange}
                                     >
                                         <SelectTrigger className="h-8 sm:h-9 text-[11px] sm:text-sm">
                                             <SelectValue placeholder="Select escape type" />
@@ -269,7 +283,7 @@ export default function StringEscaperPage() {
                             <Button
                                 variant="ghost"
                                 size="icon"
-                                onClick={clearHistory}
+                                onClick={handleClearHistory}
                                 className="h-7 w-7 sm:h-8 sm:w-8 md:h-9 md:w-9"
                                 title="Clear History"
                             >

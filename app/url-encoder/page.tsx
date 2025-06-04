@@ -10,21 +10,25 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Link, Copy, Check, RefreshCw, ArrowRight, ArrowLeft, FileText, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { useURLEncoderStore } from "@/lib/url-encoder-store";
+import { useServiceTracking } from '@/hooks/useServiceTracking';
 
 export default function URLEncoderPage() {
     const [input, setInput] = useState('');
     const [copied, setCopied] = useState<string | null>(null);
     const { history, addToHistory, clearHistory, loadHistory } = useURLEncoderStore();
+    const { trackServiceUsage } = useServiceTracking();
 
     useEffect(() => {
         loadHistory();
-    }, [loadHistory]);
+        trackServiceUsage('URL Encoder', 'page_view');
+    }, [loadHistory, trackServiceUsage]);
 
     const encodeURL = () => {
         try {
             const encoded = encodeURIComponent(input);
             addToHistory('URL Encoded', encoded);
             toast.success('URL encoded successfully');
+            trackServiceUsage('URL Encoder', 'url_encoded');
         } catch (error) {
             toast.error('Failed to encode URL');
         }
@@ -35,6 +39,7 @@ export default function URLEncoderPage() {
             const decoded = decodeURIComponent(input);
             addToHistory('URL Decoded', decoded);
             toast.success('URL decoded successfully');
+            trackServiceUsage('URL Encoder', 'url_decoded');
         } catch (error) {
             toast.error('Failed to decode URL');
         }
@@ -50,6 +55,7 @@ export default function URLEncoderPage() {
     const handleClearHistory = async () => {
         await clearHistory();
         toast.success('History cleared');
+        trackServiceUsage('URL Encoder', 'history_cleared');
     };
 
     return (

@@ -10,12 +10,14 @@ import { toast } from 'sonner';
 import { usePasswordGeneratorStore } from '@/lib/password-generator-store';
 import { Copy, RefreshCw, Shield, Lock, Key, Zap, CheckCircle2, AlertCircle, XCircle } from 'lucide-react';
 import { Loading } from '@/components/ui/loading';
+import { useServiceTracking } from '@/hooks/useServiceTracking';
 
 export default function PasswordGenerator() {
     const [password, setPassword] = useState('');
     const [strength, setStrength] = useState<number>(0);
     const [isLoading, setIsLoading] = useState(true);
     const { settings, updateSettings, loadSettings } = usePasswordGeneratorStore();
+    const { trackServiceUsage } = useServiceTracking();
 
     useEffect(() => {
         const initializeGenerator = async () => {
@@ -32,6 +34,10 @@ export default function PasswordGenerator() {
 
         initializeGenerator();
     }, [loadSettings]);
+
+    useEffect(() => {
+        trackServiceUsage('Password Studio', 'page_view');
+    }, []);
 
     const generatePassword = () => {
         const { length, includeUppercase, includeLowercase, includeNumbers, includeSymbols } = settings;
@@ -59,6 +65,7 @@ export default function PasswordGenerator() {
 
         setPassword(result);
         calculateStrength(result);
+        trackServiceUsage('Password Studio', 'password_generated');
     };
 
     const calculateStrength = (pass: string) => {

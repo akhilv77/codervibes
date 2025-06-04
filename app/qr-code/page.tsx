@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import { useQRCodeStore } from "@/lib/qr-code-store";
 import QRCode from 'qrcode';
 import jsQR from 'jsqr';
+import { useServiceTracking } from '@/hooks/useServiceTracking';
 
 export default function QRCodePage() {
     const [input, setInput] = useState('');
@@ -22,10 +23,12 @@ export default function QRCodePage() {
     const videoRef = useRef<HTMLVideoElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const { history, addToHistory, clearHistory, loadHistory } = useQRCodeStore();
+    const { trackServiceUsage } = useServiceTracking();
 
     useEffect(() => {
         loadHistory();
-    }, [loadHistory]);
+        trackServiceUsage('QR Code Studio', 'page_view');
+    }, [loadHistory, trackServiceUsage]);
 
     const generateQRCode = async () => {
         try {
@@ -44,6 +47,7 @@ export default function QRCodePage() {
             setQrCodeUrl(url);
             addToHistory('Generated', input);
             toast.success('QR code generated successfully');
+            trackServiceUsage('QR Code Studio', 'qr_generated');
         } catch (error) {
             toast.error('Failed to generate QR code');
         }
@@ -74,6 +78,7 @@ export default function QRCodePage() {
                     setInput(code.data);
                     addToHistory('Scanned', code.data);
                     toast.success('QR code scanned successfully');
+                    trackServiceUsage('QR Code Studio', 'qr_scanned');
                 } else {
                     toast.error('No QR code found in the image');
                 }
@@ -125,6 +130,7 @@ export default function QRCodePage() {
                         addToHistory('Scanned', code.data);
                         toast.success('QR code scanned successfully');
                         stopCamera();
+                        trackServiceUsage('QR Code Studio', 'qr_scanned');
                     }
                 }
                 animationFrameId = requestAnimationFrame(scanQRCode);
@@ -140,7 +146,7 @@ export default function QRCodePage() {
                 cancelAnimationFrame(animationFrameId);
             }
         };
-    }, [isReading, addToHistory]);
+    }, [isReading, addToHistory, trackServiceUsage]);
 
     const downloadQRCode = () => {
         if (qrCodeUrl) {
@@ -164,6 +170,7 @@ export default function QRCodePage() {
     const handleClearHistory = async () => {
         await clearHistory();
         toast.success('History cleared');
+        trackServiceUsage('QR Code Studio', 'history_cleared');
     };
 
     return (

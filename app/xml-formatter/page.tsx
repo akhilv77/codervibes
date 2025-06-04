@@ -9,6 +9,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { Loader2, Copy, Trash2, Check, AlertCircle, FileCode, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
+import { useServiceTracking } from '@/hooks/useServiceTracking';
 
 export default function XMLFormatterPage() {
     const [input, setInput] = useState('');
@@ -17,10 +18,12 @@ export default function XMLFormatterPage() {
     const [isLoading, setIsLoading] = useState(false);
     const [copied, setCopied] = useState<string | null>(null);
     const { history, addToHistory, clearHistory, loadHistory } = useXMLFormatterStore();
+    const { trackServiceUsage } = useServiceTracking();
 
     useEffect(() => {
         loadHistory();
-    }, [loadHistory]);
+        trackServiceUsage('XML Formatter', 'page_view');
+    }, [loadHistory, trackServiceUsage]);
 
     const formatXML = (xml: string): string => {
         let formatted = '';
@@ -75,6 +78,7 @@ export default function XMLFormatterPage() {
                     to: formatted,
                 });
                 toast.success('XML formatted successfully');
+                trackServiceUsage('XML Formatter', 'xml_formatted');
             } else {
                 setOutput('');
                 toast.error('Invalid XML format');
@@ -107,6 +111,7 @@ export default function XMLFormatterPage() {
                     to: minified,
                 });
                 toast.success('XML minified successfully');
+                trackServiceUsage('XML Formatter', 'xml_minified');
             } else {
                 setOutput('');
                 toast.error('Invalid XML format');
@@ -128,6 +133,7 @@ export default function XMLFormatterPage() {
     const handleClearHistory = () => {
         clearHistory();
         toast.success('History cleared');
+        trackServiceUsage('XML Formatter', 'history_cleared');
     };
 
     return (

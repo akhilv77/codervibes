@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useCaseConverterStore } from '@/lib/case-converter-store';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -16,6 +16,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import { useServiceTracking } from '@/hooks/useServiceTracking';
 
 const caseTypes = [
     { id: 'camelCase', name: 'camelCase', description: 'camelCase format' },
@@ -40,6 +41,11 @@ export default function CaseConverterPage() {
     } = useCaseConverterStore();
 
     const [isConverting, setIsConverting] = useState(false);
+    const { trackServiceUsage } = useServiceTracking();
+
+    useEffect(() => {
+        trackServiceUsage('Case Transformer', 'page_view');
+    }, []);
 
     const convertToCase = (text: string, caseType: string): string => {
         if (!text) return '';
@@ -90,6 +96,7 @@ export default function CaseConverterPage() {
             const converted = convertToCase(inputText, selectedCase);
             setConvertedText(converted);
             toast.success('Text converted successfully');
+            trackServiceUsage('Case Transformer', 'case_converted');
         } catch (error) {
             toast.error('Error converting text');
         } finally {
@@ -104,6 +111,11 @@ export default function CaseConverterPage() {
         } catch (error) {
             toast.error('Failed to copy to clipboard');
         }
+    };
+
+    const resetCaseConverter = () => {
+        reset();
+        trackServiceUsage('Case Transformer', 'history_cleared');
     };
 
     return (
@@ -184,7 +196,7 @@ export default function CaseConverterPage() {
                                     </Button>
                                     <Button
                                         variant="outline"
-                                        onClick={reset}
+                                        onClick={resetCaseConverter}
                                         className="text-xs sm:text-sm"
                                     >
                                         Reset

@@ -9,6 +9,7 @@ import { Copy, RefreshCw, Trash2, Code2, FileText, Scissors, Wand2 } from "lucid
 import { useMinifierStore } from "@/lib/minifier-store";
 import { formatDistanceToNow } from "date-fns";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useServiceTracking } from '@/hooks/useServiceTracking';
 
 // Minification functions
 const minifyHTML = (html: string): string => {
@@ -175,10 +176,12 @@ export default function Minifier() {
     const [output, setOutput] = useState<string>("");
     const [type, setType] = useState<'html' | 'css' | 'js'>('html');
     const { history, addToHistory, clearHistory, loadHistory } = useMinifierStore();
+    const { trackServiceUsage } = useServiceTracking();
 
     useEffect(() => {
         loadHistory();
-    }, [loadHistory]);
+        trackServiceUsage('Code Optimizer', 'page_view');
+    }, [loadHistory, trackServiceUsage]);
 
     const handleMinify = () => {
         try {
@@ -202,6 +205,7 @@ export default function Minifier() {
                 timestamp: new Date().toISOString()
             });
             toast.success("Code minified successfully!");
+            trackServiceUsage('Code Optimizer', 'code_minified');
         } catch (error) {
             toast.error("Error minifying code");
         }
@@ -229,6 +233,7 @@ export default function Minifier() {
                 timestamp: new Date().toISOString()
             });
             toast.success("Code beautified successfully!");
+            trackServiceUsage('Code Optimizer', 'code_beautified');
         } catch (error) {
             toast.error("Error beautifying code");
         }
@@ -243,6 +248,7 @@ export default function Minifier() {
         setInput("");
         setOutput("");
         toast.success("Cleared successfully!");
+        trackServiceUsage('Code Optimizer', 'history_cleared');
     };
 
     const handleHistoryClick = (item: { original: string; minified: string; type: 'html' | 'css' | 'js' }) => {

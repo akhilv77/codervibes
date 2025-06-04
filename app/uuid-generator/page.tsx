@@ -1,17 +1,23 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { Copy, RefreshCw, Key, Hash, CheckCircle2 } from 'lucide-react';
 import { v4 as uuidv4, v1 as uuidv1, v5 as uuidv5 } from 'uuid';
+import { useServiceTracking } from '@/hooks/useServiceTracking';
 
 export default function UUIDGenerator() {
     const [uuid, setUUID] = useState('');
     const [version, setVersion] = useState<'v4' | 'v1' | 'v5'>('v4');
     const [namespace, setNamespace] = useState('');
+    const { trackServiceUsage } = useServiceTracking();
+
+    useEffect(() => {
+        trackServiceUsage('UUID Studio', 'page_view');
+    }, []);
 
     const generateUUID = () => {
         try {
@@ -30,6 +36,7 @@ export default function UUIDGenerator() {
                     break;
             }
             setUUID(newUUID);
+            trackServiceUsage('UUID Studio', 'uuid_generated');
         } catch (error) {
             toast.error('Failed to generate UUID');
         }

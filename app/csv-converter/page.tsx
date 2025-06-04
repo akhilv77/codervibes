@@ -10,6 +10,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { FileText, RefreshCw, Check, Copy, ArrowRight, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { useCSVConverterStore } from "@/lib/csv-converter-store";
+import { useServiceTracking } from '@/hooks/useServiceTracking';
 
 export default function CSVConverterPage() {
     const [input, setInput] = useState('');
@@ -17,10 +18,12 @@ export default function CSVConverterPage() {
     const [conversionType, setConversionType] = useState<'csv-to-json' | 'json-to-csv'>('csv-to-json');
     const [copied, setCopied] = useState<string | null>(null);
     const { history, addToHistory, clearHistory, loadHistory } = useCSVConverterStore();
+    const { trackServiceUsage } = useServiceTracking();
 
     useEffect(() => {
         loadHistory();
-    }, [loadHistory]);
+        trackServiceUsage('CSV Converter', 'page_view');
+    }, [loadHistory, trackServiceUsage]);
 
     const csvToJson = (csv: string): string => {
         const lines = csv.split('\n');
@@ -84,6 +87,7 @@ export default function CSVConverterPage() {
                 result
             );
             toast.success('Conversion successful');
+            trackServiceUsage('CSV Converter', 'csv_converted');
         } catch (error) {
             toast.error(error instanceof Error ? error.message : 'Invalid input format');
         }
@@ -99,6 +103,7 @@ export default function CSVConverterPage() {
     const handleClearHistory = async () => {
         await clearHistory();
         toast.success('History cleared');
+        trackServiceUsage('CSV Converter', 'history_cleared');
     };
 
     const handleClearAll = () => {

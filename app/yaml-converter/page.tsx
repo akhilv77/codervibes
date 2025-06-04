@@ -11,6 +11,7 @@ import { FileText, RefreshCw, Check, Copy, ArrowRight, Trash2 } from "lucide-rea
 import { toast } from "sonner";
 import { useYAMLConverterStore } from "@/lib/yaml-converter-store";
 import yaml from 'js-yaml';
+import { useServiceTracking } from '@/hooks/useServiceTracking';
 
 export default function YAMLConverterPage() {
     const [input, setInput] = useState('');
@@ -18,10 +19,12 @@ export default function YAMLConverterPage() {
     const [conversionType, setConversionType] = useState<'yaml-to-json' | 'json-to-yaml'>('yaml-to-json');
     const [copied, setCopied] = useState<string | null>(null);
     const { history, addToHistory, clearHistory, loadHistory } = useYAMLConverterStore();
+    const { trackServiceUsage } = useServiceTracking();
 
     useEffect(() => {
         loadHistory();
-    }, [loadHistory]);
+        trackServiceUsage('YAML Converter', 'page_view');
+    }, [loadHistory, trackServiceUsage]);
 
     const handleConvert = () => {
         if (!input.trim()) {
@@ -46,6 +49,7 @@ export default function YAMLConverterPage() {
                 result
             );
             toast.success('Conversion successful');
+            trackServiceUsage('YAML Converter', 'yaml_converted');
         } catch (error) {
             toast.error(error instanceof Error ? error.message : 'Invalid input format');
         }
@@ -61,6 +65,7 @@ export default function YAMLConverterPage() {
     const handleClearHistory = async () => {
         await clearHistory();
         toast.success('History cleared');
+        trackServiceUsage('YAML Converter', 'history_cleared');
     };
 
     const handleClearAll = () => {

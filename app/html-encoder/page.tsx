@@ -10,15 +10,18 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Code, Copy, Check, RefreshCw, ArrowRight, ArrowLeft, FileText, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { useHTMLEncoderStore } from "@/lib/html-encoder-store";
+import { useServiceTracking } from '@/hooks/useServiceTracking';
 
 export default function HTMLEncoderPage() {
     const [input, setInput] = useState('');
     const [copied, setCopied] = useState<string | null>(null);
     const { history, addToHistory, clearHistory, loadHistory } = useHTMLEncoderStore();
+    const { trackServiceUsage } = useServiceTracking();
 
     useEffect(() => {
         loadHistory();
-    }, [loadHistory]);
+        trackServiceUsage('HTML Encoder', 'page_view');
+    }, [loadHistory, trackServiceUsage]);
 
     const encodeHTML = () => {
         try {
@@ -38,6 +41,7 @@ export default function HTMLEncoderPage() {
 
             addToHistory('HTML Encoded', encoded);
             toast.success('HTML encoded successfully');
+            trackServiceUsage('HTML Encoder', 'html_encoded');
         } catch (error) {
             toast.error('Failed to encode HTML');
         }
@@ -99,6 +103,7 @@ export default function HTMLEncoderPage() {
 
             addToHistory('HTML Decoded', decoded);
             toast.success('HTML decoded successfully');
+            trackServiceUsage('HTML Encoder', 'html_decoded');
         } catch (error) {
             toast.error('Failed to decode HTML');
         }
@@ -114,6 +119,7 @@ export default function HTMLEncoderPage() {
     const handleClearHistory = async () => {
         await clearHistory();
         toast.success('History cleared');
+        trackServiceUsage('HTML Encoder', 'history_cleared');
     };
 
     return (
