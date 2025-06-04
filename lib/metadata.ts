@@ -52,8 +52,8 @@ const defaultMetadata: Metadata = {
     },
   },
   verification: {
-    google: 'your-google-site-verification',
-    yandex: 'your-yandex-verification'
+    google: 'mfgQI3XcvwL8P4jtvsnLondkHTwiKCRqjV_Xt1JIZ74',
+    yandex: 'dd52f3fe2b855a95'
   }
 };
 
