@@ -12,6 +12,20 @@ export interface AppConfig {
 
 export const apps: AppConfig[] = [
   {
+    id: "base64",
+    name: "Base64 Encoder & Decoder",
+    description: "Convert files to Base64 encoding and decode Base64 URLs",
+    href: "/base64",
+    icon: Binary,
+    features: [
+      "File encoding",
+      "Base64 decoding",
+      "Multiple file types",
+      "Live preview"
+    ],
+    tags: ["base64", "encoding", "decoding", "files", "conversion", "utility"]
+  },
+  {
     id: "string-escaper",
     name: "String Escaper",
     description: "Escape strings for JavaScript, JSON, HTML, and SQL",
