@@ -1,6 +1,6 @@
 import { openDB, DBSchema, IDBPDatabase } from 'idb';
 
-export type StoreNames = 'settings' | 'currencyRates' | 'moneyTracker' | 'scorecard' | 'ipTracker' | 'regex' | 'regexTester' | 'jsonFormatter' | 'jwtDecoder' | 'urlEncoder' | 'htmlEncoder' | 'qrCode' | 'colorConverter' | 'textConverter' | 'yamlConverter' | 'csvConverter' | 'xmlFormatter' | 'markdownPreviewer' | 'htmlPreviewer' | 'diffChecker' | 'passwordGenerator' | 'hashGenerator' | 'minifier' | 'stringEscaper' | 'timeConversion' | 'cronParser' | 'textEncoder';
+export type StoreNames = 'settings' | 'currencyRates' | 'moneyTracker' | 'scorecard' | 'ipTracker' | 'regex' | 'regexTester' | 'jsonFormatter' | 'jwtDecoder' | 'urlEncoder' | 'htmlEncoder' | 'qrCode' | 'colorConverter' | 'textConverter' | 'yamlConverter' | 'csvConverter' | 'xmlFormatter' | 'markdownPreviewer' | 'htmlPreviewer' | 'diffChecker' | 'passwordGenerator' | 'hashGenerator' | 'minifier' | 'stringEscaper' | 'timeConversion' | 'cronParser' | 'textEncoder' | 'textToSpeech';
 
 interface CoderVibesDB extends DBSchema {
   settings: {
@@ -111,6 +111,10 @@ interface CoderVibesDB extends DBSchema {
     key: string;
     value: any;
   };
+  textToSpeech: {
+    key: string;
+    value: any;
+  };
 }
 
 function createStores(db: IDBPDatabase<CoderVibesDB>) {
@@ -120,7 +124,7 @@ function createStores(db: IDBPDatabase<CoderVibesDB>) {
     'htmlEncoder', 'qrCode', 'colorConverter', 'textConverter', 'yamlConverter',
     'csvConverter', 'xmlFormatter', 'markdownPreviewer', 'htmlPreviewer',
     'diffChecker', 'passwordGenerator', 'hashGenerator', 'minifier', 'stringEscaper',
-    'timeConversion', 'cronParser', 'textEncoder'
+    'timeConversion', 'cronParser', 'textEncoder', 'textToSpeech'
   ];
 
   storeNames.forEach(storeName => {

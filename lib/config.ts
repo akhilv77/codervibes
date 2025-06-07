@@ -1,4 +1,4 @@
-import { Trophy, Wallet, type LucideIcon, DollarSign, BadgeDollarSignIcon, Globe, Calculator, LineChart, Code, FileJson, Key, Link, QrCode, Palette, Binary, FileCode, Table, FileText, Type, Eye, GitCompare, Lock, Hash, Scissors, Clock, Timer, FileInput } from "lucide-react";
+import { Trophy, Wallet, type LucideIcon, DollarSign, BadgeDollarSignIcon, Globe, Calculator, LineChart, Code, FileJson, Key, Link, QrCode, Palette, Binary, FileCode, Table, FileText, Type, Eye, GitCompare, Lock, Hash, Scissors, Clock, Timer, FileInput, Volume2 } from "lucide-react";
 
 export interface AppConfig {
   id: string;
@@ -391,5 +391,19 @@ export const apps: AppConfig[] = [
       "History tracking"
     ],
     tags: ["text", "encoding", "decoding", "base64", "url", "html", "utility"]
+  },
+  {
+    id: 'text-to-speech',
+    name: 'Text to Speech',
+    description: 'Convert text to speech using the Web Speech API',
+    href: '/text-to-speech',
+    icon: Volume2,
+    features: [
+      'Multiple voices',
+      'Adjustable rate and pitch',
+      'Speech synthesis',
+      'Voice preview'
+    ],
+    tags: ['text', 'speech', 'audio', 'accessibility', 'utility', 'development']
   },
 ]; 
