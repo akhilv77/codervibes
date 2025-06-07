@@ -1,6 +1,6 @@
 import { openDB, DBSchema, IDBPDatabase } from 'idb';
 
-export type StoreNames = 'settings' | 'currencyRates' | 'moneyTracker' | 'scorecard' | 'ipTracker' | 'regex' | 'regexTester' | 'jsonFormatter' | 'jwtDecoder' | 'urlEncoder' | 'htmlEncoder' | 'qrCode' | 'colorConverter' | 'textConverter' | 'yamlConverter' | 'csvConverter' | 'xmlFormatter' | 'markdownPreviewer' | 'htmlPreviewer' | 'diffChecker' | 'passwordGenerator' | 'hashGenerator' | 'minifier' | 'stringEscaper' | 'timeConversion' | 'cronParser' | 'textEncoder' | 'textToSpeech' | 'voiceRecorder' | 'imageCompressor';
+export type StoreNames = 'settings' | 'currencyRates' | 'moneyTracker' | 'scorecard' | 'ipTracker' | 'regex' | 'regexTester' | 'jsonFormatter' | 'jwtDecoder' | 'urlEncoder' | 'htmlEncoder' | 'qrCode' | 'colorConverter' | 'textConverter' | 'yamlConverter' | 'csvConverter' | 'xmlFormatter' | 'markdownPreviewer' | 'htmlPreviewer' | 'diffChecker' | 'passwordGenerator' | 'hashGenerator' | 'minifier' | 'stringEscaper' | 'timeConversion' | 'cronParser' | 'textEncoder' | 'textToSpeech' | 'voiceRecorder' | 'imageCompressor' | 'pdfCompressor';
 
 interface CoderVibesDB extends DBSchema {
   settings: {
@@ -123,6 +123,10 @@ interface CoderVibesDB extends DBSchema {
     key: string;
     value: any;
   };
+  pdfCompressor: {
+    key: string;
+    value: any;
+  };
 }
 
 function createStores(db: IDBPDatabase<CoderVibesDB>) {
@@ -133,7 +137,7 @@ function createStores(db: IDBPDatabase<CoderVibesDB>) {
     'csvConverter', 'xmlFormatter', 'markdownPreviewer', 'htmlPreviewer',
     'diffChecker', 'passwordGenerator', 'hashGenerator', 'minifier', 'stringEscaper',
     'timeConversion', 'cronParser', 'textEncoder', 'textToSpeech', 'voiceRecorder',
-    'imageCompressor'
+    'imageCompressor', 'pdfCompressor'
   ];
 
   storeNames.forEach(storeName => {
@@ -147,7 +151,7 @@ class IndexedDBService {
   private db: IDBPDatabase<CoderVibesDB> | null = null;
   private isInitialized = false;
   private initPromise: Promise<void> | null = null;
-  private readonly DB_VERSION = 37; // Increased version number for imageCompressor store
+  private readonly DB_VERSION = 38; // Increased version number for pdfCompressor store
 
   async init() {
     if (typeof window === 'undefined') {

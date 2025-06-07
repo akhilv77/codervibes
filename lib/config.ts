@@ -1,4 +1,4 @@
-import { Trophy, Wallet, type LucideIcon, DollarSign, BadgeDollarSignIcon, Globe, Calculator, LineChart, Code, FileJson, Key, Link, QrCode, Palette, Binary, FileCode, Table, FileText, Type, Eye, GitCompare, Lock, Hash, Scissors, Clock, Timer, FileInput, Volume2, Mic, Image } from "lucide-react";
+import { Trophy, Wallet, type LucideIcon, DollarSign, BadgeDollarSignIcon, Globe, Calculator, LineChart, Code, FileJson, Key, Link, QrCode, Palette, Binary, FileCode, Table, FileText, Type, Eye, GitCompare, Lock, Hash, Scissors, Clock, Timer, FileInput, Volume2, Mic, Image, MessageSquare, Settings2, Upload, Video } from "lucide-react";
 
 export interface AppConfig {
   id: string;
@@ -434,5 +434,20 @@ export const apps: AppConfig[] = [
       'Preview before download'
     ],
     tags: ['image', 'compression', 'conversion', 'canvas', 'utility', 'development']
+  },
+  {
+    id: 'pdf-compressor',
+    name: 'PDF Compressor',
+    description: 'Compress PDF files while maintaining quality',
+    href: '/pdf-compressor',
+    icon: FileText,
+    features: [
+      'PDF compression',
+      'Quality control',
+      'Batch processing',
+      'Preview before download',
+      'Compression history'
+    ],
+    tags: ['pdf', 'compression', 'document', 'utility', 'development']
   },
 ]; 
