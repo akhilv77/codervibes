@@ -1,4 +1,4 @@
-import { Trophy, Wallet, type LucideIcon, DollarSign, BadgeDollarSignIcon, Globe, Calculator, LineChart, Code, FileJson, Key, Link, QrCode, Palette, Binary, FileCode, Table, FileText, Type, Eye, GitCompare, Lock, Hash, Scissors, Clock } from "lucide-react";
+import { Trophy, Wallet, type LucideIcon, DollarSign, BadgeDollarSignIcon, Globe, Calculator, LineChart, Code, FileJson, Key, Link, QrCode, Palette, Binary, FileCode, Table, FileText, Type, Eye, GitCompare, Lock, Hash, Scissors, Clock, Timer } from "lucide-react";
 
 export interface AppConfig {
   id: string;
@@ -363,5 +363,19 @@ export const apps: AppConfig[] = [
       "Current time display"
     ],
     tags: ["timestamp", "date", "time", "conversion", "utility", "development"]
+  },
+  {
+    id: "cron-parser",
+    name: "Cron Expression Parser",
+    description: "Parse and validate cron expressions with human-readable explanations",
+    href: "/cron-parser",
+    icon: Timer,
+    features: [
+      "Expression validation",
+      "Human-readable explanation",
+      "Next run times",
+      "Common patterns"
+    ],
+    tags: ["cron", "scheduler", "parser", "validation", "utility", "development"]
   },
 ]; 
