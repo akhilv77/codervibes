@@ -1,4 +1,4 @@
-import { Trophy, Wallet, type LucideIcon, DollarSign, BadgeDollarSignIcon, Globe, Calculator, LineChart, Code, FileJson, Key, Link, QrCode, Palette, Binary, FileCode, Table, FileText, Type, Eye, GitCompare, Lock, Hash, Scissors, Clock, Timer, FileInput, Volume2 } from "lucide-react";
+import { Trophy, Wallet, type LucideIcon, DollarSign, BadgeDollarSignIcon, Globe, Calculator, LineChart, Code, FileJson, Key, Link, QrCode, Palette, Binary, FileCode, Table, FileText, Type, Eye, GitCompare, Lock, Hash, Scissors, Clock, Timer, FileInput, Volume2, Mic } from "lucide-react";
 
 export interface AppConfig {
   id: string;
@@ -405,5 +405,19 @@ export const apps: AppConfig[] = [
       'Voice preview'
     ],
     tags: ['text', 'speech', 'audio', 'accessibility', 'utility', 'development']
+  },
+  {
+    id: 'voice-recorder',
+    name: 'Voice Recorder',
+    description: 'Record and save audio using the MediaRecorder API',
+    href: '/voice-recorder',
+    icon: Mic,
+    features: [
+      'Audio recording',
+      'Multiple formats',
+      'Download recordings',
+      'Recording history'
+    ],
+    tags: ['audio', 'recording', 'media', 'utility', 'development']
   },
 ]; 
