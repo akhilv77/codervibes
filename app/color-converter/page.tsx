@@ -31,6 +31,7 @@ export default function ColorConverterPage() {
     const [copied, setCopied] = useState<string | null>(null);
     const { history, addToHistory, clearHistory, loadHistory } = useColorConverterStore();
     const { trackServiceUsage } = useServiceTracking();
+    const [showColorPicker, setShowColorPicker] = useState(false);
 
     useEffect(() => {
         loadHistory();
@@ -179,13 +180,23 @@ export default function ColorConverterPage() {
         return brightness > 128 ? '#000000' : '#ffffff';
     };
 
+    const handleColorPreviewClick = () => {
+        setShowColorPicker(true);
+    };
+
+    const handleColorPickerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const newColor = e.target.value;
+        handleHexChange(newColor);
+        setShowColorPicker(false);
+    };
+
     return (
         <div className="container mx-auto px-4 py-4 sm:py-8 max-w-screen-xl">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 sm:mb-8">
                 <div>
-                    <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Color Converter</h1>
+                    <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Color Studio</h1>
                     <p className="text-muted-foreground mt-1 text-sm sm:text-base">
-                        Convert colors between HEX, RGB, and HSL formats
+                        Professional color format conversion and management tool
                     </p>
                 </div>
             </div>
@@ -222,13 +233,23 @@ export default function ColorConverterPage() {
                                             placeholder="#000000"
                                             className="text-xs sm:text-sm font-mono"
                                         />
-                                        <div
-                                            className="w-10 h-10 rounded-md border"
-                                            style={{
-                                                backgroundColor: hexInput.match(/^#?[0-9A-Fa-f]{6}$/) ? hexInput : '#ffffff',
-                                                color: getContrastColor(hexInput)
-                                            }}
-                                        />
+                                        <div className="relative">
+                                            <input
+                                                type="color"
+                                                value={hexInput}
+                                                onChange={handleColorPickerChange}
+                                                className="w-10 h-10 cursor-pointer rounded-md border"
+                                                style={{
+                                                    WebkitAppearance: 'none',
+                                                    MozAppearance: 'none',
+                                                    appearance: 'none',
+                                                    backgroundColor: hexInput.match(/^#?[0-9A-Fa-f]{6}$/) ? hexInput : '#ffffff',
+                                                    padding: 0,
+                                                    border: '1px solid var(--border)',
+                                                    cursor: 'pointer'
+                                                }}
+                                            />
+                                        </div>
                                     </div>
                                 </div>
 
