@@ -1,4 +1,4 @@
-import { Trophy, Wallet, type LucideIcon, DollarSign, BadgeDollarSignIcon, Globe, Calculator, LineChart, Code, FileJson, Key, Link, QrCode, Palette, Binary, FileCode, Table, FileText, Type, Eye, GitCompare, Lock, Hash, Scissors, Clock, Timer, FileInput, Volume2, Mic } from "lucide-react";
+import { Trophy, Wallet, type LucideIcon, DollarSign, BadgeDollarSignIcon, Globe, Calculator, LineChart, Code, FileJson, Key, Link, QrCode, Palette, Binary, FileCode, Table, FileText, Type, Eye, GitCompare, Lock, Hash, Scissors, Clock, Timer, FileInput, Volume2, Mic, Image } from "lucide-react";
 
 export interface AppConfig {
   id: string;
@@ -419,5 +419,20 @@ export const apps: AppConfig[] = [
       'Recording history'
     ],
     tags: ['audio', 'recording', 'media', 'utility', 'development']
+  },
+  {
+    id: 'image-compressor',
+    name: 'Image Compressor',
+    description: 'Compress and convert images using the Canvas API',
+    href: '/image-compressor',
+    icon: Image,
+    features: [
+      'Image compression',
+      'Format conversion',
+      'Quality control',
+      'Batch processing',
+      'Preview before download'
+    ],
+    tags: ['image', 'compression', 'conversion', 'canvas', 'utility', 'development']
   },
 ]; 
