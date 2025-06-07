@@ -1,4 +1,4 @@
-import { Trophy, Wallet, type LucideIcon, DollarSign, BadgeDollarSignIcon, Globe, Calculator, LineChart, Code, FileJson, Key, Link, QrCode, Palette, Binary, FileCode, Table, FileText, Type, Eye, GitCompare, Lock, Hash, Scissors, Clock, Timer } from "lucide-react";
+import { Trophy, Wallet, type LucideIcon, DollarSign, BadgeDollarSignIcon, Globe, Calculator, LineChart, Code, FileJson, Key, Link, QrCode, Palette, Binary, FileCode, Table, FileText, Type, Eye, GitCompare, Lock, Hash, Scissors, Clock, Timer, FileInput } from "lucide-react";
 
 export interface AppConfig {
   id: string;
@@ -377,5 +377,19 @@ export const apps: AppConfig[] = [
       "Common patterns"
     ],
     tags: ["cron", "scheduler", "parser", "validation", "utility", "development"]
+  },
+  {
+    id: "text-encoder",
+    name: "Text Encoder/Decoder",
+    description: "Encode and decode text in various formats (Base64, URL, HTML, etc.)",
+    href: "/text-encoder",
+    icon: FileInput,
+    features: [
+      "Multiple encoding formats",
+      "Real-time conversion",
+      "Copy to clipboard",
+      "History tracking"
+    ],
+    tags: ["text", "encoding", "decoding", "base64", "url", "html", "utility"]
   },
 ]; 
